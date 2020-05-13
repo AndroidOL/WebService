@@ -95,15 +95,17 @@ namespace WebServicePark {
                 CI.isUpdate = false;
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
-                CPublic.WriteLog ("解析：" + e.Message);
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】Condition 解析时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("解析 ToJson:" + ex.Message);
+                CPublic.WriteLog ("【警告】关键信息：" + Condition);
+                CPublic.WriteLog ("【警告】Condition 解析 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】Condition 解析成功执行，关键信息：" + Condition);
             return json;
         }
 
@@ -120,11 +122,12 @@ namespace WebServicePark {
         public string TPE_LostAccount (string NodeNo, string AccountNo, string PassWord, string Operation, string MAC) {
             CReturnFlowRes retRes = new CReturnFlowRes ();
             string json = "";
+            string param = "";
             try {
                 int nodeNo;
                 int accNo;
                 byte operation;
-                string param = AccountNo + "$" + PassWord + "$" + Operation;
+                param = AccountNo + "$" + PassWord + "$" + Operation;
                 if (string.IsNullOrEmpty (NodeNo) || !int.TryParse (NodeNo, out nodeNo)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[NodeNo(类型Int)]";
@@ -225,15 +228,17 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
-                CPublic.WriteLog ("挂失异常：" + e.Message);
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】挂失解挂时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("挂失 ToJson:" + ex.Message);
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】挂失解挂 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】挂失解挂成功执行，关键信息：" + param);
             return json;
         }
 
@@ -251,6 +256,7 @@ namespace WebServicePark {
         public string TPE_ChangeAccountPassword (string NodeNo, string AccountNo, string CardNo, string OldPassWord, string NewPassWord, string MAC) {
             CReturnFlowUpdateAccountRes retRes = new CReturnFlowUpdateAccountRes ();
             string json = "";
+            string param = "";
             try {
                 int nodeNo;
                 int accNo;
@@ -277,7 +283,6 @@ namespace WebServicePark {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[NewPassWord]";
                 } else {
-                    string param = "";
                     if (!string.IsNullOrEmpty (AccountNo)) {
                         param = AccountNo;
                     } else if (string.IsNullOrEmpty (AccountNo) && !string.IsNullOrEmpty (CardNo)) {
@@ -353,15 +358,17 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
-                CPublic.WriteLog ("修改密码 异常：" + e.Message);
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】修改密码时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("修改密码 异常 ToJson:" + ex.Message);
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】修改密码 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】修改密码解析成功执行，关键信息：" + param);
             return json;
         }
 
@@ -376,6 +383,7 @@ namespace WebServicePark {
         public string TPE_GetAccount (string NodeNo, string CardNo, string MAC) {
             CReturnGetAccountRes retRes = new CReturnGetAccountRes ();
             string json = "";
+            string param = "";
             try {
                 int nodeNo;
                 if (string.IsNullOrEmpty (NodeNo) || !int.TryParse (NodeNo, out nodeNo)) {
@@ -388,7 +396,6 @@ namespace WebServicePark {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[CardNo]";
                 } else {
-                    string param = "";
                     if (!string.IsNullOrEmpty (CardNo)) {
                         param = CardNo;
                     }
@@ -454,15 +461,17 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
-                CPublic.WriteLog ("调账异常：" + e.Message);
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】按卡号调账时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("调账异常 ToJson:" + ex.Message);
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】按卡号调账 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】按卡号调账成功执行，关键信息：" + param);
             return json;
         }
 
@@ -471,13 +480,13 @@ namespace WebServicePark {
         /// </summary>
         /// <param name="NodeNo">节点号</param>
         /// <param name="AccountNo">帐号(卡号传入一项即可)</param>
-        /// <param name="CardNo">卡号(帐号传入一项即可)</param>
         /// <param name="MAC">MAC(加密过程请查看CheckNode()方法)</param>
         /// <returns>json </returns>
         [WebMethod]
         public string TPE_GetAccountByNo (string NodeNo, string AccountNo, string MAC) {
             CReturnGetAccountRes retRes = new CReturnGetAccountRes ();
             string json = "";
+            string param = "";
             try {
                 int nodeNo;
                 if (string.IsNullOrEmpty (NodeNo) || !int.TryParse (NodeNo, out nodeNo)) {
@@ -490,7 +499,6 @@ namespace WebServicePark {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[AccountNo]";
                 } else {
-                    string param = "";
                     if (!string.IsNullOrEmpty (AccountNo)) {
                         param = AccountNo;
                     }
@@ -556,15 +564,17 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
-                CPublic.WriteLog ("调账异常：" + e.Message);
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】按账号调账时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("调账异常 ToJson:" + ex.Message);
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】按账号调账 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】按账号调账成功执行，关键信息：" + param);
             return json;
         }
 
@@ -580,6 +590,7 @@ namespace WebServicePark {
             CReturnGetAccountRes retRes = new CReturnGetAccountRes ();
             List<TPE_GetAccountRes> listRes = new List<TPE_GetAccountRes> ();
             string json = "";
+            string param = "";
             try {
                 CPublic.WriteLog ("TPE_GetAccount NodeNo=" + NodeNo + ";LocalNode=" + CPublic.LocalNode);
                 int nodeNo;
@@ -593,7 +604,6 @@ namespace WebServicePark {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[CertNo]";
                 } else {
-                    string param = "";
                     if (!string.IsNullOrEmpty (IDNo)) {
                         param = IDNo;
                     }
@@ -645,15 +655,17 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
-                CPublic.WriteLog ("调账异常：" + e.Message);
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】按身份证调账时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("调账异常 ToJson:" + ex.Message);
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】按身份证调账 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】按身份证调账成功执行，关键信息：" + param);
             return json;
         }
 
@@ -668,6 +680,7 @@ namespace WebServicePark {
         public string TPE_GetAccountByCertNo (string NodeNo, string CertNo, string MAC) {
             CReturnGetAccountRes retRes = new CReturnGetAccountRes ();
             string json = "";
+            string param = "";
             try {
                 CPublic.WriteLog ("TPE_GetAccount NodeNo=" + NodeNo + ";LocalNode=" + CPublic.LocalNode);
                 int nodeNo;
@@ -681,7 +694,6 @@ namespace WebServicePark {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[CertNo]";
                 } else {
-                    string param = "";
                     if (!string.IsNullOrEmpty (CertNo)) {
                         param = CertNo;
                     }
@@ -756,15 +768,17 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
-                CPublic.WriteLog ("调账异常：" + e.Message);
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】按身份证调账时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("调账异常 ToJson:" + ex.Message);
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】按身份证调账 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】按身份证调账成功执行，关键信息：" + param);
             return json;
         }
 
@@ -783,9 +797,10 @@ namespace WebServicePark {
             CReturnCReturnObj retRes = new CReturnCReturnObj ();
             List<TPE_CReturnObj> listCRO = new List<TPE_CReturnObj> ();
             string json = "";
+            string param = "";
             try {
                 int nodeNo;
-                string param = CertCode + "$" + BeginTime + "$" + EndTime;
+                param = CertCode + "$" + BeginTime + "$" + EndTime;
                 if (string.IsNullOrEmpty (NodeNo) || !int.TryParse (NodeNo, out nodeNo)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[NodeNo(类型Int)]";
@@ -1053,15 +1068,17 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
-                CPublic.WriteLog ("按中心记帐号查询流水异常：" + e.Message);
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】按工号查询流水时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("按中心记帐号查询流水异常 ToJson:" + ex.Message);
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】按工号查询流水 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】按工号查询流水成功执行，关键信息：" + param);
             return json;
         }
 
@@ -1078,6 +1095,7 @@ namespace WebServicePark {
         public string TPE_CheckPassword (string NodeNo, string AccountNo, string CardNo, string PassWord, string MAC) {
             CReturnGetAccountRes retRes = new CReturnGetAccountRes ();
             string json = "";
+            string param = "";
             try {
                 int nodeNo;
                 int accNo;
@@ -1101,7 +1119,6 @@ namespace WebServicePark {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[PassWord]";
                 } else {
-                    string param = "";
                     if (!string.IsNullOrEmpty (AccountNo)) {
                         param = AccountNo;
                     } else if (string.IsNullOrEmpty (AccountNo) && !string.IsNullOrEmpty (CardNo)) {
@@ -1145,15 +1162,17 @@ namespace WebServicePark {
 
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
-                CPublic.WriteLog ("验证密码 异常：" + e.Message);
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】密码校验时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("验证密码 异常 ToJson:" + ex.Message);
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】密码校验 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】密码校验成功执行，关键信息：" + param);
             return json;
         }
 
@@ -1170,11 +1189,12 @@ namespace WebServicePark {
             CReturnGetAccountRes retRes = new CReturnGetAccountRes ();
             List<TPE_GetAccountRes> listRes = new List<TPE_GetAccountRes> ();
             string json = "";
+            string param = "";
             try {
                 int nodeNo;
                 int begNo;
                 int endNo;
-                string param = BeginNo + "$" + EndNo;
+                param = BeginNo + "$" + EndNo;
                 if (string.IsNullOrEmpty (NodeNo) || !int.TryParse (NodeNo, out nodeNo)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[NodeNo(类型Int)]";
@@ -1248,16 +1268,18 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg += "按标准条件查询帐户异常：" + e.Message;
-                CPublic.WriteLog ("按标准条件查询帐户异常：" + e.Message);
+                retRes.Msg += "按标准条件查询帐户时抛出异常：" + e.Message;
+                CPublic.WriteLog ("【严重】按标准条件查询帐户时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                retRes.Msg += "按标准条件查询帐户异常 ToJson:" + ex.Message;
-                CPublic.WriteLog ("按标准条件查询帐户异常 ToJson:" + ex.Message);
+                retRes.Msg += "按标准条件查询帐户 JSON 序列化时抛出异常：" + ex.Message;
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】按标准条件查询帐户 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】按标准条件查询帐户成功执行，关键信息：" + param);
             return json;
         }
 
@@ -1274,11 +1296,12 @@ namespace WebServicePark {
             CReturnCReturnObj retRes = new CReturnCReturnObj ();
             List<TPE_CReturnObj> listCRO = new List<TPE_CReturnObj> ();
             string json = "";
+            string param = "";
             try {
                 int nodeNo;
                 int fromNo;
                 int toNo;
-                string param = FromCentralNo + "$" + ToCentralNo;
+                param = FromCentralNo + "$" + ToCentralNo;
                 if (string.IsNullOrEmpty (NodeNo) || !int.TryParse (NodeNo, out nodeNo)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[NodeNo(类型Int)]";
@@ -1489,15 +1512,17 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
-                CPublic.WriteLog ("按中心记帐号查询流水异常：" + e.Message);
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】按平台流水号调账时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("按中心记帐号查询流水异常 ToJson:" + ex.Message);
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】按平台流水号调账 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】按平台流水号调账成功执行，关键信息：" + param);
             return json;
         }
 
@@ -1686,12 +1711,13 @@ namespace WebServicePark {
             CReturnCReturnObj retRes = new CReturnCReturnObj ();
             List<TPE_CReturnObj> listCRO = new List<TPE_CReturnObj> ();
             string json = "";
+            string param = "";
             try {
                 int nodeNo;
                 int occurNodeNo;
                 int fromNo;
                 int toNo;
-                string param = OccurNodeNo + "$" + FromOccurNo + "$" + ToOccurNo;
+                param = OccurNodeNo + "$" + FromOccurNo + "$" + ToOccurNo;
                 if (string.IsNullOrEmpty (NodeNo) || !int.TryParse (NodeNo, out nodeNo)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[NodeNo(类型Int)]";
@@ -1902,15 +1928,17 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
-                CPublic.WriteLog ("按中心记帐号查询流水异常：" + e.Message);
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】按平台流水号调账时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("按中心记帐号查询流水异常 ToJson:" + ex.Message);
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】按平台流水号调账 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】按平台流水号调账成功执行，关键信息：" + param);
             return json;
         }
 
@@ -1929,9 +1957,10 @@ namespace WebServicePark {
             CReturnCReturnObj retRes = new CReturnCReturnObj ();
             List<TPE_CReturnObj> listCRO = new List<TPE_CReturnObj> ();
             string json = "";
+            string param = "";
             try {
                 int nodeNo;
-                string param = AccountNo + "$" + BeginTime + "$" + EndTime;
+                param = AccountNo + "$" + BeginTime + "$" + EndTime;
                 if (string.IsNullOrEmpty (NodeNo) || !int.TryParse (NodeNo, out nodeNo)) {
                     retRes.Result = "error";
                     retRes.Msg += "请传入有效参数[NodeNo(类型Int)]";
@@ -2208,15 +2237,17 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg += "服务器异常.按中心记帐号查询流水异常：" + e.Message;
-                CPublic.WriteLog ("按中心记帐号查询流水异常：" + e.Message);
+                retRes.Msg += "按工号调账时抛出异常：" + e.Message;
+                CPublic.WriteLog ("【严重】按工号调账时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("按中心记帐号查询流水异常 ToJson:" + ex.Message);
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】按工号调账 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】按工号调账成功执行，关键信息：" + param);
             return json;
         }
 
@@ -2277,15 +2308,17 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
-                CPublic.WriteLog ("枚举部门异常：" + e.Message);
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】枚举部门时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("枚举部门异常 ToJson:" + ex.Message);
+                CPublic.WriteLog ("【警告】关键信息：" + "param");
+                CPublic.WriteLog ("【警告】枚举部门 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】枚举部门成功执行，关键信息：" + "param");
             return json;
         }
 
@@ -2343,15 +2376,17 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
-                CPublic.WriteLog ("白名单异常：" + e.Message + e.ToString ());
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】白名单下载时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("白名单异常 ToJson:" + ex.Message + ex.ToString ());
+                CPublic.WriteLog ("【警告】关键信息：" + "param");
+                CPublic.WriteLog ("【警告】白名单下载 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】白名单下载成功执行，关键信息：" + "param");
             return json;
         }
 
@@ -2410,15 +2445,17 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
-                CPublic.WriteLog ("枚举身份异常：" + e.Message);
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】枚举身份时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("枚举身份异常 ToJson:" + ex.Message);
+                CPublic.WriteLog ("【警告】关键信息：" + "param");
+                CPublic.WriteLog ("【警告】枚举身份 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】枚举身份成功执行，关键信息：" + "param");
             return json;
         }
 
@@ -2476,15 +2513,17 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
-                CPublic.WriteLog ("白名单异常：" + e.Message + e.ToString ());
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】枚举身份时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("白名单异常 ToJson:" + ex.Message + ex.ToString ());
+                CPublic.WriteLog ("【警告】关键信息：" + "param");
+                CPublic.WriteLog ("【警告】枚举身份 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】枚举身份成功执行，关键信息：" + "param");
             return json;
         }
 
@@ -2499,9 +2538,11 @@ namespace WebServicePark {
         public string TPE_GetAccountEx (string NodeNo, string AccountNo, string MAC) {
             CReturnGetAccountExRes retRes = new CReturnGetAccountExRes ();
             string json = "";
+            string param = "";
             try {
                 int nodeNo;
                 int accNo;
+                param = AccountNo;
                 if (string.IsNullOrEmpty (NodeNo) || !int.TryParse (NodeNo, out nodeNo)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[NodeNo(类型Int)]";
@@ -2511,9 +2552,9 @@ namespace WebServicePark {
                 } else if (string.IsNullOrEmpty (AccountNo) || !int.TryParse (AccountNo, out accNo)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[AccountNo(类型Int)]";
-                } else if (CheckNode (NodeNo, AccountNo, MAC) != 0) {
+                } else if (CheckNode (NodeNo, param, MAC) != 0) {
                     retRes.Result = "error";
-                    retRes.Msg = "节点校验失败！" + NodeCheckInfo[CheckNode (NodeNo, "", MAC)];
+                    retRes.Msg = "节点校验失败！" + NodeCheckInfo[CheckNode (NodeNo, param, MAC)];
                 } else {
                     tagTPE_GetAccountExRes Res = new tagTPE_GetAccountExRes ();
 
@@ -2535,14 +2576,15 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
-                CPublic.WriteLog ("帐户自定义字段 异常：" + e.Message);
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】账户自定义查询时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("帐户自定义字段 异常 ToJson:" + ex.Message);
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】账户自定义查询 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
             return json;
         }
@@ -2562,6 +2604,7 @@ namespace WebServicePark {
         public string TPE_FlowUpdateAccount (string NodeNo, string AccountNo, string CardNo, string Tel, string Email, string Comment, string MAC) {
             CReturnFlowUpdateAccountRes retRes = new CReturnFlowUpdateAccountRes ();
             string json = "";
+            string param = "";
             try {
                 int nodeNo;
                 int accNo;
@@ -2585,7 +2628,6 @@ namespace WebServicePark {
                     retRes.Result = "error";
                     retRes.Msg = "参数[Tel][Email][Remark]，至少传入一项";
                 } else {
-                    string param = "";
                     if (!string.IsNullOrEmpty (AccountNo) && string.IsNullOrEmpty (CardNo)) {
                         param = AccountNo;
                     } else if (string.IsNullOrEmpty (AccountNo) && !string.IsNullOrEmpty (CardNo)) {
@@ -2661,15 +2703,17 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
-                CPublic.WriteLog ("更新账户 异常：" + e.Message);
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】修改账户信息时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("更新账户 异常 ToJson:" + ex.Message);
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】修改账户信息 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】修改账户信息成功执行，关键信息：" + param);
             return json;
         }
 
@@ -2686,6 +2730,7 @@ namespace WebServicePark {
         public string TPE_FlowCost (string NodeNo, string AccountNo, string CardNo, string TransMoney, string MAC) {
             CReturnFlowCostRes retRes = new CReturnFlowCostRes ();
             string json = "";
+            string param = "";
             try {
                 int nodeNo;
                 int accNo;
@@ -2712,8 +2757,6 @@ namespace WebServicePark {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[TransMoney(金额不能为0,大于0补助,小于0扣款)]";
                 } else {
-
-                    string param = "";
                     if (!string.IsNullOrEmpty (AccountNo) && !string.IsNullOrEmpty (CardNo)) {
                         param = AccountNo + "$" + CardNo;
                     } else {
@@ -2759,17 +2802,221 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常." + e.Message;
-                CPublic.WriteLog ("充值异常：" + e.Message);
+                retRes.Msg = "服务器异常" + e.Message;
+                CPublic.WriteLog ("【严重】账户充值扣款时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常." + ex.Message;
-                CPublic.WriteLog ("充值 ToJson:" + ex.Message);
+                retRes.Msg = "服务器异常" + ex.Message;
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】账户充值扣款 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】账户充值扣款成功执行，关键信息：" + param);
+            return json;
+        }
+
+        /// <summary>
+        /// 补助/扣款
+        /// </summary>
+        /// <param name="NodeNo">节点号</param>
+        /// <param name="AccountNo">帐号(卡号传入一项即可)</param>
+        /// <param name="CardNo">卡号(帐号传入一项即可)</param>
+        /// <param name="TransMoney">充值金额 单位分 补助>0 扣款<0</param>
+        /// <param name="MAC">MAC</param>
+        /// <returns></returns>
+        [WebMethod]
+        public string TPE_FlowCostPlus (string NodeNo, string AccountNo, string CardNo, string TransMoney, string MAC) {
+            CReturnFlowCostRes retRes = new CReturnFlowCostRes ();
+            string json = "";
+            string param = "";
+            try {
+                int nodeNo;
+                int accNo;
+                int transMoney;
+                if (string.IsNullOrEmpty (NodeNo) || !int.TryParse (NodeNo, out nodeNo)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[NodeNo(类型Int)]";
+                } else if (string.IsNullOrEmpty (MAC)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[MAC]";
+                } else if (string.IsNullOrEmpty (AccountNo) && string.IsNullOrEmpty (CardNo)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[AccountNo/CardNo(至少传入一项)] // 不再允许";
+                } else if (AccountNo.Length <= 0 && CardNo.Length <= 0) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[AccountNo/CardNo(必须传入)] [[[" + AccountNo + "---" + CardNo + "]]]";
+                } else if (string.IsNullOrEmpty (AccountNo) || !int.TryParse (AccountNo, out accNo)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[AccountNo(类型Int)]";
+                } else if (string.IsNullOrEmpty (TransMoney) || !int.TryParse (TransMoney, out transMoney)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[TransMoney(类型Int,单位:分)]";
+                } else if (transMoney <= 0) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[TransMoney(该接口仅允许向账户充值)]";
+                } else {
+                    if (!string.IsNullOrEmpty (AccountNo) && !string.IsNullOrEmpty (CardNo)) {
+                        param = AccountNo + "$" + CardNo;
+                    } else {
+                        if (!string.IsNullOrEmpty (AccountNo)) {
+                            param = AccountNo;
+                        } else {
+                            param = CardNo;
+                        }
+                    }
+                    param = param + "$" + transMoney;
+                    if (CheckNode (NodeNo, param, MAC) != 0) {
+                        retRes.Result = "error";
+                        retRes.Msg = "节点校验失败！" + NodeCheckInfo[CheckNode (NodeNo, param, MAC)];
+                    } else {
+                        tagTPE_OnLineGetMaxSnRes SnRes = new tagTPE_OnLineGetMaxSnRes ();
+                        TPE_Class.TPE_OnLineGetMaxSn (1, out SnRes, 1);
+                        tagTPE_FlowCostReq ReqL = new tagTPE_FlowCostReq ();
+                        tagTPE_FlowCostRes ResF = new tagTPE_FlowCostRes ();
+                        ReqL.OccurIdNo = SnRes.MaxSn + 1;
+                        byte[] occurtime = Encoding.GetEncoding ("gb2312").GetBytes (DateTime.Now.ToString ("yyyyMMddHHmmss"));
+                        ReqL.OccurTime = new byte[14];
+                        Array.Copy (occurtime, ReqL.OccurTime, 14);
+                        if (!string.IsNullOrEmpty (AccountNo)) {
+                            ReqL.AccountNo = System.Convert.ToInt32 (AccountNo);
+                        }
+                        if (!string.IsNullOrEmpty (CardNo)) {
+                            ReqL.CardNo = System.Convert.ToInt32 (CardNo);
+                        }
+                        ReqL.CostType = 9;
+                        ReqL.TransMoney = transMoney;
+                        int nRet = TPE_Class.TPE_FlowCost (1, ref ReqL, 1, out ResF, 1);
+                        if (nRet != 0) {
+                            retRes.Result = "error";
+                            retRes.Msg = "nRet=" + nRet.ToString ();
+                        } else {
+                            TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
+                            Fr.CenterNo = QueryOccurByCenter (NodeNo, Fr.OccurIdNo);
+                            retRes.Result = "ok";
+                            retRes.Msg = "成功";
+                            retRes.Data = Fr;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                retRes.Result = "error";
+                retRes.Msg = "服务器异常" + e.Message;
+                CPublic.WriteLog ("【严重】账户充值时抛出异常：" + e.Message);
+            }
+            try {
+                JavaScriptSerializer jss = new JavaScriptSerializer ();
+                json = jss.Serialize (retRes);
+            } catch (Exception ex) {
+                retRes.Result = "error";
+                retRes.Msg = "服务器异常" + ex.Message;
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】账户充值 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
+            }
+            CPublic.WriteLog ("【记录】账户充值成功执行，关键信息：" + param);
+            return json;
+        }
+
+        /// <summary>
+        /// 补助/扣款
+        /// </summary>
+        /// <param name="NodeNo">节点号</param>
+        /// <param name="AccountNo">帐号(卡号传入一项即可)</param>
+        /// <param name="CardNo">卡号(帐号传入一项即可)</param>
+        /// <param name="TransMoney">充值金额 单位分 补助>0 扣款<0</param>
+        /// <param name="MAC">MAC</param>
+        /// <returns></returns>
+        [WebMethod]
+        public string TPE_FlowCostMinus (string NodeNo, string AccountNo, string CardNo, string TransMoney, string MAC) {
+            CReturnFlowCostRes retRes = new CReturnFlowCostRes ();
+            string json = "";
+            string param = "";
+            try {
+                int nodeNo;
+                int accNo;
+                int transMoney;
+                if (string.IsNullOrEmpty (NodeNo) || !int.TryParse (NodeNo, out nodeNo)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[NodeNo(类型Int)]";
+                } else if (string.IsNullOrEmpty (MAC)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[MAC]";
+                } else if (string.IsNullOrEmpty (AccountNo) && string.IsNullOrEmpty (CardNo)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[AccountNo/CardNo(至少传入一项)] // 不再允许";
+                } else if (AccountNo.Length <= 0 && CardNo.Length <= 0) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[AccountNo/CardNo(必须传入)] [[[" + AccountNo + "---" + CardNo + "]]]";
+                } else if (string.IsNullOrEmpty (AccountNo) || !int.TryParse (AccountNo, out accNo)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[AccountNo(类型Int)]";
+                } else if (string.IsNullOrEmpty (TransMoney) || !int.TryParse (TransMoney, out transMoney)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[TransMoney(类型Int,单位:分)]";
+                } else if (transMoney >= 0) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[TransMoney(该接口仅允许向账户扣款)]";
+                } else {
+                    if (!string.IsNullOrEmpty (AccountNo) && !string.IsNullOrEmpty (CardNo)) {
+                        param = AccountNo + "$" + CardNo;
+                    } else {
+                        if (!string.IsNullOrEmpty (AccountNo)) {
+                            param = AccountNo;
+                        } else {
+                            param = CardNo;
+                        }
+                    }
+                    param = param + "$" + transMoney;
+                    if (CheckNode (NodeNo, param, MAC) != 0) {
+                        retRes.Result = "error";
+                        retRes.Msg = "节点校验失败！" + NodeCheckInfo[CheckNode (NodeNo, param, MAC)];
+                    } else {
+                        tagTPE_OnLineGetMaxSnRes SnRes = new tagTPE_OnLineGetMaxSnRes ();
+                        TPE_Class.TPE_OnLineGetMaxSn (1, out SnRes, 1);
+                        tagTPE_FlowCostReq ReqL = new tagTPE_FlowCostReq ();
+                        tagTPE_FlowCostRes ResF = new tagTPE_FlowCostRes ();
+                        ReqL.OccurIdNo = SnRes.MaxSn + 1;
+                        byte[] occurtime = Encoding.GetEncoding ("gb2312").GetBytes (DateTime.Now.ToString ("yyyyMMddHHmmss"));
+                        ReqL.OccurTime = new byte[14];
+                        Array.Copy (occurtime, ReqL.OccurTime, 14);
+                        if (!string.IsNullOrEmpty (AccountNo)) {
+                            ReqL.AccountNo = System.Convert.ToInt32 (AccountNo);
+                        }
+                        if (!string.IsNullOrEmpty (CardNo)) {
+                            ReqL.CardNo = System.Convert.ToInt32 (CardNo);
+                        }
+                        ReqL.CostType = 9;
+                        ReqL.TransMoney = transMoney;
+                        int nRet = TPE_Class.TPE_FlowCost (1, ref ReqL, 1, out ResF, 1);
+                        if (nRet != 0) {
+                            retRes.Result = "error";
+                            retRes.Msg = "nRet=" + nRet.ToString ();
+                        } else {
+                            TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
+                            Fr.CenterNo = QueryOccurByCenter (NodeNo, Fr.OccurIdNo);
+                            retRes.Result = "ok";
+                            retRes.Msg = "成功";
+                            retRes.Data = Fr;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                retRes.Result = "error";
+                retRes.Msg = "服务器异常" + e.Message;
+                CPublic.WriteLog ("【严重】账户扣款时抛出异常：" + e.Message);
+            }
+            try {
+                JavaScriptSerializer jss = new JavaScriptSerializer ();
+                json = jss.Serialize (retRes);
+            } catch (Exception ex) {
+                retRes.Result = "error";
+                retRes.Msg = "服务器异常" + ex.Message;
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】账户扣款 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
+            }
+            CPublic.WriteLog ("【记录】账户扣款成功执行，关键信息：" + param);
             return json;
         }
 
@@ -2777,6 +3024,7 @@ namespace WebServicePark {
         public string TPE_FlowCostByCertCode (string NodeNo, string CertCode, string TransMoney, string MAC) {
             CReturnFlowCostRes retRes = new CReturnFlowCostRes ();
             string json = "";
+            string param = "";
             try {
                 int nodeNo;
                 int transMoney;
@@ -2797,7 +3045,7 @@ namespace WebServicePark {
                     retRes.Msg = "请传入有效参数[TransMoney(金额不能为0,大于0补助,小于0扣款)]";
                 } else {
 
-                    string param = CertCode + "$" + transMoney;
+                    param = CertCode + "$" + transMoney;
                     if (CheckNode (NodeNo, param, MAC) != 0) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + NodeCheckInfo[CheckNode (NodeNo, param, MAC)];
@@ -2859,15 +3107,18 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
+                retRes.Msg = "服务器异常";
                 CPublic.WriteLog ("充值异常：" + e.Message);
+                CPublic.WriteLog ("【严重】按工号向账户充值扣款时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("充值 ToJson:" + ex.Message);
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】按工号向账户充值扣款序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】按工号向账户充值扣款成功执行，关键信息：" + param);
             return json;
         }
 
@@ -2875,6 +3126,7 @@ namespace WebServicePark {
         public string TPE_FlowCostByIDNO (string NodeNo, string IDNO, string TransMoney, string MAC) {
             CReturnFlowCostRes retRes = new CReturnFlowCostRes ();
             string json = "";
+            string param = "";
             try {
                 int nodeNo;
                 int transMoney;
@@ -2895,7 +3147,7 @@ namespace WebServicePark {
                     retRes.Msg = "请传入有效参数[TransMoney(金额不能为0,大于0补助,小于0扣款)]";
                 } else {
 
-                    string param = IDNO + "$" + transMoney;
+                    param = IDNO + "$" + transMoney;
                     if (CheckNode (NodeNo, param, MAC) != 0) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + NodeCheckInfo[CheckNode (NodeNo, param, MAC)];
@@ -2955,15 +3207,17 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常.";
-                CPublic.WriteLog ("充值异常1：" + e.Message);
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】按身份证向账户充值扣款时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
-                CPublic.WriteLog ("充值1 ToJson:" + ex.Message);
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】按身份证向账户充值扣款序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
+            CPublic.WriteLog ("【记录】按身份证向账户充值扣款成功执行，关键信息：" + param);
             return json;
         }
 
@@ -2973,11 +3227,11 @@ namespace WebServicePark {
         /// <param name="NodeNo">节点号</param>
         /// <param name="param">参数(参数间加$符号)</param>
         /// <param name="MAC">MAC</param>
-        /// <returns></returns>
+        /// <returns>返回值为1时请检查证书、返回值为2时请校验信息、返回值为3时请检查平台状态</returns>
         public int CheckNode (string NodeNo, string param, string MAC) {
             try {
                 if (NodeNo != CPublic.LocalNode) {
-                    CPublic.WriteLog ("验证节点失败 NodeNo=" + NodeNo + ";LocalNode=" + CPublic.LocalNode);
+                    CPublic.WriteLog ("验证节点失败 形参节点 [" + NodeNo + "] <=> 平台节点 [" + CPublic.LocalNode + "]");
                     return 1;
                 }
                 //（shareKey+$+参数(参数间+$)）
@@ -2988,36 +3242,14 @@ namespace WebServicePark {
                 string pass = "$senOjnyS";
                 shareKey += pass;
                 if (shareKey != MAC) {
-                    CPublic.WriteLog ("验证参数失败 shareKey=" + shareKey + ";mac=" + MAC + ";param=" + param);
+                    CPublic.WriteLog ("验证参数失败 实际形参校验值 [" + MAC + "] <=> 应提供校验值 [" + shareKey + "] 传递参数 [" + param + "]");
                     return 2;
                 } else {
                     return 0;
                 }
             } catch (Exception ex) {
-                CPublic.WriteLog ("查询节点失败,异常:" + ex.Message);
+                CPublic.WriteLog ("查询节点失败，异常：" + ex.Message);
                 return 3;
-            }
-        }
-        public string CheckNodeDetail (string NodeNo, string param, string MAC) {
-            try {
-                if (NodeNo != CPublic.LocalNode) {
-                    return "验证节点失败 NodeNo=" + NodeNo + ";LocalNode=" + CPublic.LocalNode;
-                }
-                //（shareKey+$+参数(参数间+$)）
-                string shareKey = "Synj0nes";
-                if (!string.IsNullOrEmpty (param)) {
-                    shareKey = shareKey + "$" + param;
-                }
-                string pass = "$senOjnyS";
-                shareKey += pass;
-                if (shareKey != MAC) {
-                    return "验证参数失败 shareKey=" + shareKey + ";mac=" + MAC + ";param=" + param;
-                } else {
-                    return "OK";
-                }
-            } catch (Exception ex) {
-                CPublic.WriteLog ("查询节点失败,异常:" + ex.Message);
-                return "查询节点失败,异常:" + ex.Message;
             }
         }
     }
