@@ -3144,15 +3144,24 @@ namespace WebServicePark {
                             ReqU.ReqCardNo = System.Convert.ToInt32(CardNo);
                         }
                         ReqU.Password = new byte[8];
-                        tmp = System.Text.Encoding.ASCII.GetBytes(Tel);
-                        ReqU.Tel = new byte[48];
-                        Array.Copy(tmp, ReqU.Tel, tmp.Length > 48 ? 48 : tmp.Length);
-                        tmp = System.Text.Encoding.ASCII.GetBytes(Email);
-                        ReqU.Email = new byte[48];
-                        Array.Copy(tmp, ReqU.Email, tmp.Length > 48 ? 48 : tmp.Length);
-                        tmp = System.Text.Encoding.ASCII.GetBytes(Comment);
-                        ReqU.Comment = new byte[120];
-                        Array.Copy(tmp, ReqU.Comment, tmp.Length > 120 ? 120 : tmp.Length);
+                        if (!string.IsNullOrEmpty(Tel))
+                        {
+                            tmp = System.Text.Encoding.ASCII.GetBytes(Tel);
+                            ReqU.Tel = new byte[48];
+                            Array.Copy(tmp, ReqU.Tel, tmp.Length > 48 ? 48 : tmp.Length);
+                        }
+                        if (!string.IsNullOrEmpty(Email))
+                        {
+                            tmp = System.Text.Encoding.ASCII.GetBytes(Email);
+                            ReqU.Email = new byte[48];
+                            Array.Copy(tmp, ReqU.Email, tmp.Length > 48 ? 48 : tmp.Length);
+                        }
+                        if (!string.IsNullOrEmpty(Comment))
+                        {
+                            tmp = System.Text.Encoding.ASCII.GetBytes(Comment);
+                            ReqU.Comment = new byte[120];
+                            Array.Copy(tmp, ReqU.Comment, tmp.Length > 120 ? 120 : tmp.Length);
+                        }
 
                         int nRet = TPE_Class.TPE_FlowUpdateAccount(1, ref ReqU, out ResU, 1);
                         if (nRet != 0)
