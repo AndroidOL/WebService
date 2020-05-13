@@ -1268,7 +1268,7 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg += "按标准条件查询帐户时抛出异常：" + e.Message;
+                retRes.Msg = "服务器异常";
                 CPublic.WriteLog ("【严重】按标准条件查询帐户时抛出异常：" + e.Message);
             }
             try {
@@ -2237,7 +2237,7 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg += "按工号调账时抛出异常：" + e.Message;
+                retRes.Msg = "服务器异常";
                 CPublic.WriteLog ("【严重】按工号调账时抛出异常：" + e.Message);
             }
             try {
@@ -2903,7 +2903,7 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常" + e.Message;
+                retRes.Msg = "服务器异常";
                 CPublic.WriteLog ("【严重】账户充值时抛出异常：" + e.Message);
             }
             try {
@@ -3004,7 +3004,7 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常" + e.Message;
+                retRes.Msg = "服务器异常";
                 CPublic.WriteLog ("【严重】账户扣款时抛出异常：" + e.Message);
             }
             try {
@@ -3108,7 +3108,6 @@ namespace WebServicePark {
             } catch (Exception e) {
                 retRes.Result = "error";
                 retRes.Msg = "服务器异常";
-                CPublic.WriteLog ("充值异常：" + e.Message);
                 CPublic.WriteLog ("【严重】按工号向账户充值扣款时抛出异常：" + e.Message);
             }
             try {
