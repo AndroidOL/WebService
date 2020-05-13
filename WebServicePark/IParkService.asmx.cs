@@ -53,11 +53,12 @@ namespace WebServicePark {
             "查询节点失败，请检查是否已添加节点"
 
         };
+
         /// <summary>
         /// 调帐
         /// </summary>
-        /// <param name="Condition">Condition</param>
-        /// <returns>json </returns>
+        /// <param name="Condition">Condition 数值用于表示账户状态</param>
+        /// <returns>json</returns>
         [WebMethod]
         public string TPE_ConditionParse (string Condition) {
             CReturnFlowRes retRes = new CReturnFlowRes ();
@@ -105,13 +106,16 @@ namespace WebServicePark {
             }
             return json;
         }
+
         /// <summary>
         /// 调帐
         /// </summary>
         /// <param name="NodeNo">节点号</param>
+        /// <param name="AccountNo">账号</param>
+        /// <param name="PassWord">密码</param>
+        /// <param name="Operation">操作类型，1表示挂失、2表示解挂</param>
         /// <param name="MAC">MAC(加密过程请查看CheckNode()方法)</param>
-        /// <param name="CardNo">卡号</param>
-        /// <returns>json </returns>
+        /// <returns>json</returns>
         [WebMethod]
         public string TPE_LostAccount (string NodeNo, string AccountNo, string PassWord, string Operation, string MAC) {
             CReturnFlowRes retRes = new CReturnFlowRes ();
@@ -232,6 +236,7 @@ namespace WebServicePark {
             }
             return json;
         }
+
         /// <summary>
         /// 修改密码
         /// </summary>
@@ -241,7 +246,7 @@ namespace WebServicePark {
         /// <param name="OldPassWord">原密码</param>
         /// <param name="NewPassWord">新密码</param>
         /// <param name="MAC">MAC</param>
-        /// <returns></returns>
+        /// <returns>json</returns>
         [WebMethod]
         public string TPE_ChangeAccountPassword (string NodeNo, string AccountNo, string CardNo, string OldPassWord, string NewPassWord, string MAC) {
             CReturnFlowUpdateAccountRes retRes = new CReturnFlowUpdateAccountRes ();
@@ -364,8 +369,8 @@ namespace WebServicePark {
         /// 调帐
         /// </summary>
         /// <param name="NodeNo">节点号</param>
-        /// <param name="MAC">MAC(加密过程请查看CheckNode()方法)</param>
         /// <param name="CardNo">卡号</param>
+        /// <param name="MAC">MAC(加密过程请查看CheckNode()方法)</param>
         /// <returns>json </returns>
         [WebMethod]
         public string TPE_GetAccount (string NodeNo, string CardNo, string MAC) {
@@ -460,13 +465,14 @@ namespace WebServicePark {
             }
             return json;
         }
+
         /// <summary>
         /// 调帐
         /// </summary>
         /// <param name="NodeNo">节点号</param>
-        /// <param name="MAC">MAC(加密过程请查看CheckNode()方法)</param>
         /// <param name="AccountNo">帐号(卡号传入一项即可)</param>
         /// <param name="CardNo">卡号(帐号传入一项即可)</param>
+        /// <param name="MAC">MAC(加密过程请查看CheckNode()方法)</param>
         /// <returns>json </returns>
         [WebMethod]
         public string TPE_GetAccountByNo (string NodeNo, string AccountNo, string MAC) {
@@ -562,12 +568,11 @@ namespace WebServicePark {
             return json;
         }
 
-        ////////!!!!!!!!!!!!!!!!!!!!
         /// <summary>
         /// 调帐
         /// </summary>
         /// <param name="NodeNo">节点号</param>
-        /// <param name="CertNo">学工号</param>
+        /// <param name="IDNo">身份证</param>
         /// <param name="MAC">MAC(加密过程请查看CheckNode()方法)</param>
         /// <returns>json </returns>
         [WebMethod]
@@ -652,7 +657,6 @@ namespace WebServicePark {
             return json;
         }
 
-        ////////!!!!!!!!!!!!!!!!!!!!
         /// <summary>
         /// 调帐
         /// </summary>
@@ -763,13 +767,14 @@ namespace WebServicePark {
             }
             return json;
         }
+
         /// <summary>
         /// 按学工号查询流水
         /// </summary>
         /// <param name="NodeNo">节点号</param>
         /// <param name="CertCode">学工号</param>
-        /// <param name="FromCentralNo">开始位置</param>
-        /// <param name="ToCentralNo">结束位置</param>
+        /// <param name="BeginTime">起始时间 20200101000000</param>
+        /// <param name="EndTime">结束时间 20200101000000</param>
         /// <param name="MAC">MAC</param>
         /// <returns></returns>
         [WebMethod]
@@ -1059,6 +1064,7 @@ namespace WebServicePark {
             }
             return json;
         }
+
         /// <summary>
         /// 密码验证
         /// </summary>
@@ -1151,14 +1157,13 @@ namespace WebServicePark {
             return json;
         }
 
-        ////////!!!!!!!!!!!!!!!!!!!!
         /// <summary>
         /// 按标准条件查询帐户
         /// </summary>
         /// <param name="NodeNo">节点号</param>
-        /// <param name="MAC">MAC</param>
         /// <param name="BeginNo">起始位置</param>
         /// <param name="EndNo">结束位置</param>
+        /// <param name="MAC">MAC</param>
         /// <returns></returns>
         [WebMethod]
         unsafe public string TPE_QueryStdAccount (string NodeNo, string BeginNo, string EndNo, string MAC) {
@@ -1497,12 +1502,10 @@ namespace WebServicePark {
         }
 
         /// <summary>
-        /// 按发生序号查询流水
+        /// 按发端流水号查询中心流水号
         /// </summary>
-        /// <param name="NodeNo">节点号</param>
-        /// <param name="FromCentralNo">开始位置</param>
-        /// <param name="ToCentralNo">结束位置</param>
-        /// <param name="MAC">MAC</param>
+        /// <param name="OccurNodeNo">发端节点号</param>
+        /// <param name="OccurNo">发端流水号</param>
         /// <returns></returns>
         unsafe int QueryOccurByCenter (string OccurNodeNo, int OccurNo) {
             CReturnCReturnObj retRes = new CReturnCReturnObj ();
@@ -1673,8 +1676,9 @@ namespace WebServicePark {
         /// 按发生序号查询流水
         /// </summary>
         /// <param name="NodeNo">节点号</param>
-        /// <param name="FromCentralNo">开始位置</param>
-        /// <param name="ToCentralNo">结束位置</param>
+        /// <param name="OccurNodeNo">发端节点号</param>
+        /// <param name="FromOccurNo">发端起始序号</param>
+        /// <param name="ToOccurNo">发端结束序号</param>
         /// <param name="MAC">MAC</param>
         /// <returns></returns>
         [WebMethod]
@@ -1914,9 +1918,9 @@ namespace WebServicePark {
         /// 按学工号查询流水
         /// </summary>
         /// <param name="NodeNo">节点号</param>
-        /// <param name="CertCode">学工号</param>
-        /// <param name="FromCentralNo">开始位置</param>
-        /// <param name="ToCentralNo">结束位置</param>
+        /// <param name="AccountNo">账号</param>
+        /// <param name="BeginTime">起始时间 20200101000000</param>
+        /// <param name="EndTime">结束时间 20200101000000</param>
         /// <param name="MAC">MAC</param>
         /// <returns></returns>
         [WebMethod]
