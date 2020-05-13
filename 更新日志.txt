@@ -1,0 +1,22 @@
+2020-05-07
+更新日志：
+初版发布
+
+2020-05-11
+更新日志：
+[+] 增加 TPE_ConditionParse 解析 Condition 值
+[+] 增加 NodeCheckInfo[0-3] 提示说明错误原因
+[+] 拆分 TPE_GetAccount 为 TPE_GetAccount 和 TPE_GetAccountByNo
+
+2020-05-12
+更新日志：
+[+] 增加 TPE_QueryFlowByOccur 按发生节点流水信息查询
+[*] 修复由 TPE_FlowCost 发生的交易没有中心流水号的问题
+[*] 修复 TPE_FlowCost 中只填写一项条件时验证失败的问题
+[*] 修复 TPE_ConfigThirdChecker 实际功能为部门枚举的问题
+
+2020-05-13
+更新日志：
+[+] 为所有发生流水的操作添加中心流水号
+[+] 附带 TPE.DLL 文件，其中 TPE_GetAccountEx 不可用
+[*] 重写 TPE_FlowUpdateAccount 提供信息修改
