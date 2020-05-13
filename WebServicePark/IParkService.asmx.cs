@@ -46,6 +46,73 @@ namespace WebServicePark {
             return false;
         }
 
+        public static bool CheckIdCard (string idNumber) {
+            if (idNumber.Length == 18) {
+                var check = CheckIdCard18 (idNumber);
+                return check;
+            }
+            if (idNumber.Length != 15) return false; {
+                var check = CheckIdCard15 (idNumber);
+                return check;
+            }
+        }
+
+        /// <summary> 
+        /// 18位身份证号码验证 
+        /// </summary> 
+        private static bool CheckIdCard18 (string idNumber) {
+            if (long.TryParse (idNumber.Remove (17), out var n) == false ||
+                n < Math.Pow (10, 16) ||
+                long.TryParse (idNumber.Replace ('x', '0').Replace ('X', '0'), out n) == false) {
+                return false; //数字验证 
+            }
+            //省份编号
+            const string address = "11x22x35x44x53x12x23x36x45x54x13x31x37x46x61x14x32x41x50x62x15x33x42x51x63x21x34x43x52x64x65x71x81x82x91";
+            if (address.IndexOf (idNumber.Remove (2), StringComparison.Ordinal) == -1) {
+                return false; //省份验证 
+            }
+            var birth = idNumber.Substring (6, 8).Insert (6, "-").Insert (4, "-");
+            if (DateTime.TryParse (birth, out _) == false) {
+                return false; //生日验证 
+            }
+            string[] arrArrifyCode = ("1,0,x,9,8,7,6,5,4,3,2").Split (',');
+            string[] Wi = ("7,9,10,5,8,4,2,1,6,3,7,9,10,5,8,4,2").Split (',');
+            char[] Ai = idNumber.Remove (17).ToCharArray ();
+            int sum = 0;
+            for (int i = 0; i < 17; i++) {
+                // 加权求和 
+                sum += int.Parse (Wi[i]) * int.Parse (Ai[i].ToString ());
+            }
+            //得到验证码所在位置
+            Math.DivRem (sum, 11, out var y);
+            var x = idNumber.Substring (17, 1).ToLower ();
+            var yy = arrArrifyCode[y];
+            if (arrArrifyCode[y] != idNumber.Substring (17, 1).ToLower ()) {
+                return false; //校验码验证 
+            }
+            return true; //符合GB11643-1999标准 
+        }
+
+        /// <summary> 
+        /// 15位身份证号码验证 
+        /// </summary> 
+        private static bool CheckIdCard15 (string idNumber) {
+            long n = 0;
+            if (long.TryParse (idNumber, out n) == false || n < Math.Pow (10, 14)) {
+                return false; //数字验证 
+            }
+            string address = "11x22x35x44x53x12x23x36x45x54x13x31x37x46x61x14x32x41x50x62x15x33x42x51x63x21x34x43x52x64x65x71x81x82x91";
+            if (address.IndexOf (idNumber.Remove (2)) == -1) {
+                return false; //省份验证 
+            }
+            string birth = idNumber.Substring (6, 6).Insert (4, "-").Insert (2, "-");
+            DateTime time = new DateTime ();
+            if (DateTime.TryParse (birth, out time) == false) {
+                return false; //生日验证 
+            }
+            return true;
+        }
+
         string[] NodeCheckInfo = new string[] {
             "节点验证成功，数据校验正确",
             "节点验证失败，请检查证书、第三方加密狗以及平台是否正常，重启中心平台或尝试将证书文件放置于 SysWow64 文件夹下",
@@ -586,7 +653,7 @@ namespace WebServicePark {
         /// <param name="MAC">MAC(加密过程请查看CheckNode()方法)</param>
         /// <returns>json </returns>
         [WebMethod]
-        public string TPE_GetAccountByIDNo (string NodeNo, string IDNo, string MAC) {
+        public string TPE_GetAccountByIDNo (string NodeNo, string IDNO, string MAC) {
             CReturnGetAccountRes retRes = new CReturnGetAccountRes ();
             List<TPE_GetAccountRes> listRes = new List<TPE_GetAccountRes> ();
             string json = "";
@@ -600,14 +667,14 @@ namespace WebServicePark {
                 } else if (string.IsNullOrEmpty (MAC)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[MAC]";
-                } else if (string.IsNullOrEmpty (IDNo)) {
+                } else if (string.IsNullOrEmpty (IDNO)) {
                     retRes.Result = "error";
-                    retRes.Msg = "请传入有效参数[CertNo]";
+                    retRes.Msg = "请传入有效参数[IDNO]";
+                } else if (!CheckIdCard(IDNO)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效身份证[IDNO]";
                 } else {
-                    if (!string.IsNullOrEmpty (IDNo)) {
-                        param = IDNo;
-                    }
-
+                    param = IDNO;
                     if (CheckNode (NodeNo, param, MAC) != 0) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + NodeCheckInfo[CheckNode (NodeNo, param, MAC)];
@@ -615,7 +682,12 @@ namespace WebServicePark {
                         tagTPE_QueryGeneralAccountReq Req = new tagTPE_QueryGeneralAccountReq ();
                         tagTPE_QueryResControl ResControl = new tagTPE_QueryResControl ();
 
-                        Req.SQL = "where PersonID = '" + IDNo.Trim () + "'";
+                        string sqlinput = IDNO.Replace (" ", "").Replace ("'", "").Trim ();
+                        Regex.Replace (sqlinput, "update", "", RegexOptions.IgnoreCase);
+                        Regex.Replace (sqlinput, "delete", "", RegexOptions.IgnoreCase);
+                        Regex.Replace (sqlinput, "drop", "", RegexOptions.IgnoreCase);
+                        Regex.Replace (sqlinput, "select", "", RegexOptions.IgnoreCase);
+                        Req.SQL = " where PersonID = '" + sqlinput + "'";
                         Req.resflagName = 1;
                         Req.resflagCertCode = 1;
                         Req.resflagBalance = 1;
@@ -705,7 +777,12 @@ namespace WebServicePark {
                         tagTPE_QueryGeneralAccountReq Req = new tagTPE_QueryGeneralAccountReq ();
                         tagTPE_QueryResControl ResControl = new tagTPE_QueryResControl ();
 
-                        Req.SQL = "where CertCode = '" + CertNo.Trim () + "'";
+                        string sqlinput = CertNo.Replace (" ", "").Replace ("'", "").Trim ();
+                        Regex.Replace (sqlinput, "update", "", RegexOptions.IgnoreCase);
+                        Regex.Replace (sqlinput, "delete", "", RegexOptions.IgnoreCase);
+                        Regex.Replace (sqlinput, "drop", "", RegexOptions.IgnoreCase);
+                        Regex.Replace (sqlinput, "select", "", RegexOptions.IgnoreCase);
+                        Req.SQL = " where CertCode = '" + sqlinput + "'";
                         /*经常会有这样的检索条件,AccountNo , CardNo , JoinNode,JoinCardHolder
                           TPE在处理时优先级按帐号>卡号>对应关系来处理,过渡的条件为前面字段=0;
                           调帐交易中用户可以定义自己需要的字段,如果不需要的字段可以不选择,网络上也不会传输
@@ -815,7 +892,12 @@ namespace WebServicePark {
                     //调账获取账户信息
                     tagTPE_QueryGeneralAccountReq ReqAcc = new tagTPE_QueryGeneralAccountReq ();
                     tagTPE_QueryResControl ResControl = new tagTPE_QueryResControl ();
-                    ReqAcc.SQL = "where CertCode = '" + CertCode.Trim () + "'";
+                    string sqlinput = CertCode.Replace (" ", "").Replace ("'", "").Trim ();
+                    Regex.Replace (sqlinput, "update", "", RegexOptions.IgnoreCase);
+                    Regex.Replace (sqlinput, "delete", "", RegexOptions.IgnoreCase);
+                    Regex.Replace (sqlinput, "drop", "", RegexOptions.IgnoreCase);
+                    Regex.Replace (sqlinput, "select", "", RegexOptions.IgnoreCase);
+                    ReqAcc.SQL = " where CertCode = '" + sqlinput + "'";
                     ReqAcc.resflagName = 1;
                     ReqAcc.resflagCertCode = 1;
                     ReqAcc.resflagBalance = 1;
@@ -1538,7 +1620,12 @@ namespace WebServicePark {
             try {
                 tagTPE_QueryFlowBySQLReq Req = new tagTPE_QueryFlowBySQLReq ();
                 tagTPE_QueryResControl Res = new tagTPE_QueryResControl ();
-                String tmpSQL = " WHERE OccurNode = '" + OccurNodeNo + "' AND OccurTick = '" + OccurNo.ToString () + "'";
+                string sqlinput = OccurNodeNo.Replace (" ", "").Replace ("'", "").Trim ();
+                Regex.Replace (sqlinput, "update", "", RegexOptions.IgnoreCase);
+                Regex.Replace (sqlinput, "delete", "", RegexOptions.IgnoreCase);
+                Regex.Replace (sqlinput, "drop", "", RegexOptions.IgnoreCase);
+                Regex.Replace (sqlinput, "select", "", RegexOptions.IgnoreCase);
+                String tmpSQL = " WHERE OccurNode = '" + sqlinput + "' AND OccurTick = '" + OccurNo.ToString () + "'";
                 Req.SQL = new byte[4096];
                 Array.Copy (System.Text.Encoding.Default.GetBytes (tmpSQL), 0, Req.SQL, 0, System.Text.Encoding.Default.GetBytes (tmpSQL).Length);
                 int nRet = TPE_Class.TPE_QueryFlowBySQL (1, ref Req, out Res, 1);
@@ -1620,7 +1707,12 @@ namespace WebServicePark {
             try {
                 tagTPE_QueryFlowBySQLReq Req = new tagTPE_QueryFlowBySQLReq ();
                 tagTPE_QueryResControl Res = new tagTPE_QueryResControl ();
-                String tmpSQL = " WHERE OccurNode = '" + OccurNodeNo + "' AND OccurTick = '" + OccurNo.ToString () + "'";
+                string sqlinput = OccurNodeNo.Replace (" ", "").Replace ("'", "").Trim ();
+                Regex.Replace (sqlinput, "update", "", RegexOptions.IgnoreCase);
+                Regex.Replace (sqlinput, "delete", "", RegexOptions.IgnoreCase);
+                Regex.Replace (sqlinput, "drop", "", RegexOptions.IgnoreCase);
+                Regex.Replace (sqlinput, "select", "", RegexOptions.IgnoreCase);
+                String tmpSQL = " WHERE OccurNode = '" + sqlinput + "' AND OccurTick = '" + OccurNo.ToString () + "'";
                 Req.SQL = new byte[4096];
                 Array.Copy (System.Text.Encoding.Default.GetBytes (tmpSQL), 0, Req.SQL, 0, System.Text.Encoding.Default.GetBytes (tmpSQL).Length);
                 int nRet = TPE_Class.TPE_QueryFlowBySQL (1, ref Req, out Res, 1);
@@ -1742,7 +1834,12 @@ namespace WebServicePark {
                     tagTPE_QueryFlowBySQLReq Req = new tagTPE_QueryFlowBySQLReq ();
                     tagTPE_QueryResControl Res = new tagTPE_QueryResControl ();
                     //Req.ToCentralNo = 0x0FFFFFFF;
-                    String tmpSQL = " WHERE OccurNode = '" + OccurNodeNo.ToString () + "' AND OccurTick BETWEEN '" + FromOccurNo.ToString () + "' AND '" + ToOccurNo.ToString () + "'";
+                    string sqlinput = OccurNodeNo.Replace (" ", "").Replace ("'", "").Trim ();
+                    Regex.Replace (sqlinput, "update", "", RegexOptions.IgnoreCase);
+                    Regex.Replace (sqlinput, "delete", "", RegexOptions.IgnoreCase);
+                    Regex.Replace (sqlinput, "drop", "", RegexOptions.IgnoreCase);
+                    Regex.Replace (sqlinput, "select", "", RegexOptions.IgnoreCase);
+                    String tmpSQL = " WHERE OccurNode = '" + sqlinput + "' AND OccurTick BETWEEN '" + FromOccurNo.ToString () + "' AND '" + ToOccurNo.ToString () + "'";
                     Req.SQL = new byte[4096];
                     Array.Copy (System.Text.Encoding.Default.GetBytes (tmpSQL), 0, Req.SQL, 0, System.Text.Encoding.Default.GetBytes (tmpSQL).Length);
                     int nRet = TPE_Class.TPE_QueryFlowBySQL (1, ref Req, out Res, 1);
@@ -3053,7 +3150,12 @@ namespace WebServicePark {
                         tagTPE_QueryGeneralAccountReq Req = new tagTPE_QueryGeneralAccountReq ();
                         tagTPE_QueryResControl ResControl = new tagTPE_QueryResControl ();
 
-                        Req.SQL = "where CertCode = '" + CertCode.Trim () + "'";
+                        string sqlinput = CertCode.Replace (" ", "").Replace ("'", "").Trim ();
+                        Regex.Replace (sqlinput, "update", "", RegexOptions.IgnoreCase);
+                        Regex.Replace (sqlinput, "delete", "", RegexOptions.IgnoreCase);
+                        Regex.Replace (sqlinput, "drop", "", RegexOptions.IgnoreCase);
+                        Regex.Replace (sqlinput, "select", "", RegexOptions.IgnoreCase);
+                        Req.SQL = " where CertCode = '" + sqlinput + "'";
                         Req.resflagName = 1;
                         Req.resflagCondition = 1;
                         Req.resflagBalance = 1;
@@ -3138,6 +3240,9 @@ namespace WebServicePark {
                 } else if (string.IsNullOrEmpty (IDNO)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[IDNO]";
+                } else if (!CheckIdCard(IDNO)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效身份证[IDNO]";
                 } else if (string.IsNullOrEmpty (TransMoney) || !int.TryParse (TransMoney, out transMoney)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[TransMoney(类型Int,单位:分)]";
@@ -3154,7 +3259,12 @@ namespace WebServicePark {
                         tagTPE_QueryGeneralAccountReq Req = new tagTPE_QueryGeneralAccountReq ();
                         tagTPE_QueryResControl ResControl = new tagTPE_QueryResControl ();
 
-                        Req.SQL = "where PersonID = '" + IDNO.Trim () + "'";
+                        string sqlinput = IDNO.Replace (" ", "").Replace ("'", "").Trim ();
+                        Regex.Replace (sqlinput, "update", "", RegexOptions.IgnoreCase);
+                        Regex.Replace (sqlinput, "delete", "", RegexOptions.IgnoreCase);
+                        Regex.Replace (sqlinput, "drop", "", RegexOptions.IgnoreCase);
+                        Regex.Replace (sqlinput, "select", "", RegexOptions.IgnoreCase);
+                        Req.SQL = " where PersonID = '" + sqlinput + "'";
                         Req.resflagName = 1;
                         Req.resflagCondition = 1;
                         Req.resflagBalance = 1;
