@@ -128,8 +128,28 @@ namespace WebServicePark {
         /// <returns>json</returns>
         [WebMethod]
         public string TPE_ConditionParse (string Condition) {
-            CReturnFlowRes retRes = new CReturnFlowRes ();
             string json = "";
+            CReturnFlowRes retRes = new CReturnFlowRes ();
+            bool auth = false;
+            try {
+                System.Configuration.ExeConfigurationFileMap map = new System.Configuration.ExeConfigurationFileMap();
+                map.ExeConfigFilename = "setting.xml";
+                System.Configuration.Configuration config = System.Configuration.ConfigurationManager.OpenMappedExeConfiguration(map, System.Configuration.ConfigurationUserLevel.None);
+                if (config.Sections["appSettings"] != null) {
+                    if (config.AppSettings.Settings["TPE_ConditionParse"].Value.ToString() != "0") {
+                        auth = true;
+                    }
+                }
+            } catch (Exception) {
+                auth = true;
+            }
+            if (!auth) {
+                retRes.Result = "error";
+                retRes.Msg = "权限异常";
+                JavaScriptSerializer jss = new JavaScriptSerializer ();
+                json = jss.Serialize (retRes);
+                return json;
+            }
 
             ConditionInfo CI;
             CI.isUsable = false;
