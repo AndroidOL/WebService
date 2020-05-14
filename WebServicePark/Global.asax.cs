@@ -19,7 +19,7 @@ namespace WebServicePark
         {
             CPublic.AppPath = Server.MapPath(@"\");
             CPublic.LogPath = CPublic.AppPath + "Log\\";
-
+            CPublic.AuthUpdate();
             //int nRet = CPublic.Init();
             //if (nRet != 0)
             //{

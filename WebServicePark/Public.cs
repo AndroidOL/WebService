@@ -14,6 +14,7 @@ using System.Data.SqlClient;
 using System.Xml;
 using System.Text;
 using System.Globalization;
+using System.Collections.Generic;
 
 namespace WebServicePark
 {
@@ -23,6 +24,7 @@ namespace WebServicePark
         public static string AppPath = "";
         public static string LogPath = @"D:\WebServices\";
         public static string ConnString = "";//@"Data Source=127.0.0.1;Initial Catalog=ConCard;User ID=sa;Password=2008sa";
+        public static List<string> myFunc = new List<string>();
         //public static SqlConnection conn = new SqlConnection();
 
         //@"Data Source=" + IP + ";Initial Catalog=SMS;User ID=" + UserName + ";Password=" + Password;
@@ -69,6 +71,25 @@ namespace WebServicePark
                 CPublic.WriteLog("初始化异常:" + e.Message);
                 return -1;
             }
+        }
+        public static bool AuthUpdate() {
+            try {
+                myFunc.Clear();
+                ExeConfigurationFileMap map = new ExeConfigurationFileMap();
+                map.ExeConfigFilename = CPublic.AppPath + "setting.xml";
+                Configuration config = ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.None);
+                if (config.Sections["appSettings"] != null) {
+                    KeyValueConfigurationCollection kv = config.AppSettings.Settings;
+
+                    foreach(KeyValueConfigurationElement el in kv) {
+                        if (el.Value == "0") {
+                            myFunc.Add(el.Key);
+                        }
+                    }
+                    return true;
+                }
+            } catch { return false; }
+            return false;
         }
         public static int WriteLog(string Msg)
         {
