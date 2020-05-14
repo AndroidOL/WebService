@@ -1935,15 +1935,10 @@ namespace WebServicePark {
                         try {
                             switch (type) {
                                 case 1: //开户
-                                    break;
                                 case 2: //撤户
-                                    break;
                                 case 3: //建立对应关系
-                                    break;
                                 case 4: //撤消对应
-                                    break;
                                 case 5: //更改帐户信息
-                                    break;
                                 case 6: //更改对应关系
                                     break;
                                 case 7: //余额变更, 不区分具体来源
@@ -3341,7 +3336,7 @@ namespace WebServicePark {
                         if (!string.IsNullOrEmpty (CardNo)) {
                             ReqL.CardNo = System.Convert.ToInt32 (CardNo);
                         }
-                        ReqL.CostType = 9;
+                        ReqL.CostType = 11;
                         ReqL.TransMoney = transMoney;
                         int nRet = TPE_Class.TPE_FlowCost (1, ref ReqL, 1, out ResF, 1);
                         if (nRet != 0) {
@@ -3387,7 +3382,7 @@ namespace WebServicePark {
         public string TPE_RefundByCenterID (string NodeNo, string AccountNo, string CenterID, string TransMoney, string MAC) {
             CReturnFlowCostRes retRes = new CReturnFlowCostRes ();
             string json = "";
-            if (!isAllow ("TPE_FlowCostMinus")) {
+            if (!isAllow ("TPE_RefundByCenterID")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -3449,7 +3444,9 @@ namespace WebServicePark {
                         ReqL.OccurTime = new byte[14];
                         Array.Copy (occurtime, ReqL.OccurTime, 14);
                         ReqL.AccountNo = System.Convert.ToInt32 (AccountNo);
-                        ReqL.CostType = 9;
+                        if (TransferInfo.CostType >= 7 && TransferInfo.CostType <= 19) {
+                            ReqL.CostType = TransferInfo.CostType;
+                        } else { ReqL.CostType = 11; }
                         ReqL.TransMoney = System.Math.Abs(transMoney);
                         int nRet = TPE_Class.TPE_FlowCost (1, ref ReqL, 1, out ResF, 1);
                         if (nRet != 0) {
