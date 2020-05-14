@@ -1,6 +1,29 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <configuration>
-	<appSettings>
-		<add key="TPE_ConditionParse" value="0" />
-	</appSettings>
+<appSettings>
+<add key="TPE_ChangeAccountPassword" value="1" />
+<add key="TPE_CheckPassword" value="1" />
+<add key="TPE_ConditionParse" value="1" />
+<add key="TPE_ConfigDownloadWhiteList" value="1" />
+<add key="TPE_ConfigEnumDepartment" value="1" />
+<add key="TPE_ConfigEnumIdenti" value="1" />
+<add key="TPE_ConfigThirdChecker" value="1" />
+<add key="TPE_FlowCost" value="1" />
+<add key="TPE_FlowCostByCertCode" value="1" />
+<add key="TPE_FlowCostByIDNO" value="1" />
+<add key="TPE_FlowCostMinus" value="1" />
+<add key="TPE_FlowCostPlus" value="1" />
+<add key="TPE_FlowUpdateAccount" value="1" />
+<add key="TPE_GetAccount" value="1" />
+<add key="TPE_GetAccountByCertNo" value="1" />
+<add key="TPE_GetAccountByIDNo" value="1" />
+<add key="TPE_GetAccountByNo" value="1" />
+<add key="TPE_GetAccountEx" value="1" />
+<add key="TPE_LostAccount" value="1" />
+<add key="TPE_QueryFlowByAccount" value="1" />
+<add key="TPE_QueryFlowByCenter" value="1" />
+<add key="TPE_QueryFlowByCertNo" value="1" />
+<add key="TPE_QueryFlowByOccur" value="1" />
+<add key="TPE_QueryStdAccount " value="1" />
+</appSettings>
 </configuration>
