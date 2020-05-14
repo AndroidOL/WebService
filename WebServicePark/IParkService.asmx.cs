@@ -122,19 +122,11 @@ namespace WebServicePark {
 
         };
 
-        public bool isAllow(string FuncName) {
+        public bool isAllow (string FuncName) {
             bool auth = false;
             if (CPublic.myFunc.Count > 0) {
-                // CPublic.WriteLog ("权限总计 " + CPublic.myFunc.Count);
-                string Auth = CPublic.myFunc.Find(strFinder => { return strFinder.Equals(FuncName); });
+                string Auth = CPublic.myFunc.Find (strFinder => { return strFinder.Equals (FuncName); });
                 if (Auth == null) { auth = true; }
-                // CPublic.WriteLog("权限校验 " + Auth == null ? "非法" : "通过");
-
-                // string Tools = "";
-                // foreach (string Func in CPublic.myFunc) {
-                //     Tools += Func + ";";
-                // }
-                // CPublic.WriteLog(Tools);
             } else { auth = true; }
             return auth;
         }
@@ -148,12 +140,12 @@ namespace WebServicePark {
         /// <returns>json </returns>
         [WebMethod]
         public string TPE_AuthUpdate (string MAC) {
-            CReturnGetAccountRes retRes = new CReturnGetAccountRes();
+            CReturnGetAccountRes retRes = new CReturnGetAccountRes ();
             string param = "";
             string json = "";
             try {
                 retRes.Result = "ok";
-                retRes.Msg = CPublic.AuthUpdate().ToString();
+                retRes.Msg = CPublic.AuthUpdate ().ToString ();
             } catch (Exception e) {
                 retRes.Result = "error";
                 retRes.Msg = "服务器异常";
@@ -178,8 +170,8 @@ namespace WebServicePark {
         [WebMethod]
         public string TPE_ConditionParse (string Condition) {
             string json = "";
-            CReturnFlowRes retRes = new CReturnFlowRes();
-            if (!isAllow("TPE_ConditionParse")) {
+            CReturnFlowRes retRes = new CReturnFlowRes ();
+            if (!isAllow ("TPE_ConditionParse")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -244,8 +236,8 @@ namespace WebServicePark {
         [WebMethod]
         public string TPE_LostAccount (string NodeNo, string AccountNo, string PassWord, string Operation, string MAC) {
             string json = "";
-            CReturnFlowRes retRes = new CReturnFlowRes();
-            if (!isAllow("TPE_LostAccount")) {
+            CReturnFlowRes retRes = new CReturnFlowRes ();
+            if (!isAllow ("TPE_LostAccount")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -384,9 +376,9 @@ namespace WebServicePark {
         /// <returns>json</returns>
         [WebMethod]
         public string TPE_ChangeAccountPassword (string NodeNo, string AccountNo, string CardNo, string OldPassWord, string NewPassWord, string MAC) {
-            CReturnFlowUpdateAccountRes retRes = new CReturnFlowUpdateAccountRes();
+            CReturnFlowUpdateAccountRes retRes = new CReturnFlowUpdateAccountRes ();
             string json = "";
-            if (!isAllow("TPE_ChangeAccountPassword")) {
+            if (!isAllow ("TPE_ChangeAccountPassword")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -518,9 +510,9 @@ namespace WebServicePark {
         /// <returns>json </returns>
         [WebMethod]
         public string TPE_GetAccount (string NodeNo, string CardNo, string MAC) {
-            CReturnGetAccountRes retRes = new CReturnGetAccountRes();
+            CReturnGetAccountRes retRes = new CReturnGetAccountRes ();
             string json = "";
-            if (!isAllow("TPE_GetAccount")) {
+            if (!isAllow ("TPE_GetAccount")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -628,9 +620,9 @@ namespace WebServicePark {
         /// <returns>json </returns>
         [WebMethod]
         public string TPE_GetAccountByNo (string NodeNo, string AccountNo, string MAC) {
-            CReturnGetAccountRes retRes = new CReturnGetAccountRes();
+            CReturnGetAccountRes retRes = new CReturnGetAccountRes ();
             string json = "";
-            if (!isAllow("TPE_GetAccountByNo")) {
+            if (!isAllow ("TPE_GetAccountByNo")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -739,9 +731,9 @@ namespace WebServicePark {
         [WebMethod]
         public string TPE_GetAccountByIDNo (string NodeNo, string IDNO, string MAC) {
             List<TPE_GetAccountRes> listRes = new List<TPE_GetAccountRes> ();
-            CReturnGetAccountRes retRes = new CReturnGetAccountRes();
+            CReturnGetAccountRes retRes = new CReturnGetAccountRes ();
             string json = "";
-            if (!isAllow("TPE_GetAccountByIDNo")) {
+            if (!isAllow ("TPE_GetAccountByIDNo")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -761,7 +753,7 @@ namespace WebServicePark {
                 } else if (string.IsNullOrEmpty (IDNO)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[IDNO]";
-                } else if (!CheckIdCard(IDNO)) {
+                } else if (!CheckIdCard (IDNO)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效身份证[IDNO]";
                 } else {
@@ -843,7 +835,7 @@ namespace WebServicePark {
         public string TPE_GetAccountByCertNo (string NodeNo, string CertNo, string MAC) {
             CReturnGetAccountRes retRes = new CReturnGetAccountRes ();
             string json = "";
-            if (!isAllow("TPE_GetAccountByCertNo")) {
+            if (!isAllow ("TPE_GetAccountByCertNo")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -971,7 +963,7 @@ namespace WebServicePark {
             CReturnCReturnObj retRes = new CReturnCReturnObj ();
             List<TPE_CReturnObj> listCRO = new List<TPE_CReturnObj> ();
             string json = "";
-            if (!isAllow("TPE_QueryFlowByCertNo")) {
+            if (!isAllow ("TPE_QueryFlowByCertNo")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -1281,7 +1273,7 @@ namespace WebServicePark {
         public string TPE_CheckPassword (string NodeNo, string AccountNo, string CardNo, string PassWord, string MAC) {
             CReturnGetAccountRes retRes = new CReturnGetAccountRes ();
             string json = "";
-            if (!isAllow("TPE_CheckPassword")) {
+            if (!isAllow ("TPE_CheckPassword")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -1382,7 +1374,7 @@ namespace WebServicePark {
             CReturnGetAccountRes retRes = new CReturnGetAccountRes ();
             List<TPE_GetAccountRes> listRes = new List<TPE_GetAccountRes> ();
             string json = "";
-            if (!isAllow("TPE_QueryStdAccount")) {
+            if (!isAllow ("TPE_QueryStdAccount")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -1496,7 +1488,7 @@ namespace WebServicePark {
             CReturnCReturnObj retRes = new CReturnCReturnObj ();
             List<TPE_CReturnObj> listCRO = new List<TPE_CReturnObj> ();
             string json = "";
-            if (!isAllow("TPE_QueryFlowByCenter")) {
+            if (!isAllow ("TPE_QueryFlowByCenter")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -1928,7 +1920,7 @@ namespace WebServicePark {
             CReturnCReturnObj retRes = new CReturnCReturnObj ();
             List<TPE_CReturnObj> listCRO = new List<TPE_CReturnObj> ();
             string json = "";
-            if (!isAllow("TPE_QueryFlowByOccur")) {
+            if (!isAllow ("TPE_QueryFlowByOccur")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -2185,7 +2177,7 @@ namespace WebServicePark {
             CReturnCReturnObj retRes = new CReturnCReturnObj ();
             List<TPE_CReturnObj> listCRO = new List<TPE_CReturnObj> ();
             string json = "";
-            if (!isAllow("TPE_QueryFlowByAccount")) {
+            if (!isAllow ("TPE_QueryFlowByAccount")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -2497,7 +2489,7 @@ namespace WebServicePark {
             CReturnConfigDeptRec retRes = new CReturnConfigDeptRec ();
             List<TPE_ConfigDeptRec> listRes = new List<TPE_ConfigDeptRec> ();
             string json = "";
-            if (!isAllow("TPE_ConfigEnumDepartment")) {
+            if (!isAllow ("TPE_ConfigEnumDepartment")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -2575,7 +2567,7 @@ namespace WebServicePark {
             CReturnGetAccountRes retRes = new CReturnGetAccountRes ();
             List<TPE_GetAccountRes> listRes = new List<TPE_GetAccountRes> ();
             string json = "";
-            if (!isAllow("TPE_ConfigDownloadWhiteList")) {
+            if (!isAllow ("TPE_ConfigDownloadWhiteList")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -2650,7 +2642,7 @@ namespace WebServicePark {
             CReturnConfigIdentiRec retRes = new CReturnConfigIdentiRec ();
             List<TPE_ConfigIdentiRec> listRes = new List<TPE_ConfigIdentiRec> ();
             string json = "";
-            if (!isAllow("TPE_ConfigEnumIdenti")) {
+            if (!isAllow ("TPE_ConfigEnumIdenti")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -2726,7 +2718,7 @@ namespace WebServicePark {
             CReturnGetAccountRes retRes = new CReturnGetAccountRes ();
             List<TPE_GetAccountRes> listRes = new List<TPE_GetAccountRes> ();
             string json = "";
-            if (!isAllow("TPE_ConfigThirdChecker")) {
+            if (!isAllow ("TPE_ConfigThirdChecker")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -2801,7 +2793,7 @@ namespace WebServicePark {
         public string TPE_GetAccountEx (string NodeNo, string AccountNo, string MAC) {
             CReturnGetAccountExRes retRes = new CReturnGetAccountExRes ();
             string json = "";
-            if (!isAllow("TPE_GetAccountEx")) {
+            if (!isAllow ("TPE_GetAccountEx")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -2874,7 +2866,7 @@ namespace WebServicePark {
         public string TPE_FlowUpdateAccount (string NodeNo, string AccountNo, string CardNo, string Tel, string Email, string Comment, string MAC) {
             CReturnFlowUpdateAccountRes retRes = new CReturnFlowUpdateAccountRes ();
             string json = "";
-            if (!isAllow("TPE_FlowUpdateAccount")) {
+            if (!isAllow ("TPE_FlowUpdateAccount")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -3007,7 +2999,7 @@ namespace WebServicePark {
         public string TPE_FlowCost (string NodeNo, string AccountNo, string CardNo, string TransMoney, string MAC) {
             CReturnFlowCostRes retRes = new CReturnFlowCostRes ();
             string json = "";
-            if (!isAllow("TPE_FlowCost")) {
+            if (!isAllow ("TPE_FlowCost")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -3062,6 +3054,8 @@ namespace WebServicePark {
                         ReqL.OccurIdNo = SnRes.MaxSn + 1;
                         byte[] occurtime = Encoding.GetEncoding ("gb2312").GetBytes (DateTime.Now.ToString ("yyyyMMddHHmmss"));
                         ReqL.OccurTime = new byte[14];
+                        ReqL.ExtraInfo = Encoding.GetEncoding("GB2312").GetBytes ("123456");
+                        ReqL.ExtraInfoLen  = ReqL.ExtraInfo.Length;
                         Array.Copy (occurtime, ReqL.OccurTime, 14);
                         if (!string.IsNullOrEmpty (AccountNo)) {
                             ReqL.AccountNo = System.Convert.ToInt32 (AccountNo);
@@ -3115,7 +3109,7 @@ namespace WebServicePark {
         public string TPE_FlowCostPlus (string NodeNo, string AccountNo, string CardNo, string TransMoney, string MAC) {
             CReturnFlowCostRes retRes = new CReturnFlowCostRes ();
             string json = "";
-            if (!isAllow("TPE_FlowCostPlus")) {
+            if (!isAllow ("TPE_FlowCostPlus")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -3223,7 +3217,7 @@ namespace WebServicePark {
         public string TPE_FlowCostMinus (string NodeNo, string AccountNo, string CardNo, string TransMoney, string MAC) {
             CReturnFlowCostRes retRes = new CReturnFlowCostRes ();
             string json = "";
-            if (!isAllow("TPE_FlowCostMinus")) {
+            if (!isAllow ("TPE_FlowCostMinus")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -3322,7 +3316,7 @@ namespace WebServicePark {
         public string TPE_FlowCostByCertCode (string NodeNo, string CertCode, string TransMoney, string MAC) {
             CReturnFlowCostRes retRes = new CReturnFlowCostRes ();
             string json = "";
-            if (!isAllow("TPE_FlowCostByCertCode")) {
+            if (!isAllow ("TPE_FlowCostByCertCode")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -3435,7 +3429,7 @@ namespace WebServicePark {
         public string TPE_FlowCostByIDNO (string NodeNo, string IDNO, string TransMoney, string MAC) {
             CReturnFlowCostRes retRes = new CReturnFlowCostRes ();
             string json = "";
-            if (!isAllow("TPE_FlowCostByIDNO")) {
+            if (!isAllow ("TPE_FlowCostByIDNO")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -3455,7 +3449,7 @@ namespace WebServicePark {
                 } else if (string.IsNullOrEmpty (IDNO)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[IDNO]";
-                } else if (!CheckIdCard(IDNO)) {
+                } else if (!CheckIdCard (IDNO)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效身份证[IDNO]";
                 } else if (string.IsNullOrEmpty (TransMoney) || !int.TryParse (TransMoney, out transMoney)) {
