@@ -298,7 +298,7 @@ namespace WebServicePark {
                                 retRes.Msg = "nRet=" + nRet.ToString ();
                             } else {
                                 TPE_FlowRes Fr = new TPE_FlowRes (ResF);
-                                Fr.CenterNo = QueryOccurByCenter (NodeNo, Fr.OccurIdNo);
+                                Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                                 retRes.Result = "ok";
                                 retRes.Msg = "成功";
                                 retRes.Data = Fr;
@@ -338,7 +338,7 @@ namespace WebServicePark {
                                     retRes.Msg = "nRet=" + nRet.ToString ();
                                 } else {
                                     TPE_FlowRes Fr = new TPE_FlowRes (ResF);
-                                    Fr.CenterNo = QueryOccurByCenter (NodeNo, Fr.OccurIdNo);
+                                    Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                                     retRes.Result = "ok";
                                     retRes.Msg = "成功";
                                     retRes.Data = Fr;
@@ -475,7 +475,7 @@ namespace WebServicePark {
                                         retRes.Msg = "RecordError=" + ResU.RecordError.ToString ();
                                     } else {
                                         TPE_FlowUpdateAccountRes Fuar = new TPE_FlowUpdateAccountRes (ResU);
-                                        Fuar.CenterNo = QueryOccurByCenterUINT (NodeNo, Fuar.OccurIdNo);
+                                        Fuar.CenterNo = QueryCenterByOccurUINT (NodeNo, Fuar.OccurIdNo);
                                         retRes.Result = "ok";
                                         retRes.Msg = "成功";
                                         retRes.Data = Fuar;
@@ -1731,7 +1731,7 @@ namespace WebServicePark {
         /// <param name="OccurNodeNo">发端节点号</param>
         /// <param name="OccurNo">发端流水号</param>
         /// <returns></returns>
-        unsafe int QueryOccurByCenter (string OccurNodeNo, int OccurNo) {
+        unsafe int QueryCenterByOccur (string OccurNodeNo, int OccurNo) {
             CReturnCReturnObj retRes = new CReturnCReturnObj ();
             int json = 0;
             try {
@@ -1818,7 +1818,7 @@ namespace WebServicePark {
             }
             return json;
         }
-        unsafe uint QueryOccurByCenterUINT (string OccurNodeNo, uint OccurNo) {
+        unsafe uint QueryCenterByOccurUINT (string OccurNodeNo, uint OccurNo) {
             CReturnCReturnObj retRes = new CReturnCReturnObj ();
             uint json = 0;
             try {
@@ -1904,6 +1904,73 @@ namespace WebServicePark {
                 return uint.MaxValue - 4;;
             }
             return json;
+        }
+
+        /// <summary>
+        /// 按中心序号查询流水
+        /// </summary>
+        /// <param name="OccurNodeNo">发端节点号</param>
+        /// <param name="CenterNo">中心流水号</param>
+        /// <returns></returns>
+        unsafe tagTPE_QueryFlowRes_Cost QueryTransferByCenter (string OccurNodeNo, int CenterNo) {
+            tagTPE_QueryFlowRes_Cost FlowRes_Cost = new tagTPE_QueryFlowRes_Cost ();
+            FlowRes_Cost.AccountNo = uint.MaxValue;
+            try {
+                tagTPE_QueryFlowBySQLReq Req = new tagTPE_QueryFlowBySQLReq ();
+                tagTPE_QueryResControl Res = new tagTPE_QueryResControl ();
+                string sqlinput = OccurNodeNo.Replace (" ", "").Replace ("'", "").Trim ();
+                Regex.Replace (sqlinput, "update", "", RegexOptions.IgnoreCase);
+                Regex.Replace (sqlinput, "delete", "", RegexOptions.IgnoreCase);
+                Regex.Replace (sqlinput, "drop", "", RegexOptions.IgnoreCase);
+                Regex.Replace (sqlinput, "select", "", RegexOptions.IgnoreCase);
+                String tmpSQL = " WHERE OccurNode = '" + sqlinput + "' AND CentralNo = '" + CenterNo.ToString () + "'";
+                Req.SQL = new byte[4096];
+                Array.Copy (System.Text.Encoding.Default.GetBytes (tmpSQL), 0, Req.SQL, 0, System.Text.Encoding.Default.GetBytes (tmpSQL).Length);
+                int nRet = TPE_Class.TPE_QueryFlowBySQL (1, ref Req, out Res, 1);
+                if (nRet == 0 && Res.ResRecCount == 1) {
+                    IntPtr buffer = (IntPtr) ((Byte * ) (Res.pRes));
+                    int type = 0;
+                    for (int i = 0; i < Res.ResRecCount; i++) {
+                        type = Marshal.ReadInt32 (new IntPtr (buffer.ToInt32 ()));
+                        try {
+                            switch (type) {
+                                case 1: //开户
+                                    break;
+                                case 2: //撤户
+                                    break;
+                                case 3: //建立对应关系
+                                    break;
+                                case 4: //撤消对应
+                                    break;
+                                case 5: //更改帐户信息
+                                    break;
+                                case 6: //更改对应关系
+                                    break;
+                                case 7: //余额变更, 不区分具体来源
+                                case 8: //余额变更, 由相关操作引发
+                                case 9: //余额变更, 存取款引发
+                                case 10: //余额变更, 由补助扣款引发
+                                case 11: //余额变更, 卡片交易引发
+                                case 12: //余额变更, 银行转帐引发 
+                                case 13: //余额变更, 通用缴费 
+                                case 14: //余额变更, 押金 
+                                case 15: //余额变更, 管理费 
+                                case 16: //余额变更, 手续费 
+                                case 17: //余额变更, 工本费 
+                                case 18: //余额变更,内部转出
+                                case 19: //余额变更,内部转入
+                                    FlowRes_Cost = (tagTPE_QueryFlowRes_Cost) Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + 4), typeof (tagTPE_QueryFlowRes_Cost));
+                                    break;
+                            }
+                        } catch (Exception) {
+                            FlowRes_Cost.AccountNo = UInt32.MaxValue - 1;
+                        }
+                    }
+                }
+            } catch (Exception) {
+                FlowRes_Cost.AccountNo = UInt32.MaxValue - 1;
+            }
+            return FlowRes_Cost;
         }
 
         /// <summary>
@@ -2962,7 +3029,7 @@ namespace WebServicePark {
                                 retRes.Msg = "RecordError=" + ResU.RecordError.ToString ();
                             } else {
                                 TPE_FlowUpdateAccountRes Fuar = new TPE_FlowUpdateAccountRes (ResU);
-                                Fuar.CenterNo = QueryOccurByCenterUINT (NodeNo, Fuar.OccurIdNo);
+                                Fuar.CenterNo = QueryCenterByOccurUINT (NodeNo, Fuar.OccurIdNo);
                                 retRes.Result = "ok";
                                 retRes.Msg = "成功";
                                 retRes.Data = Fuar;
@@ -3019,10 +3086,10 @@ namespace WebServicePark {
                     retRes.Msg = "请传入有效参数[MAC]";
                 } else if (string.IsNullOrEmpty (AccountNo) && string.IsNullOrEmpty (CardNo)) {
                     retRes.Result = "error";
-                    retRes.Msg = "请传入有效参数[AccountNo/CardNo(至少传入一项)] // 不再允许";
-                } else if (AccountNo.Length <= 0 && CardNo.Length <= 0) {
+                    retRes.Msg = "请传入有效参数[AccountNo/CardNo(至少传入一项)]";
+                } else if (AccountNo.Length <= 0 || CardNo.Length <= 0) {
                     retRes.Result = "error";
-                    retRes.Msg = "请传入有效参数[AccountNo/CardNo(必须传入)] [[[" + AccountNo + "---" + CardNo + "]]]";
+                    retRes.Msg = "请传入有效参数[AccountNo/CardNo(必须传入)]";
                 } else if (string.IsNullOrEmpty (AccountNo) || !int.TryParse (AccountNo, out accNo)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[AccountNo(类型Int)]";
@@ -3054,8 +3121,6 @@ namespace WebServicePark {
                         ReqL.OccurIdNo = SnRes.MaxSn + 1;
                         byte[] occurtime = Encoding.GetEncoding ("gb2312").GetBytes (DateTime.Now.ToString ("yyyyMMddHHmmss"));
                         ReqL.OccurTime = new byte[14];
-                        ReqL.ExtraInfo = Encoding.GetEncoding("GB2312").GetBytes ("123456");
-                        ReqL.ExtraInfoLen  = ReqL.ExtraInfo.Length;
                         Array.Copy (occurtime, ReqL.OccurTime, 14);
                         if (!string.IsNullOrEmpty (AccountNo)) {
                             ReqL.AccountNo = System.Convert.ToInt32 (AccountNo);
@@ -3071,7 +3136,7 @@ namespace WebServicePark {
                             retRes.Msg = "nRet=" + nRet.ToString ();
                         } else {
                             TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
-                            Fr.CenterNo = QueryOccurByCenter (NodeNo, Fr.OccurIdNo);
+                            Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                             retRes.Result = "ok";
                             retRes.Msg = "成功";
                             retRes.Data = Fr;
@@ -3080,7 +3145,7 @@ namespace WebServicePark {
                 }
             } catch (Exception e) {
                 retRes.Result = "error";
-                retRes.Msg = "服务器异常" + e.Message;
+                retRes.Msg = "服务器异常";
                 CPublic.WriteLog ("【严重】账户充值扣款时抛出异常：" + e.Message);
             }
             try {
@@ -3129,10 +3194,10 @@ namespace WebServicePark {
                     retRes.Msg = "请传入有效参数[MAC]";
                 } else if (string.IsNullOrEmpty (AccountNo) && string.IsNullOrEmpty (CardNo)) {
                     retRes.Result = "error";
-                    retRes.Msg = "请传入有效参数[AccountNo/CardNo(至少传入一项)] // 不再允许";
-                } else if (AccountNo.Length <= 0 && CardNo.Length <= 0) {
+                    retRes.Msg = "请传入有效参数[AccountNo/CardNo(至少传入一项)]";
+                } else if (AccountNo.Length <= 0 || CardNo.Length <= 0) {
                     retRes.Result = "error";
-                    retRes.Msg = "请传入有效参数[AccountNo/CardNo(必须传入)] [[[" + AccountNo + "---" + CardNo + "]]]";
+                    retRes.Msg = "请传入有效参数[AccountNo/CardNo(必须传入)]";
                 } else if (string.IsNullOrEmpty (AccountNo) || !int.TryParse (AccountNo, out accNo)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[AccountNo(类型Int)]";
@@ -3179,7 +3244,7 @@ namespace WebServicePark {
                             retRes.Msg = "nRet=" + nRet.ToString ();
                         } else {
                             TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
-                            Fr.CenterNo = QueryOccurByCenter (NodeNo, Fr.OccurIdNo);
+                            Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                             retRes.Result = "ok";
                             retRes.Msg = "成功";
                             retRes.Data = Fr;
@@ -3237,10 +3302,7 @@ namespace WebServicePark {
                     retRes.Msg = "请传入有效参数[MAC]";
                 } else if (string.IsNullOrEmpty (AccountNo) && string.IsNullOrEmpty (CardNo)) {
                     retRes.Result = "error";
-                    retRes.Msg = "请传入有效参数[AccountNo/CardNo(至少传入一项)] // 不再允许";
-                } else if (AccountNo.Length <= 0 && CardNo.Length <= 0) {
-                    retRes.Result = "error";
-                    retRes.Msg = "请传入有效参数[AccountNo/CardNo(必须传入)] [[[" + AccountNo + "---" + CardNo + "]]]";
+                    retRes.Msg = "请传入有效参数[AccountNo/CardNo(至少传入一项)]";
                 } else if (string.IsNullOrEmpty (AccountNo) || !int.TryParse (AccountNo, out accNo)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[AccountNo(类型Int)]";
@@ -3287,7 +3349,115 @@ namespace WebServicePark {
                             retRes.Msg = "nRet=" + nRet.ToString ();
                         } else {
                             TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
-                            Fr.CenterNo = QueryOccurByCenter (NodeNo, Fr.OccurIdNo);
+                            Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
+                            retRes.Result = "ok";
+                            retRes.Msg = "成功";
+                            retRes.Data = Fr;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                retRes.Result = "error";
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】账户扣款时抛出异常：" + e.Message);
+            }
+            try {
+                JavaScriptSerializer jss = new JavaScriptSerializer ();
+                json = jss.Serialize (retRes);
+            } catch (Exception ex) {
+                retRes.Result = "error";
+                retRes.Msg = "服务器异常" + ex.Message;
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】账户扣款 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
+            }
+            CPublic.WriteLog ("【记录】账户扣款成功执行，关键信息：" + param);
+            return json;
+        }
+
+        /// <summary>
+        /// 补助/扣款
+        /// </summary>
+        /// <param name="NodeNo">节点号</param>
+        /// <param name="AccountNo">帐号(卡号传入一项即可)</param>
+        /// <param name="CardNo">卡号(帐号传入一项即可)</param>
+        /// <param name="TransMoney">充值金额 单位分 补助>0 扣款<0</param>
+        /// <param name="MAC">MAC</param>
+        /// <returns></returns>
+        [WebMethod]
+        public string TPE_RefundByCenterID (string NodeNo, string AccountNo, string CenterID, string TransMoney, string MAC) {
+            CReturnFlowCostRes retRes = new CReturnFlowCostRes ();
+            string json = "";
+            if (!isAllow ("TPE_FlowCostMinus")) {
+                retRes.Result = "error";
+                retRes.Msg = "权限异常";
+                JavaScriptSerializer jss = new JavaScriptSerializer ();
+                json = jss.Serialize (retRes);
+                return json;
+            }
+            string param = "";
+            try {
+                int nodeNo;
+                uint accNo;
+                int centerid;
+                int transMoney;
+                if (string.IsNullOrEmpty (NodeNo) || !int.TryParse (NodeNo, out nodeNo)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[NodeNo(类型Int)]";
+                } else if (string.IsNullOrEmpty (MAC)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[MAC]";
+                } else if (string.IsNullOrEmpty (AccountNo)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[AccountNo]";
+                } else if (string.IsNullOrEmpty (AccountNo) || !uint.TryParse (AccountNo, out accNo)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[AccountNo(类型Int)]";
+                } else if (string.IsNullOrEmpty (CenterID)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[CenterID]";
+                } else if (string.IsNullOrEmpty (CenterID) || !int.TryParse (CenterID, out centerid)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[CenterID(类型Int)]";
+                } else if (string.IsNullOrEmpty (TransMoney) || !int.TryParse (TransMoney, out transMoney)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[TransMoney(类型Int,单位:分)]";
+                } else if (transMoney >= 0) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[TransMoney(该接口仅允许对消费退款)]";
+                } else {
+                    param = AccountNo + "$" + CenterID + "$" + transMoney;
+                    tagTPE_QueryFlowRes_Cost TransferInfo = QueryTransferByCenter(NodeNo, centerid);
+                    if (CheckNode (NodeNo, param, MAC) != 0) {
+                        retRes.Result = "error";
+                        retRes.Msg = "节点校验失败！" + NodeCheckInfo[CheckNode (NodeNo, param, MAC)];
+                    } else if (TransferInfo.AccountNo >= uint.MaxValue - 10) {
+                        retRes.Result = "error";
+                        retRes.Msg = "流水处理时出现异常";
+                    } else if (TransferInfo.AccountNo != accNo) {
+                        retRes.Result = "error";
+                        retRes.Msg = "账号与流水记录不符";
+                    } else if (TransferInfo.TransMoney != transMoney) {
+                        retRes.Result = "error";
+                        retRes.Msg = "金额与流水记录不符";
+                    } else {
+                        tagTPE_OnLineGetMaxSnRes SnRes = new tagTPE_OnLineGetMaxSnRes ();
+                        TPE_Class.TPE_OnLineGetMaxSn (1, out SnRes, 1);
+                        tagTPE_FlowCostReq ReqL = new tagTPE_FlowCostReq ();
+                        tagTPE_FlowCostRes ResF = new tagTPE_FlowCostRes ();
+                        ReqL.OccurIdNo = SnRes.MaxSn + 1;
+                        byte[] occurtime = Encoding.GetEncoding ("gb2312").GetBytes (DateTime.Now.ToString ("yyyyMMddHHmmss"));
+                        ReqL.OccurTime = new byte[14];
+                        Array.Copy (occurtime, ReqL.OccurTime, 14);
+                        ReqL.AccountNo = System.Convert.ToInt32 (AccountNo);
+                        ReqL.CostType = 9;
+                        ReqL.TransMoney = System.Math.Abs(transMoney);
+                        int nRet = TPE_Class.TPE_FlowCost (1, ref ReqL, 1, out ResF, 1);
+                        if (nRet != 0) {
+                            retRes.Result = "error";
+                            retRes.Msg = "nRet=" + nRet.ToString ();
+                        } else {
+                            TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
+                            Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                             retRes.Result = "ok";
                             retRes.Msg = "成功";
                             retRes.Data = Fr;
@@ -3398,7 +3568,7 @@ namespace WebServicePark {
                                 retRes.Msg = "nRet=" + nRet.ToString ();
                             } else {
                                 TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
-                                Fr.CenterNo = QueryOccurByCenter (NodeNo, Fr.OccurIdNo);
+                                Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                                 int IDNO = ResF.OccurIdNo;
                                 int CTNO = ResF.CenterNo;
                                 retRes.Result = "ok";
@@ -3514,7 +3684,7 @@ namespace WebServicePark {
                                 retRes.Msg = "nRet=" + nRet.ToString ();
                             } else {
                                 TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
-                                Fr.CenterNo = QueryOccurByCenter (NodeNo, Fr.OccurIdNo);
+                                Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                                 retRes.Result = "ok";
                                 retRes.Msg = "成功";
                                 retRes.Data = Fr;
