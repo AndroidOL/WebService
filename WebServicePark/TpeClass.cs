@@ -301,6 +301,7 @@ namespace WebServicePark
         public UInt32 JoinNode;
         public string JoinCardHolder;
         public string OrderID;
+        public short CostType;
     }
 
     /// <summary>
