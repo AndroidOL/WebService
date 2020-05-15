@@ -300,6 +300,7 @@ namespace WebServicePark
         public Int32 TransferMoney;
         public UInt32 JoinNode;
         public string JoinCardHolder;
+        public string OrderID;
     }
 
     /// <summary>

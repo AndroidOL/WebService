@@ -35,6 +35,8 @@ public class TPE_Class
     public static extern int TPE_GetAccount(int CustomSn, ref tagTPE_GetAccountReq pReq, out tagTPE_GetAccountRes pRes, int bSync);
     [DllImport("TPE.dll", EntryPoint = "TPE_FlowCost")]
     public static extern int TPE_FlowCost(int CustomSn, ref tagTPE_FlowCostReq pReq, int FlowCount, out tagTPE_FlowCostRes pRes, int bSync);
+    [DllImport("TPE.dll", EntryPoint = "TPE_FlowCostOrder")]
+    public static extern int TPE_FlowCostOrder (int CustomSn, ref tagTPE_FlowCostReq pReq, ref byte OrderIDS, int FlowCount, out tagTPE_FlowCostRes pRes, int bSync);
     [DllImport("TPE.dll", EntryPoint = "TPE_GetNetState")]
     public static extern int TPE_GetNetState();
     [DllImport("TPE.dll", EntryPoint = "TPE_GetLocalNode")]

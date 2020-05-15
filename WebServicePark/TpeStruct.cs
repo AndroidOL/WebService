@@ -1441,6 +1441,8 @@ public struct tagTPE_CReturnObj
     public UInt32 JoinNode;
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 24)]
     public byte[] JoinCardHolder;
+    [MarshalAs (UnmanagedType.ByValArray, SizeConst = 16)]
+    public byte[] OrderID;
 };
 
 //查询帐户自定义字段应答结构
@@ -1461,4 +1463,19 @@ public struct tagTPE_GetAccountExRes
     public byte[] DefVAR3;
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
     public byte[] DefVAR4;
+};
+
+//流水中海通扩展信息
+[StructLayout (LayoutKind.Sequential, Pack = 1)]
+public struct HTEXTENDINFO {
+    public int DataLen;                                     //长度
+    public UInt32 NodeType;  	                            //定为0x00030001
+    [MarshalAs (UnmanagedType.ByValArray, SizeConst = 16)]   //订单编号
+    public byte[] OrderID;
+    public UInt32 Node;                                     //对应节点号
+    public byte BigGroup;                                   //对应大组号
+    public byte litGroup;                                   //对应小组号
+    public byte Segment;                                    //对应班次号
+    public byte POS;                                        //对应POS号
+    public int RecordCheck;                                 //校验
 };

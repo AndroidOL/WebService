@@ -47,6 +47,12 @@ namespace WebServicePark {
             return false;
         }
 
+        public static bool IsNumAndEnCh (string input) {
+            string pattern = @"^[A-Za-z0-9]+$";
+            Regex regex = new Regex(pattern);
+            return regex.IsMatch(input);
+        }
+
         public static bool CheckIdCard (string idNumber) {
             if (idNumber.Length == 18) {
                 var check = CheckIdCard18 (idNumber);
@@ -1198,10 +1204,10 @@ namespace WebServicePark {
                                         case 18: //余额变更,内部转出
                                         case 19: //余额变更,内部转入
                                             tagTPE_QueryFlowRes_Cost FlowRes_Cost = new tagTPE_QueryFlowRes_Cost ();
-                                            FlowRes_Cost = (tagTPE_QueryFlowRes_Cost) Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Cost));
+                                            FlowRes_Cost = (tagTPE_QueryFlowRes_Cost)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Cost));
                                             Tpe_CRO = new tagTPE_CReturnObj ();
-                                            //Tpe_CRO.OrderID = new byte[16];
-                                            Tpe_CRO.TransType = 7;
+                                            Tpe_CRO.OrderID = new byte[16];
+                                            Tpe_CRO.TransType = type;
                                             Tpe_CRO.CenterNo = FlowRes_Cost.CenterNo;
                                             Tpe_CRO.OccurNode = FlowRes_Cost.OccurNode;
                                             Tpe_CRO.OccurIdNo = FlowRes_Cost.OccurIdNo;
@@ -1214,24 +1220,24 @@ namespace WebServicePark {
                                             Tpe_CRO.TransMoney = FlowRes_Cost.TransMoney;
                                             Offset += Marshal.SizeOf (FlowRes_Cost);
                                             byte[] DataBuf = new byte[FlowRes_Cost.ExtendLen];
-                                            Marshal.Copy (new IntPtr (buffer.ToInt32 () + Offset), DataBuf, 0, (int) FlowRes_Cost.ExtendLen);
-                                            string strMsg = "流水扩展信息长度" + FlowRes_Cost.ExtendLen.ToString () + "，内容";
-                                            for (int m = 0; m < FlowRes_Cost.ExtendLen; m++) {
-                                                strMsg += DataBuf[m].ToString ("X2");
-                                            }
-                                            CPublic.WriteLog (strMsg);
-                                            //HTEXTENDINFO tmpHTEXTENDINFO = new HTEXTENDINFO();
-                                            //if (FlowRes_Cost.ExtendLen >= Marshal.SizeOf(tmpHTEXTENDINFO))
-                                            //{
-                                            //    tmpHTEXTENDINFO = (HTEXTENDINFO)Marshal.PtrToStructure(new IntPtr(buffer.ToInt32() + Offset), typeof(HTEXTENDINFO));
-                                            //    if (tmpHTEXTENDINFO.NodeType == 0X00030001)
-                                            //    {
-                                            //        tmpHTEXTENDINFO.OrderID.CopyTo(Tpe_CRO.OrderID, 0);
-                                            //    }
+                                            Marshal.Copy (new IntPtr (buffer.ToInt32 () + Offset), DataBuf, 0, (int)FlowRes_Cost.ExtendLen);
+                                            //string strMsg = "流水扩展信息长度" + FlowRes_Cost.ExtendLen.ToString () + "，内容";
+                                            //for (int m = 0; m < FlowRes_Cost.ExtendLen; m++) {
+                                            //    strMsg += DataBuf[m].ToString ("X2");
                                             //}
+                                            //CPublic.WriteLog (strMsg);
+                                            string OrderID = "";
+                                            HTEXTENDINFO tmpHTEXTENDINFO = new HTEXTENDINFO ();
+                                            if (FlowRes_Cost.ExtendLen >= Marshal.SizeOf (tmpHTEXTENDINFO)) {
+                                                tmpHTEXTENDINFO = (HTEXTENDINFO)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (HTEXTENDINFO));
+                                                if (tmpHTEXTENDINFO.NodeType == 0X00030001 && tmpHTEXTENDINFO.OrderID.Length > 0) {
+                                                    OrderID = Encoding.UTF8.GetString (tmpHTEXTENDINFO.OrderID).TrimEnd ('\0');
+                                                }
+                                            }
                                             cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
+                                            cTpe_Cro.OrderID = OrderID;
                                             listCRO.Add (cTpe_Cro);
-                                            Offset += (int) FlowRes_Cost.ExtendLen;
+                                            Offset += (int)FlowRes_Cost.ExtendLen;
                                             break;
                                     }
                                     Offset += 4;
@@ -1681,9 +1687,10 @@ namespace WebServicePark {
                                     case 18: //余额变更,内部转出
                                     case 19: //余额变更,内部转入
                                         tagTPE_QueryFlowRes_Cost FlowRes_Cost = new tagTPE_QueryFlowRes_Cost ();
-                                        FlowRes_Cost = (tagTPE_QueryFlowRes_Cost) Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Cost));
+                                        FlowRes_Cost = (tagTPE_QueryFlowRes_Cost)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Cost));
                                         Tpe_CRO = new tagTPE_CReturnObj ();
-                                        Tpe_CRO.TransType = 7;
+                                        Tpe_CRO.OrderID = new byte[16];
+                                        Tpe_CRO.TransType = type;
                                         Tpe_CRO.CenterNo = FlowRes_Cost.CenterNo;
                                         Tpe_CRO.OccurNode = FlowRes_Cost.OccurNode;
                                         Tpe_CRO.OccurIdNo = FlowRes_Cost.OccurIdNo;
@@ -1694,10 +1701,26 @@ namespace WebServicePark {
                                         Tpe_CRO.JoinNode = FlowRes_Cost.JoinNode;
                                         Tpe_CRO.JoinCardHolder = FlowRes_Cost.JoinCardHolder;
                                         Tpe_CRO.TransMoney = FlowRes_Cost.TransMoney;
-                                        cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                        listCRO.Add (cTpe_Cro);
                                         Offset += Marshal.SizeOf (FlowRes_Cost);
-                                        Offset += (int) FlowRes_Cost.ExtendLen;
+                                        byte[] DataBuf = new byte[FlowRes_Cost.ExtendLen];
+                                        Marshal.Copy (new IntPtr (buffer.ToInt32 () + Offset), DataBuf, 0, (int)FlowRes_Cost.ExtendLen);
+                                        //string strMsg = "流水扩展信息长度" + FlowRes_Cost.ExtendLen.ToString () + "，内容";
+                                        //for (int m = 0; m < FlowRes_Cost.ExtendLen; m++) {
+                                        //    strMsg += DataBuf[m].ToString ("X2");
+                                        //}
+                                        //CPublic.WriteLog (strMsg);
+                                        string OrderID = "";
+                                        HTEXTENDINFO tmpHTEXTENDINFO = new HTEXTENDINFO ();
+                                        if (FlowRes_Cost.ExtendLen >= Marshal.SizeOf (tmpHTEXTENDINFO)) {
+                                            tmpHTEXTENDINFO = (HTEXTENDINFO)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (HTEXTENDINFO));
+                                            if (tmpHTEXTENDINFO.NodeType == 0X00030001 && tmpHTEXTENDINFO.OrderID.Length > 0) {
+                                                OrderID = Encoding.UTF8.GetString (tmpHTEXTENDINFO.OrderID).TrimEnd ('\0');
+                                            }
+                                        }
+                                        cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
+                                        cTpe_Cro.OrderID = OrderID;
+                                        listCRO.Add (cTpe_Cro);
+                                        Offset += (int)FlowRes_Cost.ExtendLen;
                                         break;
                                 }
                                 Offset += 4;
@@ -2181,9 +2204,10 @@ namespace WebServicePark {
                                     case 18: //余额变更,内部转出
                                     case 19: //余额变更,内部转入
                                         tagTPE_QueryFlowRes_Cost FlowRes_Cost = new tagTPE_QueryFlowRes_Cost ();
-                                        FlowRes_Cost = (tagTPE_QueryFlowRes_Cost) Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Cost));
+                                        FlowRes_Cost = (tagTPE_QueryFlowRes_Cost)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Cost));
                                         Tpe_CRO = new tagTPE_CReturnObj ();
-                                        Tpe_CRO.TransType = 7;
+                                        Tpe_CRO.OrderID = new byte[16];
+                                        Tpe_CRO.TransType = type;
                                         Tpe_CRO.CenterNo = FlowRes_Cost.CenterNo;
                                         Tpe_CRO.OccurNode = FlowRes_Cost.OccurNode;
                                         Tpe_CRO.OccurIdNo = FlowRes_Cost.OccurIdNo;
@@ -2194,10 +2218,26 @@ namespace WebServicePark {
                                         Tpe_CRO.JoinNode = FlowRes_Cost.JoinNode;
                                         Tpe_CRO.JoinCardHolder = FlowRes_Cost.JoinCardHolder;
                                         Tpe_CRO.TransMoney = FlowRes_Cost.TransMoney;
-                                        cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                        listCRO.Add (cTpe_Cro);
                                         Offset += Marshal.SizeOf (FlowRes_Cost);
-                                        Offset += (int) FlowRes_Cost.ExtendLen;
+                                        byte[] DataBuf = new byte[FlowRes_Cost.ExtendLen];
+                                        Marshal.Copy (new IntPtr (buffer.ToInt32 () + Offset), DataBuf, 0, (int)FlowRes_Cost.ExtendLen);
+                                        //string strMsg = "流水扩展信息长度" + FlowRes_Cost.ExtendLen.ToString () + "，内容";
+                                        //for (int m = 0; m < FlowRes_Cost.ExtendLen; m++) {
+                                        //    strMsg += DataBuf[m].ToString ("X2");
+                                        //}
+                                        //CPublic.WriteLog (strMsg);
+                                        string OrderID = "";
+                                        HTEXTENDINFO tmpHTEXTENDINFO = new HTEXTENDINFO ();
+                                        if (FlowRes_Cost.ExtendLen >= Marshal.SizeOf (tmpHTEXTENDINFO)) {
+                                            tmpHTEXTENDINFO = (HTEXTENDINFO)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (HTEXTENDINFO));
+                                            if (tmpHTEXTENDINFO.NodeType == 0X00030001 && tmpHTEXTENDINFO.OrderID.Length > 0) {
+                                                OrderID = Encoding.UTF8.GetString (tmpHTEXTENDINFO.OrderID).TrimEnd ('\0');
+                                            }
+                                        }
+                                        cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
+                                        cTpe_Cro.OrderID = OrderID;
+                                        listCRO.Add (cTpe_Cro);
+                                        Offset += (int)FlowRes_Cost.ExtendLen;
                                         break;
                                 }
                                 Offset += 4;
@@ -2445,58 +2485,21 @@ namespace WebServicePark {
                                             case 7: //余额变更, 不区分具体来源
                                             case 8: //余额变更, 由相关操作引发
                                             case 9: //余额变更, 存取款引发
-                                                tagTPE_QueryFlowRes_Cost FlowRes_Cost9 = new tagTPE_QueryFlowRes_Cost ();
-                                                FlowRes_Cost9 = (tagTPE_QueryFlowRes_Cost) Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Cost));
-                                                Tpe_CRO = new tagTPE_CReturnObj ();
-                                                Tpe_CRO.TransType = 9;
-                                                Tpe_CRO.CenterNo = FlowRes_Cost9.CenterNo;
-                                                Tpe_CRO.OccurNode = FlowRes_Cost9.OccurNode;
-                                                Tpe_CRO.OccurIdNo = FlowRes_Cost9.OccurIdNo;
-                                                Tpe_CRO.OccurTime = FlowRes_Cost9.OccurTime;
-                                                Tpe_CRO.AccountNo = FlowRes_Cost9.AccountNo;
-                                                Tpe_CRO.CardNo = FlowRes_Cost9.CardNo;
-                                                Tpe_CRO.Balance = FlowRes_Cost9.Balance;
-                                                Tpe_CRO.JoinNode = FlowRes_Cost9.JoinNode;
-                                                Tpe_CRO.JoinCardHolder = FlowRes_Cost9.JoinCardHolder;
-                                                Tpe_CRO.TransMoney = FlowRes_Cost9.TransMoney;
-                                                cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                listCRO.Add (cTpe_Cro);
-                                                Offset += Marshal.SizeOf (FlowRes_Cost9);
-                                                Offset += (int) FlowRes_Cost9.ExtendLen;
-                                                break;
                                             case 10: //余额变更, 由补助扣款引发
                                             case 11: //余额变更, 卡片交易引发
                                             case 12: //余额变更, 银行转帐引发 
                                             case 13: //余额变更, 通用缴费 
                                             case 14: //余额变更, 押金 
                                             case 15: //余额变更, 管理费 
-                                                tagTPE_QueryFlowRes_Cost FlowRes_Cost15 = new tagTPE_QueryFlowRes_Cost ();
-                                                FlowRes_Cost15 = (tagTPE_QueryFlowRes_Cost) Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Cost));
-                                                Tpe_CRO = new tagTPE_CReturnObj ();
-                                                Tpe_CRO.TransType = 15;
-                                                Tpe_CRO.CenterNo = FlowRes_Cost15.CenterNo;
-                                                Tpe_CRO.OccurNode = FlowRes_Cost15.OccurNode;
-                                                Tpe_CRO.OccurIdNo = FlowRes_Cost15.OccurIdNo;
-                                                Tpe_CRO.OccurTime = FlowRes_Cost15.OccurTime;
-                                                Tpe_CRO.AccountNo = FlowRes_Cost15.AccountNo;
-                                                Tpe_CRO.CardNo = FlowRes_Cost15.CardNo;
-                                                Tpe_CRO.Balance = FlowRes_Cost15.Balance;
-                                                Tpe_CRO.JoinNode = FlowRes_Cost15.JoinNode;
-                                                Tpe_CRO.JoinCardHolder = FlowRes_Cost15.JoinCardHolder;
-                                                Tpe_CRO.TransMoney = FlowRes_Cost15.TransMoney;
-                                                cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                listCRO.Add (cTpe_Cro);
-                                                Offset += Marshal.SizeOf (FlowRes_Cost15);
-                                                Offset += (int) FlowRes_Cost15.ExtendLen;
-                                                break;
                                             case 16: //余额变更, 手续费 
                                             case 17: //余额变更, 工本费 
                                             case 18: //余额变更,内部转出
                                             case 19: //余额变更,内部转入
                                                 tagTPE_QueryFlowRes_Cost FlowRes_Cost = new tagTPE_QueryFlowRes_Cost ();
-                                                FlowRes_Cost = (tagTPE_QueryFlowRes_Cost) Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Cost));
+                                                FlowRes_Cost = (tagTPE_QueryFlowRes_Cost)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Cost));
                                                 Tpe_CRO = new tagTPE_CReturnObj ();
-                                                Tpe_CRO.TransType = 7;
+                                                Tpe_CRO.OrderID = new byte[16];
+                                                Tpe_CRO.TransType = type;
                                                 Tpe_CRO.CenterNo = FlowRes_Cost.CenterNo;
                                                 Tpe_CRO.OccurNode = FlowRes_Cost.OccurNode;
                                                 Tpe_CRO.OccurIdNo = FlowRes_Cost.OccurIdNo;
@@ -2507,10 +2510,26 @@ namespace WebServicePark {
                                                 Tpe_CRO.JoinNode = FlowRes_Cost.JoinNode;
                                                 Tpe_CRO.JoinCardHolder = FlowRes_Cost.JoinCardHolder;
                                                 Tpe_CRO.TransMoney = FlowRes_Cost.TransMoney;
-                                                cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                listCRO.Add (cTpe_Cro);
                                                 Offset += Marshal.SizeOf (FlowRes_Cost);
-                                                Offset += (int) FlowRes_Cost.ExtendLen;
+                                                byte[] DataBuf = new byte[FlowRes_Cost.ExtendLen];
+                                                Marshal.Copy (new IntPtr (buffer.ToInt32 () + Offset), DataBuf, 0, (int)FlowRes_Cost.ExtendLen);
+                                                //string strMsg = "流水扩展信息长度" + FlowRes_Cost.ExtendLen.ToString () + "，内容";
+                                                //for (int m = 0; m < FlowRes_Cost.ExtendLen; m++) {
+                                                //    strMsg += DataBuf[m].ToString ("X2");
+                                                //}
+                                                //CPublic.WriteLog (strMsg);
+                                                string OrderID = "";
+                                                HTEXTENDINFO tmpHTEXTENDINFO = new HTEXTENDINFO ();
+                                                if (FlowRes_Cost.ExtendLen >= Marshal.SizeOf (tmpHTEXTENDINFO)) {
+                                                    tmpHTEXTENDINFO = (HTEXTENDINFO)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (HTEXTENDINFO));
+                                                    if (tmpHTEXTENDINFO.NodeType == 0X00030001 && tmpHTEXTENDINFO.OrderID.Length > 0) {
+                                                        OrderID = Encoding.UTF8.GetString (tmpHTEXTENDINFO.OrderID).TrimEnd ('\0');
+                                                    }
+                                                }
+                                                cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
+                                                cTpe_Cro.OrderID = OrderID;
+                                                listCRO.Add (cTpe_Cro);
+                                                Offset += (int)FlowRes_Cost.ExtendLen;
                                                 break;
                                         }
                                         Offset += 4;
@@ -3058,7 +3077,7 @@ namespace WebServicePark {
         /// <param name="MAC">MAC</param>
         /// <returns></returns>
         [WebMethod]
-        public string TPE_FlowCost (string NodeNo, string AccountNo, string CardNo, string TransMoney, string MAC) {
+        public string TPE_FlowCost (string NodeNo, string AccountNo, string CardNo, string OrderID, string TransMoney, string MAC) {
             CReturnFlowCostRes retRes = new CReturnFlowCostRes ();
             string json = "";
             if (!isAllow ("TPE_FlowCost")) {
@@ -3088,6 +3107,12 @@ namespace WebServicePark {
                 } else if (string.IsNullOrEmpty (AccountNo) || !int.TryParse (AccountNo, out accNo)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[AccountNo(类型Int)]";
+                } else if (!string.IsNullOrEmpty (OrderID) && !IsNumAndEnCh (OrderID)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[OrderID(只允许包含数字与字母或留空)]";
+                } else if (OrderID.Length > 16) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[OrderID(订单号最长允许包含16字符)]";
                 } else if (string.IsNullOrEmpty (TransMoney) || !int.TryParse (TransMoney, out transMoney)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[TransMoney(类型Int,单位:分)]";
@@ -3104,6 +3129,7 @@ namespace WebServicePark {
                             param = CardNo;
                         }
                     }
+                    param = param + (string.IsNullOrEmpty (OrderID) ? "" : "$" + OrderID);
                     param = param + "$" + transMoney;
                     if (CheckNode (NodeNo, param, MAC) != 0) {
                         retRes.Result = "error";
@@ -3125,7 +3151,11 @@ namespace WebServicePark {
                         }
                         ReqL.CostType = 9;
                         ReqL.TransMoney = transMoney;
-                        int nRet = TPE_Class.TPE_FlowCost (1, ref ReqL, 1, out ResF, 1);
+                        int nRet = -1;
+                        if (string.IsNullOrEmpty (OrderID)) {
+                            byte[] byOrderID = Encoding.ASCII.GetBytes (OrderID);
+                            nRet = TPE_Class.TPE_FlowCostOrder (1, ref ReqL, ref byOrderID[0], 1, out ResF, 1);
+                        } else { nRet = TPE_Class.TPE_FlowCost (1, ref ReqL, 1, out ResF, 1); }
                         if (nRet != 0) {
                             retRes.Result = "error";
                             retRes.Msg = "nRet=" + nRet.ToString ();
@@ -3166,7 +3196,7 @@ namespace WebServicePark {
         /// <param name="MAC">MAC</param>
         /// <returns></returns>
         [WebMethod]
-        public string TPE_FlowCostPlus (string NodeNo, string AccountNo, string CardNo, string TransMoney, string MAC) {
+        public string TPE_FlowCostPlus (string NodeNo, string AccountNo, string CardNo, string OrderID, string TransMoney, string MAC) {
             CReturnFlowCostRes retRes = new CReturnFlowCostRes ();
             string json = "";
             if (!isAllow ("TPE_FlowCostPlus")) {
@@ -3196,6 +3226,12 @@ namespace WebServicePark {
                 } else if (string.IsNullOrEmpty (AccountNo) || !int.TryParse (AccountNo, out accNo)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[AccountNo(类型Int)]";
+                } else if (!string.IsNullOrEmpty (OrderID) && !IsNumAndEnCh (OrderID)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[OrderID(只允许包含数字与字母或留空)]";
+                } else if (OrderID.Length > 16) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[OrderID(订单号最长允许包含16字符)]";
                 } else if (string.IsNullOrEmpty (TransMoney) || !int.TryParse (TransMoney, out transMoney)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[TransMoney(类型Int,单位:分)]";
@@ -3212,6 +3248,7 @@ namespace WebServicePark {
                             param = CardNo;
                         }
                     }
+                    param = param + (string.IsNullOrEmpty (OrderID) ? "" : "$" + OrderID);
                     param = param + "$" + transMoney;
                     if (CheckNode (NodeNo, param, MAC) != 0) {
                         retRes.Result = "error";
@@ -3233,7 +3270,11 @@ namespace WebServicePark {
                         }
                         ReqL.CostType = 9;
                         ReqL.TransMoney = transMoney;
-                        int nRet = TPE_Class.TPE_FlowCost (1, ref ReqL, 1, out ResF, 1);
+                        int nRet = -1;
+                        if (string.IsNullOrEmpty (OrderID)) {
+                            byte[] byOrderID = Encoding.ASCII.GetBytes (OrderID);
+                            nRet = TPE_Class.TPE_FlowCostOrder (1, ref ReqL, ref byOrderID[0], 1, out ResF, 1);
+                        } else { nRet = TPE_Class.TPE_FlowCost (1, ref ReqL, 1, out ResF, 1); }
                         if (nRet != 0) {
                             retRes.Result = "error";
                             retRes.Msg = "nRet=" + nRet.ToString ();
@@ -3274,7 +3315,7 @@ namespace WebServicePark {
         /// <param name="MAC">MAC</param>
         /// <returns></returns>
         [WebMethod]
-        public string TPE_FlowCostMinus (string NodeNo, string AccountNo, string CardNo, string TransMoney, string MAC) {
+        public string TPE_FlowCostMinus (string NodeNo, string AccountNo, string CardNo, string OrderID, string TransMoney, string MAC) {
             CReturnFlowCostRes retRes = new CReturnFlowCostRes ();
             string json = "";
             if (!isAllow ("TPE_FlowCostMinus")) {
@@ -3301,6 +3342,12 @@ namespace WebServicePark {
                 } else if (string.IsNullOrEmpty (AccountNo) || !int.TryParse (AccountNo, out accNo)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[AccountNo(类型Int)]";
+                } else if (!string.IsNullOrEmpty (OrderID) && !IsNumAndEnCh (OrderID)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[OrderID(只允许包含数字与字母或留空)]";
+                } else if (OrderID.Length > 16) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[OrderID(订单号最长允许包含16字符)]";
                 } else if (string.IsNullOrEmpty (TransMoney) || !int.TryParse (TransMoney, out transMoney)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[TransMoney(类型Int,单位:分)]";
@@ -3317,6 +3364,7 @@ namespace WebServicePark {
                             param = CardNo;
                         }
                     }
+                    param = param + (string.IsNullOrEmpty (OrderID) ? "" : "$" + OrderID);
                     param = param + "$" + transMoney;
                     if (CheckNode (NodeNo, param, MAC) != 0) {
                         retRes.Result = "error";
@@ -3338,7 +3386,11 @@ namespace WebServicePark {
                         }
                         ReqL.CostType = 11;
                         ReqL.TransMoney = transMoney;
-                        int nRet = TPE_Class.TPE_FlowCost (1, ref ReqL, 1, out ResF, 1);
+                        int nRet = -1;
+                        if (string.IsNullOrEmpty (OrderID)) {
+                            byte[] byOrderID = Encoding.ASCII.GetBytes (OrderID);
+                            nRet = TPE_Class.TPE_FlowCostOrder (1, ref ReqL, ref byOrderID[0], 1, out ResF, 1);
+                        } else { nRet = TPE_Class.TPE_FlowCost (1, ref ReqL, 1, out ResF, 1); }
                         if (nRet != 0) {
                             retRes.Result = "error";
                             retRes.Msg = "nRet=" + nRet.ToString ();
@@ -3478,8 +3530,9 @@ namespace WebServicePark {
             CPublic.WriteLog ("【记录】账户扣款成功执行，关键信息：" + param);
             return json;
         }
-
-        [WebMethod]
+        
+        /*
+        //[WebMethod]
         public string TPE_FlowCostByCertCode (string NodeNo, string CertCode, string TransMoney, string MAC) {
             CReturnFlowCostRes retRes = new CReturnFlowCostRes ();
             string json = "";
@@ -3592,7 +3645,7 @@ namespace WebServicePark {
             return json;
         }
 
-        [WebMethod]
+        //[WebMethod]
         public string TPE_FlowCostByIDNO (string NodeNo, string IDNO, string TransMoney, string MAC) {
             CReturnFlowCostRes retRes = new CReturnFlowCostRes ();
             string json = "";
@@ -3626,7 +3679,6 @@ namespace WebServicePark {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[TransMoney(金额不能为0,大于0补助,小于0扣款)]";
                 } else {
-
                     param = IDNO + "$" + transMoney;
                     if (CheckNode (NodeNo, param, MAC) != 0) {
                         retRes.Result = "error";
@@ -3705,6 +3757,7 @@ namespace WebServicePark {
             CPublic.WriteLog ("【记录】按身份证向账户充值扣款成功执行，关键信息：" + param);
             return json;
         }
+        */
 
         /// <summary>
         /// 验证节点是否正确
