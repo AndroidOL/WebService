@@ -139,6 +139,57 @@ namespace WebServicePark {
         }
 
         /// <summary>
+        /// 按发生序号查询流水
+        /// </summary>
+        /// <param name="NodeNo">节点号</param>
+        /// <param name="OccurNodeNo">发端节点号</param>
+        /// <param name="FromOccurNo">发端起始序号</param>
+        /// <param name="ToOccurNo">发端结束序号</param>
+        /// <param name="MAC">MAC</param>
+        /// <returns></returns>
+        public int isOrderIDExist (string OrderID, string OrderStatus) {
+            try {
+                string orderStatus = "";
+                if (string.IsNullOrEmpty(OrderStatus)) { 
+                    if (OrderStatus.Length == 2) {
+                        orderStatus = OrderStatus;
+                    } else { orderStatus = ""; }
+                }
+                if (string.IsNullOrEmpty (OrderID)) {
+                    return -1;
+                } else if (OrderID.Length >= 14) {
+                    return -1;
+                } else {
+                    tagTPE_QueryFlowBySQLReq Req = new tagTPE_QueryFlowBySQLReq ();
+                    tagTPE_QueryResControl Res = new tagTPE_QueryResControl ();
+                    //Req.ToCentralNo = 0x0FFFFFFF;
+                    string tmpOrderID = "";
+                    for (int i = 0; i < OrderID.Length; i++) {
+                        tmpOrderID += System.Convert.ToString (OrderID[i], 16);
+                    }
+                    string tmpOrderStatus = "";
+                    for (int i = 0; i < orderStatus.Length; i++) {
+                        tmpOrderStatus += System.Convert.ToString (orderStatus[i], 16);
+                    }
+                    String tmpSQL = " WHERE OccurNode = '" + NodeNo.ToString () + "' AND ExtraInfo is not NULL AND sys.fn_varbintohexstr([ExtraInfo]) like '%" + tmpOrderID + "%" + (string.IsNullOrEmpty(orderStatus) ? "" : tmpOrderStatus + "%") + "'";
+                    Req.SQL = new byte[4096];
+                    Array.Copy (System.Text.Encoding.Default.GetBytes (tmpSQL), 0, Req.SQL, 0, System.Text.Encoding.Default.GetBytes (tmpSQL).Length);
+                    int nRet = TPE_Class.TPE_QueryFlowBySQL (1, ref Req, out Res, 1);
+                    if (nRet != 0) {
+                        return -1;
+                    } else {
+                        return Res.ResRecCount;
+                    }
+                }
+            } catch (Exception e) {
+                retRes.Result = "error";
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】按订单号调账时抛出异常：" + e.Message);
+            }
+            return -1;
+        }
+
+        /// <summary>
         /// 调帐
         /// </summary>
         /// <param name="NodeNo">节点号</param>
@@ -2359,7 +2410,7 @@ namespace WebServicePark {
                     for (int i = 0; i < orderStatus.Length; i++) {
                         tmpOrderStatus += System.Convert.ToString (orderStatus[i], 16);
                     }
-                    String tmpSQL = " WHERE OccurNode = '" + NodeNo.ToString () + "' AND ExtraInfo is not NULL AND sys.fn_varbintohexstr([ExtraInfo]) like '%" + tmpOrderID + "%" + tmpOrderStatus + "%'";
+                    String tmpSQL = " WHERE OccurNode = '" + NodeNo.ToString () + "' AND ExtraInfo is not NULL AND sys.fn_varbintohexstr([ExtraInfo]) like '%" + tmpOrderID + "%" + (string.IsNullOrEmpty(orderStatus) ? "" : tmpOrderStatus + "%") + "'";
                     CPublic.WriteLog (tmpSQL);
                     Req.SQL = new byte[4096];
                     Array.Copy (System.Text.Encoding.Default.GetBytes (tmpSQL), 0, Req.SQL, 0, System.Text.Encoding.Default.GetBytes (tmpSQL).Length);
@@ -3836,6 +3887,7 @@ namespace WebServicePark {
                             retRes.Result = "error";
                             retRes.Msg = "订单与流水记录不符";
                     } else {
+                        
                         tagTPE_OnLineGetMaxSnRes SnRes = new tagTPE_OnLineGetMaxSnRes ();
                         TPE_Class.TPE_OnLineGetMaxSn (1, out SnRes, 1);
                         tagTPE_FlowCostReq ReqL = new tagTPE_FlowCostReq ();
