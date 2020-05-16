@@ -2310,7 +2310,7 @@ namespace WebServicePark {
         /// <param name="MAC">MAC</param>
         /// <returns></returns>
         [WebMethod]
-        unsafe public string TPE_QueryFlowByOrderID (string NodeNo, string OrderID, string MAC) {
+        unsafe public string TPE_QueryFlowByOrderID (string NodeNo, string OrderID, string OrderStatus, string MAC) {
             CReturnCReturnObj retRes = new CReturnCReturnObj ();
             List<TPE_CReturnObj> listCRO = new List<TPE_CReturnObj> ();
             string json = "";
@@ -2324,7 +2324,13 @@ namespace WebServicePark {
             string param = "";
             try {
                 int nodeNo;
-                param = OrderID;
+                string orderStatus = "";
+                if (string.IsNullOrEmpty(OrderStatus)) { 
+                    if (OrderStatus.Length == 2) {
+                        orderStatus = OrderStatus;
+                    } else { orderStatus = ""; }
+                }
+                param = OrderID + string.IsNullOrEmpty(orderStatus) ? "" : "$" + orderStatus;
                 if (string.IsNullOrEmpty (NodeNo) || !int.TryParse (NodeNo, out nodeNo)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[NodeNo(类型Int)]";
@@ -2349,7 +2355,11 @@ namespace WebServicePark {
                     for (int i = 0; i < OrderID.Length; i++) {
                         tmpOrderID += System.Convert.ToString (OrderID[i], 16);
                     }
-                    String tmpSQL = " WHERE OccurNode = '" + NodeNo.ToString () + "' AND ExtraInfo is not NULL AND sys.fn_varbintohexstr([ExtraInfo]) like '%" + tmpOrderID + "%'";
+                    string tmpOrderStatus = "";
+                    for (int i = 0; i < orderStatus.Length; i++) {
+                        tmpOrderStatus += System.Convert.ToString (orderStatus[i], 16);
+                    }
+                    String tmpSQL = " WHERE OccurNode = '" + NodeNo.ToString () + "' AND ExtraInfo is not NULL AND sys.fn_varbintohexstr([ExtraInfo]) like '%" + tmpOrderID + "%" + tmpOrderStatus + "%'";
                     CPublic.WriteLog (tmpSQL);
                     Req.SQL = new byte[4096];
                     Array.Copy (System.Text.Encoding.Default.GetBytes (tmpSQL), 0, Req.SQL, 0, System.Text.Encoding.Default.GetBytes (tmpSQL).Length);
@@ -3462,12 +3472,15 @@ namespace WebServicePark {
                         ReqL.CostType = 9;
                         ReqL.TransMoney = transMoney;
                         int nRet = -1;
-                        if (!string.IsNullOrEmpty (OrderID)) {
-                            byte[] byOrderID = new byte[16];
-                            Array.Copy(Encoding.ASCII.GetBytes (OrderID), 0, byOrderID, 0, Encoding.ASCII.GetBytes (OrderID).Length);
-                            Array.Copy(Encoding.ASCII.GetBytes ("FC"), 0, byOrderID, 14, Encoding.ASCII.GetBytes (OrderID).Length);
-                            nRet = TPE_Class.TPE_FlowCostOrder (1, ref ReqL, ref byOrderID[0], 1, out ResF, 1);
-                        } else { nRet = TPE_Class.TPE_FlowCost (1, ref ReqL, 1, out ResF, 1); }
+                        if (string.IsNullOrEmpty (OrderID)) {
+                            if (SnRes.ToString().Length <= 10){
+                                OrderID = "WLAT" + SnRes.ToString();
+                            } else { OrderID = "WLAT" + SnRes.ToString().Substring(0, 10); }
+                        }
+                        byte[] byOrderID = new byte[16];
+                        Array.Copy(Encoding.ASCII.GetBytes (OrderID), 0, byOrderID, 0, Encoding.ASCII.GetBytes (OrderID).Length);
+                        Array.Copy(Encoding.ASCII.GetBytes ("FC"), 0, byOrderID, 14, Encoding.ASCII.GetBytes (OrderID).Length);
+                        nRet = TPE_Class.TPE_FlowCostOrder (1, ref ReqL, ref byOrderID[0], 1, out ResF, 1);
                         if (nRet != 0) {
                             retRes.Result = "error";
                             retRes.Msg = "nRet=" + nRet.ToString ();
@@ -3583,12 +3596,15 @@ namespace WebServicePark {
                         ReqL.CostType = 9;
                         ReqL.TransMoney = transMoney;
                         int nRet = -1;
-                        if (!string.IsNullOrEmpty (OrderID)) {
-                            byte[] byOrderID = new byte[16];
-                            Array.Copy(Encoding.ASCII.GetBytes (OrderID), 0, byOrderID, 0, Encoding.ASCII.GetBytes (OrderID).Length);
-                            Array.Copy(Encoding.ASCII.GetBytes ("FP"), 0, byOrderID, 14, Encoding.ASCII.GetBytes (OrderID).Length);
-                            nRet = TPE_Class.TPE_FlowCostOrder (1, ref ReqL, ref byOrderID[0], 1, out ResF, 1);
-                        } else { nRet = TPE_Class.TPE_FlowCost (1, ref ReqL, 1, out ResF, 1); }
+                        if (string.IsNullOrEmpty (OrderID)) {
+                            if (SnRes.ToString().Length <= 10){
+                                OrderID = "WLAT" + SnRes.ToString();
+                            } else { OrderID = "WLAT" + SnRes.ToString().Substring(0, 10); }
+                        }
+                        byte[] byOrderID = new byte[16];
+                        Array.Copy(Encoding.ASCII.GetBytes (OrderID), 0, byOrderID, 0, Encoding.ASCII.GetBytes (OrderID).Length);
+                        Array.Copy(Encoding.ASCII.GetBytes ("FC"), 0, byOrderID, 14, Encoding.ASCII.GetBytes (OrderID).Length);
+                        nRet = TPE_Class.TPE_FlowCostOrder (1, ref ReqL, ref byOrderID[0], 1, out ResF, 1);
                         if (nRet != 0) {
                             retRes.Result = "error";
                             retRes.Msg = "nRet=" + nRet.ToString ();
@@ -3701,11 +3717,15 @@ namespace WebServicePark {
                         ReqL.CostType = 11;
                         ReqL.TransMoney = transMoney;
                         int nRet = -1;
-                        if (!string.IsNullOrEmpty (OrderID)) {
-                            byte[] byOrderID = new byte[16];
-                            Array.Copy(Encoding.ASCII.GetBytes (OrderID), 0, byOrderID, 0, Encoding.ASCII.GetBytes (OrderID).Length);
-                            Array.Copy(Encoding.ASCII.GetBytes ("FM"), 0, byOrderID, 14, Encoding.ASCII.GetBytes (OrderID).Length);
-                        } else { nRet = TPE_Class.TPE_FlowCost (1, ref ReqL, 1, out ResF, 1); }
+                        if (string.IsNullOrEmpty (OrderID)) {
+                            if (SnRes.ToString().Length <= 10){
+                                OrderID = "WLAT" + SnRes.ToString();
+                            } else { OrderID = "WLAT" + SnRes.ToString().Substring(0, 10); }
+                        }
+                        byte[] byOrderID = new byte[16];
+                        Array.Copy(Encoding.ASCII.GetBytes (OrderID), 0, byOrderID, 0, Encoding.ASCII.GetBytes (OrderID).Length);
+                        Array.Copy(Encoding.ASCII.GetBytes ("FC"), 0, byOrderID, 14, Encoding.ASCII.GetBytes (OrderID).Length);
+                        nRet = TPE_Class.TPE_FlowCostOrder (1, ref ReqL, ref byOrderID[0], 1, out ResF, 1);
                         if (nRet != 0) {
                             retRes.Result = "error";
                             retRes.Msg = "nRet=" + nRet.ToString ();
@@ -3796,6 +3816,9 @@ namespace WebServicePark {
                     param = AccountNo + "$" + CenterID;
                     param = param + (string.IsNullOrEmpty (OrderID) ? "" : "$" + OrderID);
                     param = param + "$" + transMoney;
+                    if (string.IsNullOrEmpty(OrderID)) {
+                        OrderID = "WLAT" + TransferInfo.OccurIdNo;
+                    }
                     TPE_CReturnObj TransferInfo = QueryTransferByCenter(NodeNo, centerid);
                     if (CheckNode (NodeNo, param, MAC) != 0) {
                         retRes.Result = "error";
@@ -3810,8 +3833,8 @@ namespace WebServicePark {
                         retRes.Result = "error";
                         retRes.Msg = "金额与流水记录不符";
                     } else if (!string.IsNullOrEmpty(TransferInfo.OrderID) && !TransferInfo.OrderID.Equals(OrderID)) {
-                        retRes.Result = "error";
-                        retRes.Msg = "订单与流水记录不符";
+                            retRes.Result = "error";
+                            retRes.Msg = "订单与流水记录不符";
                     } else {
                         tagTPE_OnLineGetMaxSnRes SnRes = new tagTPE_OnLineGetMaxSnRes ();
                         TPE_Class.TPE_OnLineGetMaxSn (1, out SnRes, 1);
@@ -3827,10 +3850,15 @@ namespace WebServicePark {
                         } else { ReqL.CostType = 11; }
                         ReqL.TransMoney = System.Math.Abs(transMoney);
                         int nRet = -1;
-                        if (!string.IsNullOrEmpty (OrderID)) {
-                            byte[] byOrderID = Encoding.ASCII.GetBytes (OrderID);
-                            nRet = TPE_Class.TPE_FlowCostOrder (1, ref ReqL, ref byOrderID[0], 1, out ResF, 1);
-                        } else { nRet = TPE_Class.TPE_FlowCost (1, ref ReqL, 1, out ResF, 1); }
+                        if (string.IsNullOrEmpty (OrderID)) {
+                            if (SnRes.ToString().Length <= 10){
+                                OrderID = "WLAT" + SnRes.ToString();
+                            } else { OrderID = "WLAT" + SnRes.ToString().Substring(0, 10); }
+                        }
+                        byte[] byOrderID = new byte[16];
+                        Array.Copy(Encoding.ASCII.GetBytes (OrderID), 0, byOrderID, 0, Encoding.ASCII.GetBytes (OrderID).Length);
+                        Array.Copy(Encoding.ASCII.GetBytes ("FF"), 0, byOrderID, 14, Encoding.ASCII.GetBytes (OrderID).Length);
+                        nRet = TPE_Class.TPE_FlowCostOrder (1, ref ReqL, ref byOrderID[0], 1, out ResF, 1);
                         if (nRet != 0) {
                             retRes.Result = "error";
                             retRes.Msg = "nRet=" + nRet.ToString ();
