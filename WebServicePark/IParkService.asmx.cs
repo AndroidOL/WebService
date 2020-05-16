@@ -3886,8 +3886,12 @@ namespace WebServicePark {
                     } else if (!string.IsNullOrEmpty(TransferInfo.OrderID) && !TransferInfo.OrderID.Equals(OrderID)) {
                             retRes.Result = "error";
                             retRes.Msg = "订单与流水记录不符";
+                    } else if (isOrderIDExist(OrderID, "FF") != 0) {
+                            retRes.Result = "error";
+                            if (OrderID > 0) {
+                                retRes.Msg = "该笔订单已完成退款";
+                            } else { retRes.Msg = "订单查询出现异常"; }
                     } else {
-                        
                         tagTPE_OnLineGetMaxSnRes SnRes = new tagTPE_OnLineGetMaxSnRes ();
                         TPE_Class.TPE_OnLineGetMaxSn (1, out SnRes, 1);
                         tagTPE_FlowCostReq ReqL = new tagTPE_FlowCostReq ();
