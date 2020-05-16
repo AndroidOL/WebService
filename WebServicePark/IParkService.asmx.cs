@@ -157,7 +157,7 @@ namespace WebServicePark {
                 } else { orderStatus = ""; }
                 if (string.IsNullOrEmpty (OrderID)) {
                     return -1;
-                } else if (OrderID.Length >= 14) {
+                } else if (OrderID.Length > 14) {
                     return -1;
                 } else {
                     tagTPE_QueryFlowBySQLReq Req = new tagTPE_QueryFlowBySQLReq ();
@@ -2390,7 +2390,7 @@ namespace WebServicePark {
                 } else if (string.IsNullOrEmpty (OrderID)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[OrderID]";
-                } else if (OrderID.Length >= 14) {
+                } else if (OrderID.Length > 14) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[OrderID(订单号最长允许包含14字符)]";
                 } else if (CheckNode (NodeNo, param, MAC) != 0) {
@@ -3479,7 +3479,7 @@ namespace WebServicePark {
                 } else if (!string.IsNullOrEmpty (OrderID) && !IsNumAndEnCh (OrderID)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[OrderID(只允许包含数字与字母或留空)]";
-                } else if (OrderID.Length >= 14) {
+                } else if (OrderID.Length > 14) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[OrderID(订单号最长允许包含14字符)]";
                 } else if (string.IsNullOrEmpty (TransMoney) || !int.TryParse (TransMoney, out transMoney)) {
@@ -3602,7 +3602,7 @@ namespace WebServicePark {
                 } else if (!string.IsNullOrEmpty (OrderID) && !IsNumAndEnCh (OrderID)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[OrderID(只允许包含数字与字母或留空)]";
-                } else if (OrderID.Length >= 14) {
+                } else if (OrderID.Length > 14) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[OrderID(订单号最长允许包含14字符)]";
                 } else if (string.IsNullOrEmpty (TransMoney) || !int.TryParse (TransMoney, out transMoney)) {
@@ -3722,7 +3722,7 @@ namespace WebServicePark {
                 } else if (!string.IsNullOrEmpty (OrderID) && !IsNumAndEnCh (OrderID)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[OrderID(只允许包含数字与字母或留空)]";
-                } else if (OrderID.Length >= 14) {
+                } else if (OrderID.Length > 14) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[OrderID(订单号最长允许包含14字符)]";
                 } else if (string.IsNullOrEmpty (TransMoney) || !int.TryParse (TransMoney, out transMoney)) {
@@ -3849,7 +3849,7 @@ namespace WebServicePark {
                 } else if (!string.IsNullOrEmpty (OrderID) && !IsNumAndEnCh (OrderID)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[OrderID(只允许包含数字与字母或留空)]";
-                } else if (OrderID.Length >= 14) {
+                } else if (OrderID.Length > 14) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[OrderID(订单号最长允许包含14字符)]";
                 } else if (string.IsNullOrEmpty (TransMoney) || !int.TryParse (TransMoney, out transMoney)) {
