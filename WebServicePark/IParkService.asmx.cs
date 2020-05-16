@@ -2529,6 +2529,7 @@ namespace WebServicePark {
                                         //}
                                         //CPublic.WriteLog (strMsg);
                                         string retOrderID = "";
+                                        string retOrderWay = "";
                                         HTEXTENDINFO tmpHTEXTENDINFO = new HTEXTENDINFO ();
                                         if (FlowRes_Cost.ExtendLen >= Marshal.SizeOf (tmpHTEXTENDINFO)) {
                                             tmpHTEXTENDINFO = (HTEXTENDINFO)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (HTEXTENDINFO));
@@ -2536,10 +2537,13 @@ namespace WebServicePark {
                                                 byte[] OrderID14 = new byte[14];
                                                 Array.Copy (tmpHTEXTENDINFO.OrderID, 0, OrderID14, 0, 14);
                                                 retOrderID = Encoding.UTF8.GetString (OrderID14).TrimEnd ('\0');
+                                                byte[] OrderID2 = new byte[2];
+                                                Array.Copy (tmpHTEXTENDINFO.OrderID, 14, OrderID14, 0, 2);
+                                                retOrderWay = Encoding.UTF8.GetString (OrderID14).TrimEnd ('\0');
                                             }
                                         }
                                         cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                        cTpe_Cro.OrderID = retOrderID;
+                                        cTpe_Cro.OrderID = retOrderID + "[" + retOrderWay + "]";
                                         listCRO.Add (cTpe_Cro);
                                         Offset += (int)FlowRes_Cost.ExtendLen;
                                         break;
@@ -3459,7 +3463,9 @@ namespace WebServicePark {
                         ReqL.TransMoney = transMoney;
                         int nRet = -1;
                         if (!string.IsNullOrEmpty (OrderID)) {
-                            byte[] byOrderID = Encoding.ASCII.GetBytes (OrderID);
+                            byte[] byOrderID = new byte[16];
+                            Array.Copy(Encoding.ASCII.GetBytes (OrderID), 0, byOrderID, 0, Encoding.ASCII.GetBytes (OrderID).Length);
+                            Array.Copy(Encoding.ASCII.GetBytes ("FC"), 0, byOrderID, 14, Encoding.ASCII.GetBytes (OrderID).Length);
                             nRet = TPE_Class.TPE_FlowCostOrder (1, ref ReqL, ref byOrderID[0], 1, out ResF, 1);
                         } else { nRet = TPE_Class.TPE_FlowCost (1, ref ReqL, 1, out ResF, 1); }
                         if (nRet != 0) {
@@ -3578,7 +3584,9 @@ namespace WebServicePark {
                         ReqL.TransMoney = transMoney;
                         int nRet = -1;
                         if (!string.IsNullOrEmpty (OrderID)) {
-                            byte[] byOrderID = Encoding.ASCII.GetBytes (OrderID);
+                            byte[] byOrderID = new byte[16];
+                            Array.Copy(Encoding.ASCII.GetBytes (OrderID), 0, byOrderID, 0, Encoding.ASCII.GetBytes (OrderID).Length);
+                            Array.Copy(Encoding.ASCII.GetBytes ("FP"), 0, byOrderID, 14, Encoding.ASCII.GetBytes (OrderID).Length);
                             nRet = TPE_Class.TPE_FlowCostOrder (1, ref ReqL, ref byOrderID[0], 1, out ResF, 1);
                         } else { nRet = TPE_Class.TPE_FlowCost (1, ref ReqL, 1, out ResF, 1); }
                         if (nRet != 0) {
@@ -3694,8 +3702,9 @@ namespace WebServicePark {
                         ReqL.TransMoney = transMoney;
                         int nRet = -1;
                         if (!string.IsNullOrEmpty (OrderID)) {
-                            byte[] byOrderID = Encoding.ASCII.GetBytes (OrderID);
-                            nRet = TPE_Class.TPE_FlowCostOrder (1, ref ReqL, ref byOrderID[0], 1, out ResF, 1);
+                            byte[] byOrderID = new byte[16];
+                            Array.Copy(Encoding.ASCII.GetBytes (OrderID), 0, byOrderID, 0, Encoding.ASCII.GetBytes (OrderID).Length);
+                            Array.Copy(Encoding.ASCII.GetBytes ("FM"), 0, byOrderID, 14, Encoding.ASCII.GetBytes (OrderID).Length);
                         } else { nRet = TPE_Class.TPE_FlowCost (1, ref ReqL, 1, out ResF, 1); }
                         if (nRet != 0) {
                             retRes.Result = "error";
