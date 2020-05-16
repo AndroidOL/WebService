@@ -150,11 +150,11 @@ namespace WebServicePark {
         public int isOrderIDExist (string OrderID, string OrderStatus) {
             try {
                 string orderStatus = "";
-                if (string.IsNullOrEmpty(OrderStatus)) { 
+                if (!string.IsNullOrEmpty(OrderStatus)) { 
                     if (OrderStatus.Length == 2) {
                         orderStatus = OrderStatus;
                     } else { orderStatus = ""; }
-                }
+                } else { orderStatus = ""; }
                 if (string.IsNullOrEmpty (OrderID)) {
                     return -1;
                 } else if (OrderID.Length >= 14) {
@@ -171,7 +171,7 @@ namespace WebServicePark {
                     for (int i = 0; i < orderStatus.Length; i++) {
                         tmpOrderStatus += System.Convert.ToString (orderStatus[i], 16);
                     }
-                    String tmpSQL = " WHERE OccurNode = '" + NodeNo.ToString () + "' AND ExtraInfo is not NULL AND sys.fn_varbintohexstr([ExtraInfo]) like '%" + tmpOrderID + "%" + (string.IsNullOrEmpty(orderStatus) ? "" : tmpOrderStatus + "%") + "'";
+                    String tmpSQL = " WHERE OccurNode = '" + CPublic.LocalNode + "' AND ExtraInfo is not NULL AND sys.fn_varbintohexstr([ExtraInfo]) like '%" + tmpOrderID + "%" + (string.IsNullOrEmpty(orderStatus) ? "" : tmpOrderStatus + "%") + "'";
                     Req.SQL = new byte[4096];
                     Array.Copy (System.Text.Encoding.Default.GetBytes (tmpSQL), 0, Req.SQL, 0, System.Text.Encoding.Default.GetBytes (tmpSQL).Length);
                     int nRet = TPE_Class.TPE_QueryFlowBySQL (1, ref Req, out Res, 1);
@@ -182,8 +182,6 @@ namespace WebServicePark {
                     }
                 }
             } catch (Exception e) {
-                retRes.Result = "error";
-                retRes.Msg = "服务器异常";
                 CPublic.WriteLog ("【严重】按订单号调账时抛出异常：" + e.Message);
             }
             return -1;
@@ -2381,7 +2379,7 @@ namespace WebServicePark {
                         orderStatus = OrderStatus;
                     } else { orderStatus = ""; }
                 }
-                param = OrderID + string.IsNullOrEmpty(orderStatus) ? "" : "$" + orderStatus;
+                param = OrderID + (string.IsNullOrEmpty (orderStatus) ? "" : "$" + orderStatus);
                 if (string.IsNullOrEmpty (NodeNo) || !int.TryParse (NodeNo, out nodeNo)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[NodeNo(类型Int)]";
@@ -3524,13 +3522,12 @@ namespace WebServicePark {
                         ReqL.TransMoney = transMoney;
                         int nRet = -1;
                         if (string.IsNullOrEmpty (OrderID)) {
-                            if (SnRes.ToString().Length <= 10){
-                                OrderID = "WLAT" + SnRes.ToString();
-                            } else { OrderID = "WLAT" + SnRes.ToString().Substring(0, 10); }
+                            int OrderIDLen = ReqL.OccurIdNo.ToString ().Length;
+                            OrderID = "WLAT" + ReqL.OccurIdNo.ToString ().Substring (0, OrderIDLen <= 10 ? OrderIDLen : 10);
                         }
                         byte[] byOrderID = new byte[16];
                         Array.Copy(Encoding.ASCII.GetBytes (OrderID), 0, byOrderID, 0, Encoding.ASCII.GetBytes (OrderID).Length);
-                        Array.Copy(Encoding.ASCII.GetBytes ("FC"), 0, byOrderID, 14, Encoding.ASCII.GetBytes (OrderID).Length);
+                        Array.Copy(Encoding.ASCII.GetBytes ("FC"), 0, byOrderID, 14, 2);
                         nRet = TPE_Class.TPE_FlowCostOrder (1, ref ReqL, ref byOrderID[0], 1, out ResF, 1);
                         if (nRet != 0) {
                             retRes.Result = "error";
@@ -3539,7 +3536,7 @@ namespace WebServicePark {
                             TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
                             Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                             retRes.Result = "ok";
-                            retRes.Msg = "成功";
+                            retRes.Msg = "成功" + (isOrderIDExist (OrderID, "") > 1 ? "[订单号重复，多笔订单将无法正常处理退款]" : "");
                             retRes.Data = Fr;
                         }
                     }
@@ -3648,13 +3645,12 @@ namespace WebServicePark {
                         ReqL.TransMoney = transMoney;
                         int nRet = -1;
                         if (string.IsNullOrEmpty (OrderID)) {
-                            if (SnRes.ToString().Length <= 10){
-                                OrderID = "WLAT" + SnRes.ToString();
-                            } else { OrderID = "WLAT" + SnRes.ToString().Substring(0, 10); }
+                            int OrderIDLen = ReqL.OccurIdNo.ToString ().Length;
+                            OrderID = "WLAT" + ReqL.OccurIdNo.ToString ().Substring (0, OrderIDLen <= 10 ? OrderIDLen : 10);
                         }
                         byte[] byOrderID = new byte[16];
                         Array.Copy(Encoding.ASCII.GetBytes (OrderID), 0, byOrderID, 0, Encoding.ASCII.GetBytes (OrderID).Length);
-                        Array.Copy(Encoding.ASCII.GetBytes ("FC"), 0, byOrderID, 14, Encoding.ASCII.GetBytes (OrderID).Length);
+                        Array.Copy(Encoding.ASCII.GetBytes ("FP"), 0, byOrderID, 14, 2);
                         nRet = TPE_Class.TPE_FlowCostOrder (1, ref ReqL, ref byOrderID[0], 1, out ResF, 1);
                         if (nRet != 0) {
                             retRes.Result = "error";
@@ -3769,13 +3765,12 @@ namespace WebServicePark {
                         ReqL.TransMoney = transMoney;
                         int nRet = -1;
                         if (string.IsNullOrEmpty (OrderID)) {
-                            if (SnRes.ToString().Length <= 10){
-                                OrderID = "WLAT" + SnRes.ToString();
-                            } else { OrderID = "WLAT" + SnRes.ToString().Substring(0, 10); }
+                            int OrderIDLen = ReqL.OccurIdNo.ToString ().Length;
+                            OrderID = "WLAT" + ReqL.OccurIdNo.ToString ().Substring (0, OrderIDLen <= 10 ? OrderIDLen : 10);
                         }
                         byte[] byOrderID = new byte[16];
                         Array.Copy(Encoding.ASCII.GetBytes (OrderID), 0, byOrderID, 0, Encoding.ASCII.GetBytes (OrderID).Length);
-                        Array.Copy(Encoding.ASCII.GetBytes ("FC"), 0, byOrderID, 14, Encoding.ASCII.GetBytes (OrderID).Length);
+                        Array.Copy(Encoding.ASCII.GetBytes ("FM"), 0, byOrderID, 14, 2);
                         nRet = TPE_Class.TPE_FlowCostOrder (1, ref ReqL, ref byOrderID[0], 1, out ResF, 1);
                         if (nRet != 0) {
                             retRes.Result = "error";
@@ -3867,10 +3862,11 @@ namespace WebServicePark {
                     param = AccountNo + "$" + CenterID;
                     param = param + (string.IsNullOrEmpty (OrderID) ? "" : "$" + OrderID);
                     param = param + "$" + transMoney;
-                    if (string.IsNullOrEmpty(OrderID)) {
+                    TPE_CReturnObj TransferInfo = QueryTransferByCenter(NodeNo, centerid);
+                    if (string.IsNullOrEmpty (OrderID)) {
                         OrderID = "WLAT" + TransferInfo.OccurIdNo;
                     }
-                    TPE_CReturnObj TransferInfo = QueryTransferByCenter(NodeNo, centerid);
+                    int orderCheck = isOrderIDExist (OrderID, "FF");
                     if (CheckNode (NodeNo, param, MAC) != 0) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + NodeCheckInfo[CheckNode (NodeNo, param, MAC)];
@@ -3884,11 +3880,11 @@ namespace WebServicePark {
                         retRes.Result = "error";
                         retRes.Msg = "金额与流水记录不符";
                     } else if (!string.IsNullOrEmpty(TransferInfo.OrderID) && !TransferInfo.OrderID.Equals(OrderID)) {
+                        retRes.Result = "error";
+                        retRes.Msg = "订单与流水记录不符";
+                    } else if (orderCheck != 0) {
                             retRes.Result = "error";
-                            retRes.Msg = "订单与流水记录不符";
-                    } else if (isOrderIDExist(OrderID, "FF") != 0) {
-                            retRes.Result = "error";
-                            if (OrderID > 0) {
+                            if (orderCheck > 0) {
                                 retRes.Msg = "该笔订单已完成退款";
                             } else { retRes.Msg = "订单查询出现异常"; }
                     } else {
@@ -3907,13 +3903,12 @@ namespace WebServicePark {
                         ReqL.TransMoney = System.Math.Abs(transMoney);
                         int nRet = -1;
                         if (string.IsNullOrEmpty (OrderID)) {
-                            if (SnRes.ToString().Length <= 10){
-                                OrderID = "WLAT" + SnRes.ToString();
-                            } else { OrderID = "WLAT" + SnRes.ToString().Substring(0, 10); }
+                            int OrderIDLen = ReqL.OccurIdNo.ToString ().Length;
+                            OrderID = "WLAT" + ReqL.OccurIdNo.ToString ().Substring (0, OrderIDLen <= 10 ? OrderIDLen : 10);
                         }
                         byte[] byOrderID = new byte[16];
                         Array.Copy(Encoding.ASCII.GetBytes (OrderID), 0, byOrderID, 0, Encoding.ASCII.GetBytes (OrderID).Length);
-                        Array.Copy(Encoding.ASCII.GetBytes ("FF"), 0, byOrderID, 14, Encoding.ASCII.GetBytes (OrderID).Length);
+                        Array.Copy(Encoding.ASCII.GetBytes ("FF"), 0, byOrderID, 14, 2);
                         nRet = TPE_Class.TPE_FlowCostOrder (1, ref ReqL, ref byOrderID[0], 1, out ResF, 1);
                         if (nRet != 0) {
                             retRes.Result = "error";
@@ -3930,7 +3925,7 @@ namespace WebServicePark {
             } catch (Exception e) {
                 retRes.Result = "error";
                 retRes.Msg = "服务器异常";
-                CPublic.WriteLog ("【严重】账户扣款时抛出异常：" + e.Message);
+                CPublic.WriteLog ("【严重】账户退款时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
@@ -3939,9 +3934,9 @@ namespace WebServicePark {
                 retRes.Result = "error";
                 retRes.Msg = "服务器异常" + ex.Message;
                 CPublic.WriteLog ("【警告】关键信息：" + param);
-                CPublic.WriteLog ("【警告】账户扣款 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
+                CPublic.WriteLog ("【警告】账户退款 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
-            CPublic.WriteLog ("【记录】账户扣款成功执行，关键信息：" + param);
+            CPublic.WriteLog ("【记录】账户退款成功执行，关键信息：" + param);
             return json;
         }
         
@@ -4194,7 +4189,7 @@ namespace WebServicePark {
                 string pass = "$senOjnyS";
                 shareKey += pass;
                 if (shareKey != MAC) {
-                    CPublic.WriteLog ("验证参数失败 实际形参校验值 [" + MAC + "] <=> 应提供校验值 [" + shareKey + "] 传递参数 [" + param + "]");
+                    CPublic.WriteLog ("验证参数失败 实际形参校验值 [" + MAC + "] <=> 应提供校验值 " + param + "]");
                     return 2;
                 } else {
                     return 0;
