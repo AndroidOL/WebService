@@ -260,7 +260,7 @@ namespace WebServicePark {
                 CI.isMale = !GetBit (condt, 17);
                 CI.isUpdate = true;
 
-                retRes.Result = "OK";
+                retRes.Result = "ok";
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (CI);
                 retRes.Msg = json;
@@ -321,18 +321,22 @@ namespace WebServicePark {
                     retRes.Result = "error";
                     retRes.Msg = "节点校验失败！" + NodeCheckInfo[CheckNode (NodeNo, param, MAC)];
                 } else {
+                    retRes.Result = "error";
+                    retRes.Msg = "用户名密码校验失败";
                     // 验证用户名与密码
                     int username;
                     List<string> UserList = new List<string> ();
                     UserList.Add ("00000000"); UserList.Add ("11111111");
-                    UserList.Add ("22222222"); UserList.Add ("33333333");
-                    UserList.Add ("44444444"); UserList.Add ("55555555");
-                    UserList.Add ("66666666"); UserList.Add ("77777777");
-                    UserList.Add ("88888888"); UserList.Add ("99999999");
+                    //UserList.Add ("22222222"); UserList.Add ("33333333");
+                    //UserList.Add ("44444444"); UserList.Add ("55555555");
+                    //UserList.Add ("66666666"); UserList.Add ("77777777");
+                    //UserList.Add ("88888888"); UserList.Add ("99999999");
                     if (int.TryParse (Username, out username)) {
-                        if (UserList[username] == Password) {
-                            retRes.Result = "ok";
-                            retRes.Msg = Convert.ToBase64String (Encoding.Default.GetBytes (CPublic.MakeToken (Username)));
+                        if (username + 1 <= UserList.Count) {
+                            if (UserList[username] == Password) {
+                                retRes.Result = "ok";
+                                retRes.Msg = Convert.ToBase64String (Encoding.Default.GetBytes (CPublic.MakeToken (Username)));
+                            }
                         }
                     }
                 }
@@ -397,7 +401,7 @@ namespace WebServicePark {
                 } else if (string.IsNullOrEmpty (Operation) || !byte.TryParse (Operation, out operation)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[Operation(类型Int)]";
-                } else if (ret != 0) {
+                } else if (ret != 0 && ret != -1) {
                     retRes.Result = "error";
                     retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                 } else {
@@ -431,7 +435,7 @@ namespace WebServicePark {
                             } else {
                                 TPE_FlowRes Fr = new TPE_FlowRes (ResF);
                                 Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
-                                retRes.Result = "ok";
+                                retRes.Result = ret == 0 ? "ok" : "uok";
                                 retRes.Msg = "成功";
                                 retRes.Data = Fr;
                             }
@@ -471,7 +475,7 @@ namespace WebServicePark {
                                 } else {
                                     TPE_FlowRes Fr = new TPE_FlowRes (ResF);
                                     Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
-                                    retRes.Result = "ok";
+                                    retRes.Result = ret == 0 ? "ok" : "uok";
                                     retRes.Msg = "成功";
                                     retRes.Data = Fr;
                                 }
@@ -553,7 +557,7 @@ namespace WebServicePark {
                     }
                     param = Username + "$" + param + "$" + OldPassWord + "$" + NewPassWord;
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_ChangeAccountPassword");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -610,7 +614,7 @@ namespace WebServicePark {
                                     } else {
                                         TPE_FlowUpdateAccountRes Fuar = new TPE_FlowUpdateAccountRes (ResU);
                                         Fuar.CenterNo = QueryCenterByOccurUINT (NodeNo, Fuar.OccurIdNo);
-                                        retRes.Result = "ok";
+                                        retRes.Result = ret == 0 ? "ok" : "uok";
                                         retRes.Msg = "成功";
                                         retRes.Data = Fuar;
                                     }
@@ -668,7 +672,7 @@ namespace WebServicePark {
                 } else {
                     param = Username + "$" + CardNo;
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_GetAccount");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -720,7 +724,7 @@ namespace WebServicePark {
                                 retRes.Msg = "RetValue=" + Res.RetValue.ToString ();
                             } else {
                                 TPE_GetAccountRes tpe_GetAccRes = new TPE_GetAccountRes (Res);
-                                retRes.Result = "ok";
+                                retRes.Result = ret == 0 ? "ok" : "uok";
                                 retRes.Msg = "成功";
                                 retRes.Data = tpe_GetAccRes;
                             }
@@ -776,7 +780,7 @@ namespace WebServicePark {
                 } else {
                     param = Username + "$" + AccountNo;
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_GetAccountByNo");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -828,7 +832,7 @@ namespace WebServicePark {
                                 retRes.Msg = "RetValue=" + Res.RetValue.ToString ();
                             } else {
                                 TPE_GetAccountRes tpe_GetAccRes = new TPE_GetAccountRes (Res);
-                                retRes.Result = "ok";
+                                retRes.Result = ret == 0 ? "ok" : "uok";
                                 retRes.Msg = "成功";
                                 retRes.Data = tpe_GetAccRes;
                             }
@@ -888,7 +892,7 @@ namespace WebServicePark {
                 } else {
                     param = Username + "$" + IDNO;
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_GetAccountByIDNo");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -931,7 +935,7 @@ namespace WebServicePark {
                                     }
                                     ResControl.pRes = null;
                                 }
-                                retRes.Result = "ok";
+                                retRes.Result = (ret == 0) ? "ok" : "uok";
                                 retRes.Msg = "成功";
                                 retRes.ListDate = listRes;
                             }
@@ -987,7 +991,7 @@ namespace WebServicePark {
                 } else {
                     param = Username + "$" + CertNo;
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_GetAccountByCertNo");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -1054,7 +1058,7 @@ namespace WebServicePark {
                             }
                             TPE_GetAccountRes tpe_GetAccRes = new TPE_GetAccountRes (AccRes);
 
-                            retRes.Result = "ok";
+                            retRes.Result = (ret == 0) ? "ok" : "uok";
                             retRes.Msg = "成功";
                             retRes.Data = tpe_GetAccRes;
                         }
@@ -1118,7 +1122,7 @@ namespace WebServicePark {
                 } else {
                     param = Username + "$" + CertCode + "$" + BeginTime + "$" + EndTime;
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_QueryFlowByCertNo");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -1377,7 +1381,7 @@ namespace WebServicePark {
                                         Offset += 4;
                                     }
                                     Res.pRes = null;
-                                    retRes.Result = "ok";
+                                    retRes.Result = (ret == 0) ? "ok" : "uok";
                                     retRes.Msg = "成功";
                                     retRes.ListDate = listCRO;
                                 }
@@ -1454,7 +1458,7 @@ namespace WebServicePark {
                     }
                     param = Username + "$" + param + "$" + PassWord;
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_CheckPassword");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -1480,7 +1484,7 @@ namespace WebServicePark {
                                 retRes.Msg = "RetValue=" + Res.RetValue.ToString ();
                             } else {
                                 TPE_GetAccountRes Ctpe_Res = new TPE_GetAccountRes (Res);
-                                retRes.Result = "ok";
+                                retRes.Result = (ret == 0) ? "ok" : "uok";
                                 retRes.Msg = "成功";
                                 retRes.Data = Ctpe_Res;
                             }
@@ -1544,7 +1548,7 @@ namespace WebServicePark {
                 } else {
                     param = Username + "$" + BeginNo + "$" + EndNo;
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_QueryStdAccount");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -1597,7 +1601,7 @@ namespace WebServicePark {
                                     listRes.Add (tpe_GetAccRes);
                                 }
                                 Res.pRes = null;
-                                retRes.Result = "ok";
+                                retRes.Result = (ret == 0) ? "ok" : "uok";
                                 retRes.Msg = "成功";
                                 retRes.ListDate = listRes;
                             }
@@ -1662,7 +1666,7 @@ namespace WebServicePark {
                 } else {
                     param = Username + "$" + FromCentralNo + "$" + ToCentralNo;
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_QueryFlowByCenter");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -1870,7 +1874,7 @@ namespace WebServicePark {
                                     Offset += 4;
                                 }
                                 Res.pRes = null;
-                                retRes.Result = "ok";
+                                retRes.Result = (ret == 0) ? "ok" : "uok";
                                 retRes.Msg = "成功";
                                 retRes.ListDate = listCRO;
                             }
@@ -2211,7 +2215,7 @@ namespace WebServicePark {
                 } else {
                     param = Username + "$" + OccurNodeNo + "$" + FromOccurNo + "$" + ToOccurNo;
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_QueryFlowByOccur");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -2420,7 +2424,7 @@ namespace WebServicePark {
                                     Offset += 4;
                                 }
                                 Res.pRes = null;
-                                retRes.Result = "ok";
+                                retRes.Result = (ret == 0) ? "ok" : "uok";
                                 retRes.Msg = "成功";
                                 retRes.ListDate = listCRO;
                             }
@@ -2489,7 +2493,7 @@ namespace WebServicePark {
                 } else {
                     param = Username + "$" + OrderID + (string.IsNullOrEmpty (orderStatus) ? "" : "$" + orderStatus);
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_QueryFlowByOrderID");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -2706,7 +2710,7 @@ namespace WebServicePark {
                                     Offset += 4;
                                 }
                                 Res.pRes = null;
-                                retRes.Result = "ok";
+                                retRes.Result = ret == 0 ? "ok" : "uok";
                                 retRes.Msg = "成功";
                                 retRes.ListDate = listCRO;
                             }
@@ -2762,7 +2766,7 @@ namespace WebServicePark {
                 } else {
                     param = Username + "$" + AccountNo + "$" + BeginTime + "$" + EndTime;
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_QueryFlowByAccount");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -3002,7 +3006,7 @@ namespace WebServicePark {
                                             Offset += 4;
                                         }
                                         //TPE_Class.TPE_Free(ref Res.pRes);
-                                        retRes.Result = "ok";
+                                        retRes.Result = (ret == 0) ? "ok" : "uok";
                                         retRes.Msg = "成功";
                                         retRes.ListDate = listCRO;
                                     }
@@ -3057,7 +3061,7 @@ namespace WebServicePark {
                 } else {
                     param = Username;
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_ConfigEnumDepartment");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -3087,7 +3091,7 @@ namespace WebServicePark {
                                     listRes.Add (Ctpe_Cdr);
                                 }
                                 Res.pRes = null;
-                                retRes.Result = "ok";
+                                retRes.Result = (ret == 0) ? "ok" : "uok";
                                 retRes.Msg = "成功";
                                 retRes.ListDate = listRes;
                             }
@@ -3140,7 +3144,7 @@ namespace WebServicePark {
                 } else {
                     param = Username;
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_ConfigDownloadWhiteList");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -3169,7 +3173,7 @@ namespace WebServicePark {
                                 listRes.Add (tpe_GetAccRes);
                             }
                         }
-                        retRes.Result = "ok";
+                        retRes.Result = (ret == 0) ? "ok" : "uok";
                         retRes.Msg = "成功";
                         retRes.ListDate = listRes;
                     }
@@ -3223,7 +3227,7 @@ namespace WebServicePark {
                 } else {
                     param = Username;
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_ConfigEnumIdenti");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -3251,7 +3255,7 @@ namespace WebServicePark {
                                     listRes.Add (cTpe_Cir);
                                 }
                                 Res.pRes = null;
-                                retRes.Result = "ok";
+                                retRes.Result = (ret == 0) ? "ok" : "uok";
                                 retRes.Msg = "成功";
                                 retRes.ListDate = listRes;
                             }
@@ -3308,7 +3312,7 @@ namespace WebServicePark {
                 } else {
                     param = Username + "$" + AccountNo;
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_GetAccountEx");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -3323,7 +3327,7 @@ namespace WebServicePark {
                                 retRes.Msg = "RetValue=" + Res.RetValue.ToString ();
                             } else {
                                 TPE_GetAccountExRes Gaer = new TPE_GetAccountExRes (Res);
-                                retRes.Result = "ok";
+                                retRes.Result = (ret == 0) ? "ok" : "uok";
                                 retRes.Msg = "成功";
                                 retRes.Data = Gaer;
                             }
@@ -3403,7 +3407,7 @@ namespace WebServicePark {
                     if (!string.IsNullOrEmpty (Email)) { param = param + "$" + Email; }
                     if (!string.IsNullOrEmpty (Comment)) { param = param + "$" + Comment; }
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_FlowUpdateAccount");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -3453,7 +3457,7 @@ namespace WebServicePark {
                             } else {
                                 TPE_FlowUpdateAccountRes Fuar = new TPE_FlowUpdateAccountRes (ResU);
                                 Fuar.CenterNo = QueryCenterByOccurUINT (NodeNo, Fuar.OccurIdNo);
-                                retRes.Result = "ok";
+                                retRes.Result = (ret == 0) ? "ok" : "uok";
                                 retRes.Msg = "成功";
                                 retRes.Data = Fuar;
                             }
@@ -3541,7 +3545,7 @@ namespace WebServicePark {
                     }
                     param = param + (string.IsNullOrEmpty (OrderID) ? "" : "$" + OrderID) + "$" + transMoney;
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_FlowCost");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -3576,7 +3580,7 @@ namespace WebServicePark {
                         } else {
                             TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
                             Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
-                            retRes.Result = "ok";
+                            retRes.Result = (ret == 0) ? "ok" : "uok";
                             retRes.Msg = "成功" + (isOrderIDExist (OrderID, "") > 1 ? "[订单号重复，多笔订单将无法正常处理退款]" : "");
                             retRes.Data = Fr;
                         }
@@ -3665,7 +3669,7 @@ namespace WebServicePark {
                     }
                     param = param + (string.IsNullOrEmpty (OrderID) ? "" : "$" + OrderID) + "$" + transMoney;
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_FlowCostPlus");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -3700,7 +3704,7 @@ namespace WebServicePark {
                         } else {
                             TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
                             Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
-                            retRes.Result = "ok";
+                            retRes.Result = (ret == 0) ? "ok" : "uok";
                             retRes.Msg = "成功";
                             retRes.Data = Fr;
                         }
@@ -3786,7 +3790,7 @@ namespace WebServicePark {
                     }
                     param = param + (string.IsNullOrEmpty (OrderID) ? "" : "$" + OrderID) + "$" + transMoney;
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_FlowCostMinus");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else {
@@ -3821,7 +3825,7 @@ namespace WebServicePark {
                         } else {
                             TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
                             Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
-                            retRes.Result = "ok";
+                            retRes.Result = (ret == 0) ? "ok" : "uok";
                             retRes.Msg = "成功";
                             retRes.Data = Fr;
                         }
@@ -3910,7 +3914,7 @@ namespace WebServicePark {
                     }
                     int orderCheck = isOrderIDExist (OrderID, "FF");
                     int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_RefundByCenterID");
-                    if (ret != 0) {
+                    if (ret != 0 && ret != -1) {
                         retRes.Result = "error";
                         retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                     } else if (TransferInfo.AccountNo >= uint.MaxValue - 10) {
@@ -3959,7 +3963,7 @@ namespace WebServicePark {
                         } else {
                             TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
                             Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
-                            retRes.Result = "ok";
+                            retRes.Result = (ret == 0) ? "ok" : "uok";
                             retRes.Msg = "成功";
                             retRes.Data = Fr;
                         }
@@ -4073,7 +4077,7 @@ namespace WebServicePark {
                                 Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                                 int IDNO = ResF.OccurIdNo;
                                 int CTNO = ResF.CenterNo;
-                                retRes.Result = "ok";
+                                retRes.Result = (ret == 0) ? "ok" : "uok";
                                 retRes.Msg = "成功";
                                 retRes.Data = Fr;
                             }
@@ -4186,7 +4190,7 @@ namespace WebServicePark {
                             } else {
                                 TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
                                 Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
-                                retRes.Result = "ok";
+                                retRes.Result = (ret == 0) ? "ok" : "uok";
                                 retRes.Msg = "成功";
                                 retRes.Data = Fr;
                             }
@@ -4299,8 +4303,8 @@ namespace WebServicePark {
                 //shareKey += pass;
                 int ret = CPublic.ValidToken (username, param, SHA, DoingLog);
 
-                if (ret == 0) {
-                    return 0;
+                if (ret == 0 || ret == -1) {
+                    return ret;
                 } else {
                     CPublic.WriteLog ("验证参数失败[" + getTokenStatusInfo (ret) + "] 实际形参校验值 [" + SHA + "] <=> 提供参数列表 " + param + "]");
                     return ret;

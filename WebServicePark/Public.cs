@@ -15,48 +15,95 @@ using System.Security.Cryptography;
 namespace WebServicePark
 {
     public class Token {
-        public static int TokenIndex;
-        public static string TokenUser;
-        public static DateTime TokenCreateTime;
-        public static DateTime TokenUpdateTime;
-        private static int TokenUsage;
-        private static int TokenLifetime;
-        private static string TokenAuth;
-        private static bool isPubliced;
+        public int TokenIndex;
+        public string TokenUser;
+        public DateTime TokenCreateTime;
+        public DateTime TokenUpdateTime;
+        private int TokenUsage;
+        private int TokenLifetime;
+        private string TokenAuth;
+        private bool isPubliced;
+        public string oldTokenAuth;
+        public DateTime oldTokenLifetime;
         public int Index { get { return TokenIndex; } }
         public string User { get { return TokenUser; } }
-        public string Init (int Index, string User) {
+        private DateTime CreateTime { get { return TokenCreateTime; } }
+        private int Lifetime { get { return TokenLifetime; } }
+        private string TokenKey { get { return TokenAuth; } }
+        public string Init (int Index, string User, int Minutes, Token oldToken) {
             TokenIndex = Index;
             TokenUser = User;
             TokenCreateTime = DateTime.Now;
             TokenUpdateTime = DateTime.Now;
-            TokenUsage = 100;
-            TokenLifetime = 30;
+            TokenUsage = 30;
+            if (Minutes > 30) { Minutes = 30; }
+            if (Minutes < 0) { Minutes = 0; }
+            TokenLifetime = Minutes * 60;
             TokenAuth = RandomGenerator (32);
             isPubliced = false;
+            if (oldToken != null) {
+                if (oldToken.CreateTime.AddSeconds (oldToken.Lifetime * 60) > DateTime.Now) {
+                    oldTokenAuth = oldToken.TokenKey;
+                    oldTokenLifetime = DateTime.Now.AddSeconds (5);
+                }
+            }
             return TokenAuth;
+        }
+        public void Init (Token oldToken) {
+            TokenIndex = oldToken.TokenIndex;
+            TokenUser = oldToken.TokenUser;
+            TokenCreateTime = oldToken.TokenCreateTime;
+            TokenUpdateTime = oldToken.TokenUpdateTime;
+            TokenUsage = oldToken.TokenUsage;
+            TokenLifetime = oldToken.TokenLifetime;
+            TokenAuth = oldToken.TokenAuth;
+            isPubliced = oldToken.isPubliced;
         }
         public bool Usable () {
             bool inTimes = TokenUsage > 0 ? true : false;
-            bool inLifeTime = TokenCreateTime.AddMinutes (TokenLifetime) > DateTime.Now ? true : false;
+            bool inLifeTime = TokenCreateTime.AddSeconds (TokenLifetime) > DateTime.Now ? true : false;
+            if (!inTimes && inLifeTime && string.IsNullOrEmpty(oldTokenAuth)) {
+                oldTokenAuth = TokenAuth;
+                oldTokenLifetime = DateTime.Now.AddSeconds (5);
+            }
             return inTimes && inLifeTime;
         }
-        public void Update (string DoingLog) {
+        public bool Replaceable() {
+            bool inLifeTime = oldTokenLifetime > DateTime.Now ? true : false;
+            return inLifeTime;
+        }
+        public void Update () {
             TokenUsage = TokenUsage - 1;
             TokenUpdateTime = DateTime.Now;
-            CPublic.WriteLog (TokenUser + ": " + DoingLog);
         }
         public int TokenVaildCheck (string User, string param, string sha, string DoingLog) {
+            // -1: 需更新令牌
             // 0: 验证正确
             // 1: 验证失败
             // 2: 令牌无效
             // 3: 信息错误
+/*            CPublic.WriteLog ("提供的 SHA：" + sha.ToUpper () + "，计算的 SHA：" + SHA1 (param + "$" + TokenAuth).ToUpper () + "，内容：" + param + "$" + TokenAuth);
+            if (!string.IsNullOrEmpty (oldTokenAuth)) {
+                CPublic.WriteLog ("提供的 SHA：" + sha.ToUpper () + "，计算的 SHA：" + SHA1 (param + "$" + oldTokenAuth).ToUpper () + "，内容：" + param + "$" + oldTokenAuth);
+                CPublic.WriteLog ("检测到存在旧密钥");
+            } else { CPublic.WriteLog ("未检测到存在旧密钥"); }*/
             if (TokenUser == User) {
                 if (Usable ()) {
-                    // CPublic.WriteLog ("提供的 SHA：" + sha.ToUpper () + "，计算的 SHA：" + SHA1 (param + "$" + TokenAuth).ToUpper () + "，内容：" + param + "$" + TokenAuth);
                     if (sha.ToUpper().Equals(SHA1 (param + "$" + TokenAuth).ToUpper ())) {
-                        Update (DoingLog);
+                        Update ();
+                        CPublic.WriteLog (TokenUser + ": " + DoingLog);
                         return 0;
+                    } else if (!string.IsNullOrEmpty(oldTokenAuth) && oldTokenLifetime > DateTime.Now) {
+                        if (sha.ToUpper ().Equals (SHA1 (param + "$" + oldTokenAuth).ToUpper ())) {
+                            CPublic.WriteLog (TokenUser + ": " + DoingLog);
+                            return -1;
+                        }
+                    }
+                    return 1;
+                } else if (Replaceable()) {
+                    if (sha.ToUpper ().Equals (SHA1 (param + "$" + TokenAuth).ToUpper ())) {
+                        CPublic.WriteLog (TokenUser + ": " + DoingLog);
+                        return -1;
                     }
                     return 1;
                 }
@@ -201,8 +248,6 @@ namespace WebServicePark
                 if (!Directory.Exists(CPublic.LogPath))
                     Directory.CreateDirectory(CPublic.LogPath);
 
-                //conn.ConnectionString = ConnString;
-                //conn.Open();
                 if (File.Exists(AppPath + "DBConfig.cfg"))
                 {
                     using (FileStream fs = new FileStream(AppPath + "DBConfig.cfg", FileMode.Open, FileAccess.Read, FileShare.None))
@@ -258,13 +303,16 @@ namespace WebServicePark
             return false;
         }
         public static string MakeToken (string User) {
+            Token oldToken = null;
             int Index = TokenCount + 1;
             int isExist = myTokenList.FindIndex (item => item.User.Equals (User));
             if (isExist >= 0) {
+                oldToken = new Token();
+                oldToken.Init (myTokenList[isExist]);
                 myTokenList.RemoveAt (isExist);
             }
             Token myToken = new Token ();
-            string Token = myToken.Init (Index, User);
+            string Token = myToken.Init (Index, User, 30, oldToken);
             myTokenList.Add (myToken);
             return Token;
         }
