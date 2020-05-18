@@ -98,6 +98,7 @@ namespace WebServicePark
                             CPublic.WriteLog (TokenUser + ": " + DoingLog);
                             return -1;
                         }
+                        return 2;
                     }
                     return 1;
                 } else if (Replaceable()) {
