@@ -87,6 +87,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="IIParkService.cs" />
     <Compile Include="IParkService.asmx.cs">
       <DependentUpon>IParkService.asmx</DependentUpon>
       <SubType>Component</SubType>

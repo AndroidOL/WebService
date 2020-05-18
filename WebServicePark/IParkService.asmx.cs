@@ -322,12 +322,19 @@ namespace WebServicePark {
                     retRes.Msg = "节点校验失败！" + NodeCheckInfo[CheckNode (NodeNo, param, MAC)];
                 } else {
                     // 验证用户名与密码
-                    if (Username != "2" || Password != "22222222") {
-                        retRes.Result = "error";
-                        retRes.Msg = "用户名密码校验失败";
+                    int username;
+                    List<string> UserList = new List<string> ();
+                    UserList.Add ("00000000"); UserList.Add ("11111111");
+                    UserList.Add ("22222222"); UserList.Add ("33333333");
+                    UserList.Add ("44444444"); UserList.Add ("55555555");
+                    UserList.Add ("66666666"); UserList.Add ("77777777");
+                    UserList.Add ("88888888"); UserList.Add ("99999999");
+                    if (int.TryParse (Username, out username)) {
+                        if (UserList[username] == Password) {
+                            retRes.Result = "ok";
+                            retRes.Msg = Convert.ToBase64String (Encoding.Default.GetBytes (CPublic.MakeToken (Username)));
+                        }
                     }
-                    retRes.Result = "ok";
-                    retRes.Msg = Convert.ToBase64String (System.Text.Encoding.Default.GetBytes (CPublic.MakeToken (Username)));
                 }
             } catch (Exception e) {
                 retRes.Result = "error";

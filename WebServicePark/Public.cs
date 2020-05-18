@@ -30,7 +30,7 @@ namespace WebServicePark
             TokenUser = User;
             TokenCreateTime = DateTime.Now;
             TokenUpdateTime = DateTime.Now;
-            TokenUsage = 10;
+            TokenUsage = 100;
             TokenLifetime = 30;
             TokenAuth = RandomGenerator (32);
             isPubliced = false;
