@@ -3678,7 +3678,7 @@ namespace WebServicePark {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[TransMoney(该接口仅允许向账户充值)]";
                 } else {
-                    param = Username;
+                    param = Username + "$";
                     if (!string.IsNullOrEmpty (AccountNo) && !string.IsNullOrEmpty (CardNo)) {
                         param += AccountNo + "$" + CardNo;
                     } else {
@@ -3799,7 +3799,7 @@ namespace WebServicePark {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[TransMoney(该接口仅允许向账户扣款)]";
                 } else {
-                    param = Username;
+                    param = Username + "$";
                     if (!string.IsNullOrEmpty (AccountNo) && !string.IsNullOrEmpty (CardNo)) {
                         param += AccountNo + "$" + CardNo;
                     } else {
