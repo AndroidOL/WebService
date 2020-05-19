@@ -42,7 +42,10 @@ namespace WebServicePark
             TokenAuth = RandomGenerator (32);
             isPubliced = false;
             if (oldToken != null) {
-                if (oldToken.CreateTime.AddSeconds (oldToken.Lifetime * 60) > DateTime.Now) {
+                if (oldToken.Usable ()) {
+                    oldTokenAuth = oldToken.TokenKey;
+                    oldTokenLifetime = DateTime.Now.AddSeconds (5);
+                } else if (oldToken.TokenUpdateTime.AddSeconds (3) > DateTime.Now && oldToken.TokenCreateTime.AddSeconds(oldToken.TokenLifetime) > DateTime.Now) {
                     oldTokenAuth = oldToken.TokenKey;
                     oldTokenLifetime = DateTime.Now.AddSeconds (5);
                 }
@@ -64,7 +67,9 @@ namespace WebServicePark
             bool inLifeTime = TokenCreateTime.AddSeconds (TokenLifetime) > DateTime.Now ? true : false;
             if (!inTimes && inLifeTime && string.IsNullOrEmpty(oldTokenAuth)) {
                 oldTokenAuth = TokenAuth;
-                oldTokenLifetime = DateTime.Now.AddSeconds (5);
+                if (TokenUpdateTime.AddSeconds(3) > DateTime.Now) {
+                    oldTokenLifetime = DateTime.Now.AddSeconds (5);
+                } else { oldTokenLifetime = DateTime.Now; }
             }
             return inTimes && inLifeTime;
         }
