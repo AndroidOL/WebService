@@ -238,7 +238,9 @@ namespace WebServicePark
         public static string ConnString = "";//@"Data Source=127.0.0.1;Initial Catalog=ConCard;User ID=sa;Password=2008sa";
         public static List<string> myFunc = new List<string>();
         public static int TokenCount = 0;
+        public static bool isLoadUser = false;
         public static List<Token> myTokenList = new List<Token>();
+        public static Dictionary<string, string> userList = new Dictionary<string, string> ();
         //public static SqlConnection conn = new SqlConnection();
 
         //@"Data Source=" + IP + ";Initial Catalog=SMS;User ID=" + UserName + ";Password=" + Password;
@@ -285,22 +287,48 @@ namespace WebServicePark
             }
         }
         public static bool AuthUpdate() {
-            try {
-                myFunc.Clear();
-                ExeConfigurationFileMap map = new ExeConfigurationFileMap();
-                map.ExeConfigFilename = CPublic.AppPath + "setting.xml";
-                Configuration config = ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.None);
-                if (config.Sections["appSettings"] != null) {
-                    KeyValueConfigurationCollection kv = config.AppSettings.Settings;
-
-                    foreach(KeyValueConfigurationElement el in kv) {
-                        if (el.Value == "0") {
-                            myFunc.Add(el.Key);
+            string TU0Username = "0";
+            string TU0Password = "00000000";
+            string TU1Username = "1";
+            string TU1Password = "11111111";
+            if (userList.Count == 0) {
+                userList.Add (TU0Username, TU0Password);
+                userList.Add (TU1Username, TU1Password);
+            }
+            ExeConfigurationFileMap map = new ExeConfigurationFileMap ();
+            map.ExeConfigFilename = CPublic.AppPath + "setting.xml";
+            Configuration config = ConfigurationManager.OpenMappedExeConfiguration (map, ConfigurationUserLevel.None);
+            myFunc.Clear ();
+            if (config.Sections["appSettings"] != null) {
+                KeyValueConfigurationCollection kv = config.AppSettings.Settings;
+                foreach (KeyValueConfigurationElement el in kv) {
+                    if (el.Key.Contains ("TPE_") && "FALSE".Equals (el.Value.ToUpper ())) {
+                        myFunc.Add (el.Key);
+                    } else if (!isLoadUser) {
+                        switch (el.Key) {
+                            case "TokenUsername0":
+                                TU0Username = string.IsNullOrEmpty (el.Value) ? TU0Username : el.Value;
+                                break;
+                            case "TokenPassword0":
+                                TU0Password = string.IsNullOrEmpty (el.Value) ? TU0Password : el.Value;
+                                break;
+                            case "TokenUsername1":
+                                TU1Username = string.IsNullOrEmpty (el.Value) ? TU1Username : el.Value;
+                                break;
+                            case "TokenPassword1":
+                                TU1Password = string.IsNullOrEmpty (el.Value) ? TU1Password : el.Value;
+                                break;
                         }
                     }
-                    return true;
                 }
-            } catch { return false; }
+                if (!isLoadUser) {
+                    isLoadUser = true;
+                    userList.Clear ();
+                    userList.Add (TU0Username, TU0Password);
+                    userList.Add (TU1Username, TU1Password);
+                }
+                return true;
+            }
             return false;
         }
         public static string MakeToken (string User) {
@@ -316,6 +344,16 @@ namespace WebServicePark
             string Token = myToken.Init (Index, User, 30, oldToken);
             myTokenList.Add (myToken);
             return Token;
+        }
+        public static bool ValidUser (string username, string password) {
+            string getPassword = "";
+            userList.TryGetValue (username, out getPassword);
+            if (!string.IsNullOrEmpty(getPassword)) {
+                if (getPassword.Equals(password)) {
+                    return true;
+                }
+            }
+            return false;
         }
         public static int ValidToken (string User, string param, string sha, string DoingLog) {
             // 0: 验证正确
