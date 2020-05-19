@@ -436,7 +436,7 @@ namespace WebServicePark {
                                 TPE_FlowRes Fr = new TPE_FlowRes (ResF);
                                 Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                                 retRes.Result = ret == 0 ? "ok" : "uok";
-                                retRes.Msg = "成功";
+                                retRes.Msg = "ok";
                                 retRes.Data = Fr;
                             }
                         }
@@ -476,7 +476,7 @@ namespace WebServicePark {
                                     TPE_FlowRes Fr = new TPE_FlowRes (ResF);
                                     Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                                     retRes.Result = ret == 0 ? "ok" : "uok";
-                                    retRes.Msg = "成功";
+                                    retRes.Msg = "ok";
                                     retRes.Data = Fr;
                                 }
                             }
@@ -615,7 +615,7 @@ namespace WebServicePark {
                                         TPE_FlowUpdateAccountRes Fuar = new TPE_FlowUpdateAccountRes (ResU);
                                         Fuar.CenterNo = QueryCenterByOccurUINT (NodeNo, Fuar.OccurIdNo);
                                         retRes.Result = ret == 0 ? "ok" : "uok";
-                                        retRes.Msg = "成功";
+                                        retRes.Msg = "ok";
                                         retRes.Data = Fuar;
                                     }
                                 }
@@ -725,7 +725,7 @@ namespace WebServicePark {
                             } else {
                                 TPE_GetAccountRes tpe_GetAccRes = new TPE_GetAccountRes (Res);
                                 retRes.Result = ret == 0 ? "ok" : "uok";
-                                retRes.Msg = "成功";
+                                retRes.Msg = "ok";
                                 retRes.Data = tpe_GetAccRes;
                             }
                         }
@@ -833,7 +833,7 @@ namespace WebServicePark {
                             } else {
                                 TPE_GetAccountRes tpe_GetAccRes = new TPE_GetAccountRes (Res);
                                 retRes.Result = ret == 0 ? "ok" : "uok";
-                                retRes.Msg = "成功";
+                                retRes.Msg = "ok";
                                 retRes.Data = tpe_GetAccRes;
                             }
                         }
@@ -936,7 +936,7 @@ namespace WebServicePark {
                                     ResControl.pRes = null;
                                 }
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "成功";
+                                retRes.Msg = "ok";
                                 retRes.ListDate = listRes;
                             }
                         }
@@ -1059,7 +1059,7 @@ namespace WebServicePark {
                             TPE_GetAccountRes tpe_GetAccRes = new TPE_GetAccountRes (AccRes);
 
                             retRes.Result = (ret == 0) ? "ok" : "uok";
-                            retRes.Msg = "成功";
+                            retRes.Msg = "ok";
                             retRes.Data = tpe_GetAccRes;
                         }
                     }
@@ -1094,7 +1094,7 @@ namespace WebServicePark {
             string json = "";
             string param = "";
             CReturnCReturnObj retRes = new CReturnCReturnObj ();
-            List<TPE_CReturnObj> listCRO = new List<TPE_CReturnObj> ();
+            List<TPE_CReturnObj> listCRO = null;
             if (!isAllow ("TPE_QueryFlowByCertNo")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
@@ -1196,219 +1196,9 @@ namespace WebServicePark {
                                     retRes.Result = "error";
                                     retRes.Msg = "ResRecCount=" + Res.ResRecCount.ToString ();
                                 } else {
-                                    tagTPE_CReturnObj Tpe_CRO;
-                                    TPE_CReturnObj cTpe_Cro;
-                                    IntPtr buffer = (IntPtr)((Byte*)(Res.pRes));
-                                    int Offset = 4;
-                                    int type = 0;
-                                    for (int i = 0; i < Res.ResRecCount; i++) {
-                                        type = Marshal.ReadInt32 (new IntPtr (buffer.ToInt32 () + Offset - 4));
-                                        switch (type) {
-                                            case 1: //开户
-                                                tagTPE_QueryFlowRes_Open FlowRes_Open = new tagTPE_QueryFlowRes_Open ();
-                                                FlowRes_Open = (tagTPE_QueryFlowRes_Open)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Open));
-                                                Tpe_CRO = new tagTPE_CReturnObj ();
-                                                Tpe_CRO.TransType = 1;
-                                                Tpe_CRO.CenterNo = FlowRes_Open.CenterNo;
-                                                Tpe_CRO.OccurNode = FlowRes_Open.OccurNode;
-                                                Tpe_CRO.OccurIdNo = FlowRes_Open.OccurIdNo;
-                                                Tpe_CRO.OccurTime = FlowRes_Open.OccurTime;
-                                                Tpe_CRO.AccountNo = FlowRes_Open.AccountNo;
-                                                Tpe_CRO.CardNo = FlowRes_Open.CardNo;
-                                                Tpe_CRO.Balance = FlowRes_Open.Balance;
-                                                Tpe_CRO.Condition = FlowRes_Open.Condition;
-                                                Tpe_CRO.TransferLimit = FlowRes_Open.TransferLimit;
-                                                Tpe_CRO.TransferMoney = FlowRes_Open.TransferMoney;
-                                                cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                listCRO.Add (cTpe_Cro);
-                                                Offset += Marshal.SizeOf (FlowRes_Open);
-                                                break;
-                                            case 2: //撤户
-                                                tagTPE_QueryFlowRes_Open FlowRes_Close = new tagTPE_QueryFlowRes_Open ();
-                                                FlowRes_Close = (tagTPE_QueryFlowRes_Open)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Open));
-                                                Tpe_CRO = new tagTPE_CReturnObj ();
-                                                Tpe_CRO.TransType = 2;
-                                                Tpe_CRO.CenterNo = FlowRes_Close.CenterNo;
-                                                Tpe_CRO.OccurNode = FlowRes_Close.OccurNode;
-                                                Tpe_CRO.OccurIdNo = FlowRes_Close.OccurIdNo;
-                                                Tpe_CRO.OccurTime = FlowRes_Close.OccurTime;
-                                                Tpe_CRO.AccountNo = FlowRes_Close.AccountNo;
-                                                Tpe_CRO.CardNo = FlowRes_Close.CardNo;
-                                                Tpe_CRO.Balance = FlowRes_Close.Balance;
-                                                Tpe_CRO.Condition = FlowRes_Close.Condition;
-                                                Tpe_CRO.TransferLimit = FlowRes_Close.TransferLimit;
-                                                Tpe_CRO.TransferMoney = FlowRes_Close.TransferMoney;
-                                                cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                listCRO.Add (cTpe_Cro);
-                                                Offset += Marshal.SizeOf (FlowRes_Close);
-                                                break;
-                                            case 3: //建立对应关系
-                                                tagTPE_QueryFlowRes_BuildRelation FlowRes_Create = new tagTPE_QueryFlowRes_BuildRelation ();
-                                                FlowRes_Create = (tagTPE_QueryFlowRes_BuildRelation)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_BuildRelation));
-                                                Tpe_CRO = new tagTPE_CReturnObj ();
-                                                Tpe_CRO.TransType = 3;
-                                                Tpe_CRO.CenterNo = FlowRes_Create.CenterNo;
-                                                Tpe_CRO.OccurNode = FlowRes_Create.OccurNode;
-                                                Tpe_CRO.OccurIdNo = FlowRes_Create.OccurIdNo;
-                                                Tpe_CRO.OccurTime = FlowRes_Create.OccurTime;
-                                                Tpe_CRO.AccountNo = FlowRes_Create.AccountNo;
-                                                Tpe_CRO.CardNo = FlowRes_Create.CardNo;
-                                                Tpe_CRO.JoinCardHolder = FlowRes_Create.JoinCardHolder;
-                                                Tpe_CRO.JoinNode = FlowRes_Create.JoinNode;
-                                                cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                listCRO.Add (cTpe_Cro);
-                                                Offset += Marshal.SizeOf (FlowRes_Create);
-                                                break;
-                                            case 4: //撤消对应
-                                                tagTPE_QueryFlowRes_BuildRelation FlowRes_Drop = new tagTPE_QueryFlowRes_BuildRelation ();
-                                                FlowRes_Drop = (tagTPE_QueryFlowRes_BuildRelation)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_BuildRelation));
-                                                Tpe_CRO = new tagTPE_CReturnObj ();
-                                                Tpe_CRO.TransType = 4;
-                                                Tpe_CRO.CenterNo = FlowRes_Drop.CenterNo;
-                                                Tpe_CRO.OccurNode = FlowRes_Drop.OccurNode;
-                                                Tpe_CRO.OccurIdNo = FlowRes_Drop.OccurIdNo;
-                                                Tpe_CRO.OccurTime = FlowRes_Drop.OccurTime;
-                                                Tpe_CRO.AccountNo = FlowRes_Drop.AccountNo;
-                                                Tpe_CRO.CardNo = FlowRes_Drop.CardNo;
-                                                Tpe_CRO.JoinCardHolder = FlowRes_Drop.JoinCardHolder;
-                                                Tpe_CRO.JoinNode = FlowRes_Drop.JoinNode;
-                                                cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                listCRO.Add (cTpe_Cro);
-                                                Offset += Marshal.SizeOf (FlowRes_Drop);
-                                                break;
-                                            case 5: //更改帐户信息
-                                                tagTPE_QueryFlowRes_UpdateAccount FlowRes_Update = new tagTPE_QueryFlowRes_UpdateAccount ();
-                                                FlowRes_Update = (tagTPE_QueryFlowRes_UpdateAccount)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_UpdateAccount));
-                                                Tpe_CRO = new tagTPE_CReturnObj ();
-                                                Tpe_CRO.TransType = 5;
-                                                Tpe_CRO.CenterNo = FlowRes_Update.CenterNo;
-                                                Tpe_CRO.OccurNode = FlowRes_Update.OccurNode;
-                                                Tpe_CRO.OccurIdNo = FlowRes_Update.OccurIdNo;
-                                                Tpe_CRO.OccurTime = FlowRes_Update.OccurTime;
-                                                Tpe_CRO.AccountNo = FlowRes_Update.AccountNo;
-                                                Tpe_CRO.CardNo = FlowRes_Update.CardNo;
-                                                Tpe_CRO.TransferLimit = FlowRes_Update.TransferLimit;
-                                                Tpe_CRO.TransferMoney = FlowRes_Update.TransferMoney;
-                                                cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                listCRO.Add (cTpe_Cro);
-                                                Offset += Marshal.SizeOf (FlowRes_Update);
-                                                //tagTPE_GetAccountReq ReqA = new tagTPE_GetAccountReq();
-                                                //tagTPE_GetAccountRes ResA = new tagTPE_GetAccountRes();
-                                                //ReqA.AccountNo = FlowRes_Update.AccountNo;
-                                                //ReqA.resflagAccountNo = 1;     //帐号
-                                                //ReqA.resflagCardNo = 1;        //卡号
-                                                //ReqA.resflagCondition = 1;     //状态
-                                                //ReqA.resflagBalance = 1;       //余额
-                                                //ReqA.resflagName = 1;          //姓名
-                                                //ReqA.resflagPersonID = 1;      //身份证号
-                                                //ReqA.resflagPassword = 1;      //密码 
-                                                //ReqA.resflagBirthday = 1;      //出生日期
-                                                //ReqA.resflagDepart = 1;        //部门
-                                                //ReqA.resflagIdenti = 1;        //身份
-                                                //ReqA.resflagNation = 1;        //民族国籍
-                                                //ReqA.resflagTel = 1;           //电话
-                                                //int nRetA = TPE_Class.TPE_GetAccount(1, ref ReqA, out ResA, 1);
-                                                break;
-                                            case 6: //更改对应关系
-                                                tagTPE_QueryFlowRes_UpdateRelation FlowRes_UpdateRelation = new tagTPE_QueryFlowRes_UpdateRelation ();
-                                                FlowRes_UpdateRelation = (tagTPE_QueryFlowRes_UpdateRelation)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_UpdateRelation));
-                                                Tpe_CRO = new tagTPE_CReturnObj ();
-                                                Tpe_CRO.TransType = 6;
-                                                Tpe_CRO.CenterNo = FlowRes_UpdateRelation.CenterNo;
-                                                Tpe_CRO.OccurNode = FlowRes_UpdateRelation.OccurNode;
-                                                Tpe_CRO.OccurIdNo = FlowRes_UpdateRelation.OccurIdNo;
-                                                Tpe_CRO.OccurTime = FlowRes_UpdateRelation.OccurTime;
-                                                Tpe_CRO.AccountNo = FlowRes_UpdateRelation.AccountNo;
-                                                Tpe_CRO.CardNo = FlowRes_UpdateRelation.CardNo;
-                                                Tpe_CRO.JoinCardHolder = FlowRes_UpdateRelation.JoinCardHolder;
-                                                Tpe_CRO.JoinNode = FlowRes_UpdateRelation.JoinNode;
-                                                cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                listCRO.Add (cTpe_Cro);
-                                                Offset += Marshal.SizeOf (FlowRes_UpdateRelation);
-                                                break;
-                                            case 7: //余额变更, 不区分具体来源
-                                            case 8: //余额变更, 由相关操作引发
-                                            case 9: //余额变更, 存取款引发
-                                            case 10: //余额变更, 由补助扣款引发
-                                            case 11: //余额变更, 卡片交易引发
-                                            case 12: //余额变更, 银行转帐引发 
-                                            case 13: //余额变更, 通用缴费 
-                                            case 14: //余额变更, 押金 
-                                            case 15: //余额变更, 管理费 
-                                            case 16: //余额变更, 手续费 
-                                            case 17: //余额变更, 工本费 
-                                            case 18: //余额变更,内部转出
-                                            case 19: //余额变更,内部转入
-                                                tagTPE_QueryFlowRes_Cost FlowRes_Cost = new tagTPE_QueryFlowRes_Cost ();
-                                                FlowRes_Cost = (tagTPE_QueryFlowRes_Cost)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Cost));
-                                                Tpe_CRO = new tagTPE_CReturnObj ();
-                                                Tpe_CRO.OrderID = new byte[16];
-                                                Tpe_CRO.TransType = type;
-                                                Tpe_CRO.CenterNo = FlowRes_Cost.CenterNo;
-                                                Tpe_CRO.OccurNode = FlowRes_Cost.OccurNode;
-                                                Tpe_CRO.OccurIdNo = FlowRes_Cost.OccurIdNo;
-                                                Tpe_CRO.OccurTime = FlowRes_Cost.OccurTime;
-                                                Tpe_CRO.AccountNo = FlowRes_Cost.AccountNo;
-                                                Tpe_CRO.CardNo = FlowRes_Cost.CardNo;
-                                                Tpe_CRO.Balance = FlowRes_Cost.Balance;
-                                                Tpe_CRO.JoinNode = FlowRes_Cost.JoinNode;
-                                                Tpe_CRO.JoinCardHolder = FlowRes_Cost.JoinCardHolder;
-                                                Tpe_CRO.TransMoney = FlowRes_Cost.TransMoney;
-                                                Offset += Marshal.SizeOf (FlowRes_Cost);
-                                                byte[] DataBuf = new byte[FlowRes_Cost.ExtendLen];
-                                                Marshal.Copy (new IntPtr (buffer.ToInt32 () + Offset), DataBuf, 0, (int)FlowRes_Cost.ExtendLen);
-                                                //string strMsg = "流水扩展信息长度" + FlowRes_Cost.ExtendLen.ToString () + "，内容";
-                                                //for (int m = 0; m < FlowRes_Cost.ExtendLen; m++) {
-                                                //    strMsg += DataBuf[m].ToString ("X2");
-                                                //}
-                                                //CPublic.WriteLog (strMsg);
-                                                string retOrderID = "";
-                                                string retOrderWay = "";
-                                                string retOrderStatus = "";
-                                                HTEXTENDINFO tmpHTEXTENDINFO = new HTEXTENDINFO ();
-                                                if (FlowRes_Cost.ExtendLen >= Marshal.SizeOf (tmpHTEXTENDINFO)) {
-                                                    tmpHTEXTENDINFO = (HTEXTENDINFO)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (HTEXTENDINFO));
-                                                    if (tmpHTEXTENDINFO.NodeType == 0X00030001 && tmpHTEXTENDINFO.OrderID.Length > 0) {
-                                                        byte[] OrderID14 = new byte[14];
-                                                        Array.Copy (tmpHTEXTENDINFO.OrderID, 0, OrderID14, 0, 14);
-                                                        retOrderID = Encoding.UTF8.GetString (OrderID14).TrimEnd ('\0');
-                                                        byte[] OrderID2 = new byte[2];
-                                                        Array.Copy (tmpHTEXTENDINFO.OrderID, 14, OrderID2, 0, 2);
-                                                        retOrderStatus = Encoding.UTF8.GetString (OrderID2).TrimEnd ('\0');
-                                                        switch (retOrderStatus) {
-                                                            case "FC":
-                                                                retOrderWay = "通用";
-                                                                break;
-                                                            case "FP":
-                                                                retOrderWay = "充值";
-                                                                break;
-                                                            case "FM":
-                                                                retOrderWay = "扣款";
-                                                                break;
-                                                            case "FF":
-                                                                retOrderWay = "退款";
-                                                                break;
-                                                            case "":
-                                                                retOrderWay = "未填";
-                                                                break;
-                                                            default:
-                                                                retOrderWay = "未知" + retOrderStatus;
-                                                                break;
-                                                        }
-                                                    }
-                                                }
-                                                cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                cTpe_Cro.OrderID = retOrderID;
-                                                cTpe_Cro.OrderStatus = retOrderWay;
-                                                listCRO.Add (cTpe_Cro);
-                                                Offset += (int)FlowRes_Cost.ExtendLen;
-                                                break;
-                                        }
-                                        Offset += 4;
-                                    }
-                                    Res.pRes = null;
+                                    listCRO = getWaterInfo (Res);
                                     retRes.Result = (ret == 0) ? "ok" : "uok";
-                                    retRes.Msg = "成功";
+                                    retRes.Msg = "ok";
                                     retRes.ListDate = listCRO;
                                 }
                             }
@@ -1511,7 +1301,7 @@ namespace WebServicePark {
                             } else {
                                 TPE_GetAccountRes Ctpe_Res = new TPE_GetAccountRes (Res);
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "成功";
+                                retRes.Msg = "ok";
                                 retRes.Data = Ctpe_Res;
                             }
                         }
@@ -1628,7 +1418,7 @@ namespace WebServicePark {
                                 }
                                 Res.pRes = null;
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "成功";
+                                retRes.Msg = "ok";
                                 retRes.ListDate = listRes;
                             }
                         }
@@ -1665,7 +1455,7 @@ namespace WebServicePark {
             string json = "";
             string param = "";
             CReturnCReturnObj retRes = new CReturnCReturnObj ();
-            List<TPE_CReturnObj> listCRO = new List<TPE_CReturnObj> ();
+            List<TPE_CReturnObj> listCRO = null;
             if (!isAllow ("TPE_QueryFlowByCenter")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
@@ -1715,218 +1505,9 @@ namespace WebServicePark {
                                 retRes.Result = "error";
                                 retRes.Msg = "ResRecCount=" + Res.ResRecCount.ToString ();
                             } else {
-                                tagTPE_CReturnObj Tpe_CRO;
-                                TPE_CReturnObj cTpe_Cro;
-                                IntPtr buffer = (IntPtr)((Byte*)(Res.pRes));
-                                int Offset = 4;
-                                int type = 0;
-                                for (int i = 0; i < Res.ResRecCount; i++) {
-                                    type = Marshal.ReadInt32 (new IntPtr (buffer.ToInt32 () + Offset - 4));
-                                    switch (type) {
-                                        case 1: //开户
-                                            tagTPE_QueryFlowRes_Open FlowRes_Open = new tagTPE_QueryFlowRes_Open ();
-                                            FlowRes_Open = (tagTPE_QueryFlowRes_Open)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Open));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.TransType = 1;
-                                            Tpe_CRO.CenterNo = FlowRes_Open.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_Open.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_Open.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_Open.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_Open.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_Open.CardNo;
-                                            Tpe_CRO.Balance = FlowRes_Open.Balance;
-                                            Tpe_CRO.Condition = FlowRes_Open.Condition;
-                                            Tpe_CRO.TransferLimit = FlowRes_Open.TransferLimit;
-                                            Tpe_CRO.TransferMoney = FlowRes_Open.TransferMoney;
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += Marshal.SizeOf (FlowRes_Open);
-                                            break;
-                                        case 2: //撤户
-                                            tagTPE_QueryFlowRes_Open FlowRes_Close = new tagTPE_QueryFlowRes_Open ();
-                                            FlowRes_Close = (tagTPE_QueryFlowRes_Open)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Open));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.TransType = 2;
-                                            Tpe_CRO.CenterNo = FlowRes_Close.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_Close.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_Close.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_Close.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_Close.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_Close.CardNo;
-                                            Tpe_CRO.Balance = FlowRes_Close.Balance;
-                                            Tpe_CRO.Condition = FlowRes_Close.Condition;
-                                            Tpe_CRO.TransferLimit = FlowRes_Close.TransferLimit;
-                                            Tpe_CRO.TransferMoney = FlowRes_Close.TransferMoney;
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += Marshal.SizeOf (FlowRes_Close);
-                                            break;
-                                        case 3: //建立对应关系
-                                            tagTPE_QueryFlowRes_BuildRelation FlowRes_Create = new tagTPE_QueryFlowRes_BuildRelation ();
-                                            FlowRes_Create = (tagTPE_QueryFlowRes_BuildRelation)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_BuildRelation));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.TransType = 3;
-                                            Tpe_CRO.CenterNo = FlowRes_Create.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_Create.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_Create.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_Create.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_Create.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_Create.CardNo;
-                                            Tpe_CRO.JoinCardHolder = FlowRes_Create.JoinCardHolder;
-                                            Tpe_CRO.JoinNode = FlowRes_Create.JoinNode;
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += Marshal.SizeOf (FlowRes_Create);
-                                            break;
-                                        case 4: //撤消对应
-                                            tagTPE_QueryFlowRes_BuildRelation FlowRes_Drop = new tagTPE_QueryFlowRes_BuildRelation ();
-                                            FlowRes_Drop = (tagTPE_QueryFlowRes_BuildRelation)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_BuildRelation));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.TransType = 4;
-                                            Tpe_CRO.CenterNo = FlowRes_Drop.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_Drop.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_Drop.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_Drop.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_Drop.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_Drop.CardNo;
-                                            Tpe_CRO.JoinCardHolder = FlowRes_Drop.JoinCardHolder;
-                                            Tpe_CRO.JoinNode = FlowRes_Drop.JoinNode;
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += Marshal.SizeOf (FlowRes_Drop);
-                                            break;
-                                        case 5: //更改帐户信息
-                                            tagTPE_QueryFlowRes_UpdateAccount FlowRes_Update = new tagTPE_QueryFlowRes_UpdateAccount ();
-                                            FlowRes_Update = (tagTPE_QueryFlowRes_UpdateAccount)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_UpdateAccount));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.TransType = 5;
-                                            Tpe_CRO.CenterNo = FlowRes_Update.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_Update.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_Update.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_Update.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_Update.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_Update.CardNo;
-                                            Tpe_CRO.TransferLimit = FlowRes_Update.TransferLimit;
-                                            Tpe_CRO.TransferMoney = FlowRes_Update.TransferMoney;
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += Marshal.SizeOf (FlowRes_Update);
-                                            //tagTPE_GetAccountReq ReqA = new tagTPE_GetAccountReq();
-                                            //tagTPE_GetAccountRes ResA = new tagTPE_GetAccountRes();
-                                            //ReqA.AccountNo = FlowRes_Update.AccountNo;
-                                            //ReqA.resflagAccountNo = 1;     //帐号
-                                            //ReqA.resflagCardNo = 1;        //卡号
-                                            //ReqA.resflagCondition = 1;     //状态
-                                            //ReqA.resflagBalance = 1;       //余额
-                                            //ReqA.resflagName = 1;          //姓名
-                                            //ReqA.resflagPersonID = 1;      //身份证号
-                                            //ReqA.resflagPassword = 1;      //密码 
-                                            //ReqA.resflagBirthday = 1;      //出生日期
-                                            //ReqA.resflagDepart = 1;        //部门
-                                            //ReqA.resflagIdenti = 1;        //身份
-                                            //ReqA.resflagNation = 1;        //民族国籍
-                                            //ReqA.resflagTel = 1;           //电话
-                                            //int nRetA = TPE_Class.TPE_GetAccount(1, ref ReqA, out ResA, 1);
-                                            break;
-                                        case 6: //更改对应关系
-                                            tagTPE_QueryFlowRes_UpdateRelation FlowRes_UpdateRelation = new tagTPE_QueryFlowRes_UpdateRelation ();
-                                            FlowRes_UpdateRelation = (tagTPE_QueryFlowRes_UpdateRelation)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_UpdateRelation));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.TransType = 6;
-                                            Tpe_CRO.CenterNo = FlowRes_UpdateRelation.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_UpdateRelation.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_UpdateRelation.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_UpdateRelation.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_UpdateRelation.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_UpdateRelation.CardNo;
-                                            Tpe_CRO.JoinCardHolder = FlowRes_UpdateRelation.JoinCardHolder;
-                                            Tpe_CRO.JoinNode = FlowRes_UpdateRelation.JoinNode;
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += Marshal.SizeOf (FlowRes_UpdateRelation);
-                                            break;
-                                        case 7: //余额变更, 不区分具体来源
-                                        case 8: //余额变更, 由相关操作引发
-                                        case 9: //余额变更, 存取款引发
-                                        case 10: //余额变更, 由补助扣款引发
-                                        case 11: //余额变更, 卡片交易引发
-                                        case 12: //余额变更, 银行转帐引发 
-                                        case 13: //余额变更, 通用缴费 
-                                        case 14: //余额变更, 押金 
-                                        case 15: //余额变更, 管理费 
-                                        case 16: //余额变更, 手续费 
-                                        case 17: //余额变更, 工本费 
-                                        case 18: //余额变更,内部转出
-                                        case 19: //余额变更,内部转入
-                                            tagTPE_QueryFlowRes_Cost FlowRes_Cost = new tagTPE_QueryFlowRes_Cost ();
-                                            FlowRes_Cost = (tagTPE_QueryFlowRes_Cost)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Cost));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.OrderID = new byte[16];
-                                            Tpe_CRO.TransType = type;
-                                            Tpe_CRO.CenterNo = FlowRes_Cost.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_Cost.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_Cost.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_Cost.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_Cost.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_Cost.CardNo;
-                                            Tpe_CRO.Balance = FlowRes_Cost.Balance;
-                                            Tpe_CRO.JoinNode = FlowRes_Cost.JoinNode;
-                                            Tpe_CRO.JoinCardHolder = FlowRes_Cost.JoinCardHolder;
-                                            Tpe_CRO.TransMoney = FlowRes_Cost.TransMoney;
-                                            Offset += Marshal.SizeOf (FlowRes_Cost);
-                                            byte[] DataBuf = new byte[FlowRes_Cost.ExtendLen];
-                                            Marshal.Copy (new IntPtr (buffer.ToInt32 () + Offset), DataBuf, 0, (int)FlowRes_Cost.ExtendLen);
-                                            //string strMsg = "流水扩展信息长度" + FlowRes_Cost.ExtendLen.ToString () + "，内容";
-                                            //for (int m = 0; m < FlowRes_Cost.ExtendLen; m++) {
-                                            //    strMsg += DataBuf[m].ToString ("X2");
-                                            //}
-                                            //CPublic.WriteLog (strMsg);
-                                            string retOrderID = "";
-                                            string retOrderWay = "";
-                                            string retOrderStatus = "";
-                                            HTEXTENDINFO tmpHTEXTENDINFO = new HTEXTENDINFO ();
-                                            if (FlowRes_Cost.ExtendLen >= Marshal.SizeOf (tmpHTEXTENDINFO)) {
-                                                tmpHTEXTENDINFO = (HTEXTENDINFO)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (HTEXTENDINFO));
-                                                if (tmpHTEXTENDINFO.NodeType == 0X00030001 && tmpHTEXTENDINFO.OrderID.Length > 0) {
-                                                    byte[] OrderID14 = new byte[14];
-                                                    Array.Copy (tmpHTEXTENDINFO.OrderID, 0, OrderID14, 0, 14);
-                                                    retOrderID = Encoding.UTF8.GetString (OrderID14).TrimEnd ('\0');
-                                                    byte[] OrderID2 = new byte[2];
-                                                    Array.Copy (tmpHTEXTENDINFO.OrderID, 14, OrderID2, 0, 2);
-                                                    retOrderStatus = Encoding.UTF8.GetString (OrderID2).TrimEnd ('\0');
-                                                    switch (retOrderStatus) {
-                                                        case "FC":
-                                                            retOrderWay = "通用";
-                                                            break;
-                                                        case "FP":
-                                                            retOrderWay = "充值";
-                                                            break;
-                                                        case "FM":
-                                                            retOrderWay = "扣款";
-                                                            break;
-                                                        case "FF":
-                                                            retOrderWay = "退款";
-                                                            break;
-                                                        case "":
-                                                            retOrderWay = "未填";
-                                                            break;
-                                                        default:
-                                                            retOrderWay = "未知" + retOrderStatus;
-                                                            break;
-                                                    }
-                                                }
-                                            }
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            cTpe_Cro.OrderID = retOrderID;
-                                            cTpe_Cro.OrderStatus = retOrderWay;
-                                            Offset += (int)FlowRes_Cost.ExtendLen;
-                                            break;
-                                    }
-                                    Offset += 4;
-                                }
-                                Res.pRes = null;
+                                listCRO = getWaterInfo (Res);
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "成功";
+                                retRes.Msg = "ok";
                                 retRes.ListDate = listCRO;
                             }
                         }
@@ -2290,219 +1871,9 @@ namespace WebServicePark {
                                 retRes.Result = "error";
                                 retRes.Msg = "ResRecCount=" + Res.ResRecCount.ToString ();
                             } else {
-                                tagTPE_CReturnObj Tpe_CRO;
-                                TPE_CReturnObj cTpe_Cro;
-                                IntPtr buffer = (IntPtr)((Byte*)(Res.pRes));
-                                int Offset = 4;
-                                int type = 0;
-                                for (int i = 0; i < Res.ResRecCount; i++) {
-                                    type = Marshal.ReadInt32 (new IntPtr (buffer.ToInt32 () + Offset - 4));
-                                    switch (type) {
-                                        case 1: //开户
-                                            tagTPE_QueryFlowRes_Open FlowRes_Open = new tagTPE_QueryFlowRes_Open ();
-                                            FlowRes_Open = (tagTPE_QueryFlowRes_Open)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Open));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.TransType = 1;
-                                            Tpe_CRO.CenterNo = FlowRes_Open.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_Open.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_Open.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_Open.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_Open.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_Open.CardNo;
-                                            Tpe_CRO.Balance = FlowRes_Open.Balance;
-                                            Tpe_CRO.Condition = FlowRes_Open.Condition;
-                                            Tpe_CRO.TransferLimit = FlowRes_Open.TransferLimit;
-                                            Tpe_CRO.TransferMoney = FlowRes_Open.TransferMoney;
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += Marshal.SizeOf (FlowRes_Open);
-                                            break;
-                                        case 2: //撤户
-                                            tagTPE_QueryFlowRes_Open FlowRes_Close = new tagTPE_QueryFlowRes_Open ();
-                                            FlowRes_Close = (tagTPE_QueryFlowRes_Open)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Open));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.TransType = 2;
-                                            Tpe_CRO.CenterNo = FlowRes_Close.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_Close.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_Close.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_Close.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_Close.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_Close.CardNo;
-                                            Tpe_CRO.Balance = FlowRes_Close.Balance;
-                                            Tpe_CRO.Condition = FlowRes_Close.Condition;
-                                            Tpe_CRO.TransferLimit = FlowRes_Close.TransferLimit;
-                                            Tpe_CRO.TransferMoney = FlowRes_Close.TransferMoney;
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += Marshal.SizeOf (FlowRes_Close);
-                                            break;
-                                        case 3: //建立对应关系
-                                            tagTPE_QueryFlowRes_BuildRelation FlowRes_Create = new tagTPE_QueryFlowRes_BuildRelation ();
-                                            FlowRes_Create = (tagTPE_QueryFlowRes_BuildRelation)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_BuildRelation));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.TransType = 3;
-                                            Tpe_CRO.CenterNo = FlowRes_Create.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_Create.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_Create.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_Create.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_Create.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_Create.CardNo;
-                                            Tpe_CRO.JoinCardHolder = FlowRes_Create.JoinCardHolder;
-                                            Tpe_CRO.JoinNode = FlowRes_Create.JoinNode;
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += Marshal.SizeOf (FlowRes_Create);
-                                            break;
-                                        case 4: //撤消对应
-                                            tagTPE_QueryFlowRes_BuildRelation FlowRes_Drop = new tagTPE_QueryFlowRes_BuildRelation ();
-                                            FlowRes_Drop = (tagTPE_QueryFlowRes_BuildRelation)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_BuildRelation));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.TransType = 4;
-                                            Tpe_CRO.CenterNo = FlowRes_Drop.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_Drop.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_Drop.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_Drop.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_Drop.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_Drop.CardNo;
-                                            Tpe_CRO.JoinCardHolder = FlowRes_Drop.JoinCardHolder;
-                                            Tpe_CRO.JoinNode = FlowRes_Drop.JoinNode;
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += Marshal.SizeOf (FlowRes_Drop);
-                                            break;
-                                        case 5: //更改帐户信息
-                                            tagTPE_QueryFlowRes_UpdateAccount FlowRes_Update = new tagTPE_QueryFlowRes_UpdateAccount ();
-                                            FlowRes_Update = (tagTPE_QueryFlowRes_UpdateAccount)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_UpdateAccount));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.TransType = 5;
-                                            Tpe_CRO.CenterNo = FlowRes_Update.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_Update.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_Update.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_Update.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_Update.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_Update.CardNo;
-                                            Tpe_CRO.TransferLimit = FlowRes_Update.TransferLimit;
-                                            Tpe_CRO.TransferMoney = FlowRes_Update.TransferMoney;
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += Marshal.SizeOf (FlowRes_Update);
-                                            //tagTPE_GetAccountReq ReqA = new tagTPE_GetAccountReq();
-                                            //tagTPE_GetAccountRes ResA = new tagTPE_GetAccountRes();
-                                            //ReqA.AccountNo = FlowRes_Update.AccountNo;
-                                            //ReqA.resflagAccountNo = 1;     //帐号
-                                            //ReqA.resflagCardNo = 1;        //卡号
-                                            //ReqA.resflagCondition = 1;     //状态
-                                            //ReqA.resflagBalance = 1;       //余额
-                                            //ReqA.resflagName = 1;          //姓名
-                                            //ReqA.resflagPersonID = 1;      //身份证号
-                                            //ReqA.resflagPassword = 1;      //密码 
-                                            //ReqA.resflagBirthday = 1;      //出生日期
-                                            //ReqA.resflagDepart = 1;        //部门
-                                            //ReqA.resflagIdenti = 1;        //身份
-                                            //ReqA.resflagNation = 1;        //民族国籍
-                                            //ReqA.resflagTel = 1;           //电话
-                                            //int nRetA = TPE_Class.TPE_GetAccount(1, ref ReqA, out ResA, 1);
-                                            break;
-                                        case 6: //更改对应关系
-                                            tagTPE_QueryFlowRes_UpdateRelation FlowRes_UpdateRelation = new tagTPE_QueryFlowRes_UpdateRelation ();
-                                            FlowRes_UpdateRelation = (tagTPE_QueryFlowRes_UpdateRelation)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_UpdateRelation));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.TransType = 6;
-                                            Tpe_CRO.CenterNo = FlowRes_UpdateRelation.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_UpdateRelation.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_UpdateRelation.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_UpdateRelation.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_UpdateRelation.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_UpdateRelation.CardNo;
-                                            Tpe_CRO.JoinCardHolder = FlowRes_UpdateRelation.JoinCardHolder;
-                                            Tpe_CRO.JoinNode = FlowRes_UpdateRelation.JoinNode;
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += Marshal.SizeOf (FlowRes_UpdateRelation);
-                                            break;
-                                        case 7: //余额变更, 不区分具体来源
-                                        case 8: //余额变更, 由相关操作引发
-                                        case 9: //余额变更, 存取款引发
-                                        case 10: //余额变更, 由补助扣款引发
-                                        case 11: //余额变更, 卡片交易引发
-                                        case 12: //余额变更, 银行转帐引发 
-                                        case 13: //余额变更, 通用缴费 
-                                        case 14: //余额变更, 押金 
-                                        case 15: //余额变更, 管理费 
-                                        case 16: //余额变更, 手续费 
-                                        case 17: //余额变更, 工本费 
-                                        case 18: //余额变更,内部转出
-                                        case 19: //余额变更,内部转入
-                                            tagTPE_QueryFlowRes_Cost FlowRes_Cost = new tagTPE_QueryFlowRes_Cost ();
-                                            FlowRes_Cost = (tagTPE_QueryFlowRes_Cost)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Cost));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.OrderID = new byte[16];
-                                            Tpe_CRO.TransType = type;
-                                            Tpe_CRO.CenterNo = FlowRes_Cost.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_Cost.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_Cost.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_Cost.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_Cost.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_Cost.CardNo;
-                                            Tpe_CRO.Balance = FlowRes_Cost.Balance;
-                                            Tpe_CRO.JoinNode = FlowRes_Cost.JoinNode;
-                                            Tpe_CRO.JoinCardHolder = FlowRes_Cost.JoinCardHolder;
-                                            Tpe_CRO.TransMoney = FlowRes_Cost.TransMoney;
-                                            Offset += Marshal.SizeOf (FlowRes_Cost);
-                                            byte[] DataBuf = new byte[FlowRes_Cost.ExtendLen];
-                                            Marshal.Copy (new IntPtr (buffer.ToInt32 () + Offset), DataBuf, 0, (int)FlowRes_Cost.ExtendLen);
-                                            //string strMsg = "流水扩展信息长度" + FlowRes_Cost.ExtendLen.ToString () + "，内容";
-                                            //for (int m = 0; m < FlowRes_Cost.ExtendLen; m++) {
-                                            //    strMsg += DataBuf[m].ToString ("X2");
-                                            //}
-                                            //CPublic.WriteLog (strMsg);
-                                            string retOrderID = "";
-                                            string retOrderWay = "";
-                                            string retOrderStatus = "";
-                                            HTEXTENDINFO tmpHTEXTENDINFO = new HTEXTENDINFO ();
-                                            if (FlowRes_Cost.ExtendLen >= Marshal.SizeOf (tmpHTEXTENDINFO)) {
-                                                tmpHTEXTENDINFO = (HTEXTENDINFO)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (HTEXTENDINFO));
-                                                if (tmpHTEXTENDINFO.NodeType == 0X00030001 && tmpHTEXTENDINFO.OrderID.Length > 0) {
-                                                    byte[] OrderID14 = new byte[14];
-                                                    Array.Copy (tmpHTEXTENDINFO.OrderID, 0, OrderID14, 0, 14);
-                                                    retOrderID = Encoding.UTF8.GetString (OrderID14).TrimEnd ('\0');
-                                                    byte[] OrderID2 = new byte[2];
-                                                    Array.Copy (tmpHTEXTENDINFO.OrderID, 14, OrderID2, 0, 2);
-                                                    retOrderStatus = Encoding.UTF8.GetString (OrderID2).TrimEnd ('\0');
-                                                    switch (retOrderStatus) {
-                                                        case "FC":
-                                                            retOrderWay = "通用";
-                                                            break;
-                                                        case "FP":
-                                                            retOrderWay = "充值";
-                                                            break;
-                                                        case "FM":
-                                                            retOrderWay = "扣款";
-                                                            break;
-                                                        case "FF":
-                                                            retOrderWay = "退款";
-                                                            break;
-                                                        case "":
-                                                            retOrderWay = "未填";
-                                                            break;
-                                                        default:
-                                                            retOrderWay = "未知" + retOrderStatus;
-                                                            break;
-                                                    }
-                                                }
-                                            }
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            cTpe_Cro.OrderID = retOrderID;
-                                            cTpe_Cro.OrderStatus = retOrderWay;
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += (int)FlowRes_Cost.ExtendLen;
-                                            break;
-                                    }
-                                    Offset += 4;
-                                }
-                                Res.pRes = null;
+                                listCRO = getWaterInfo (Res);
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "成功";
+                                retRes.Msg = "ok";
                                 retRes.ListDate = listCRO;
                             }
                         }
@@ -2598,219 +1969,9 @@ namespace WebServicePark {
                                 retRes.Result = "error";
                                 retRes.Msg = "ResRecCount=" + Res.ResRecCount.ToString ();
                             } else {
-                                tagTPE_CReturnObj Tpe_CRO;
-                                TPE_CReturnObj cTpe_Cro;
-                                IntPtr buffer = (IntPtr)((Byte*)(Res.pRes));
-                                int Offset = 4;
-                                int type = 0;
-                                for (int i = 0; i < Res.ResRecCount; i++) {
-                                    type = Marshal.ReadInt32 (new IntPtr (buffer.ToInt32 () + Offset - 4));
-                                    switch (type) {
-                                        case 1: //开户
-                                            tagTPE_QueryFlowRes_Open FlowRes_Open = new tagTPE_QueryFlowRes_Open ();
-                                            FlowRes_Open = (tagTPE_QueryFlowRes_Open)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Open));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.TransType = 1;
-                                            Tpe_CRO.CenterNo = FlowRes_Open.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_Open.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_Open.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_Open.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_Open.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_Open.CardNo;
-                                            Tpe_CRO.Balance = FlowRes_Open.Balance;
-                                            Tpe_CRO.Condition = FlowRes_Open.Condition;
-                                            Tpe_CRO.TransferLimit = FlowRes_Open.TransferLimit;
-                                            Tpe_CRO.TransferMoney = FlowRes_Open.TransferMoney;
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += Marshal.SizeOf (FlowRes_Open);
-                                            break;
-                                        case 2: //撤户
-                                            tagTPE_QueryFlowRes_Open FlowRes_Close = new tagTPE_QueryFlowRes_Open ();
-                                            FlowRes_Close = (tagTPE_QueryFlowRes_Open)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Open));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.TransType = 2;
-                                            Tpe_CRO.CenterNo = FlowRes_Close.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_Close.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_Close.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_Close.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_Close.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_Close.CardNo;
-                                            Tpe_CRO.Balance = FlowRes_Close.Balance;
-                                            Tpe_CRO.Condition = FlowRes_Close.Condition;
-                                            Tpe_CRO.TransferLimit = FlowRes_Close.TransferLimit;
-                                            Tpe_CRO.TransferMoney = FlowRes_Close.TransferMoney;
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += Marshal.SizeOf (FlowRes_Close);
-                                            break;
-                                        case 3: //建立对应关系
-                                            tagTPE_QueryFlowRes_BuildRelation FlowRes_Create = new tagTPE_QueryFlowRes_BuildRelation ();
-                                            FlowRes_Create = (tagTPE_QueryFlowRes_BuildRelation)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_BuildRelation));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.TransType = 3;
-                                            Tpe_CRO.CenterNo = FlowRes_Create.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_Create.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_Create.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_Create.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_Create.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_Create.CardNo;
-                                            Tpe_CRO.JoinCardHolder = FlowRes_Create.JoinCardHolder;
-                                            Tpe_CRO.JoinNode = FlowRes_Create.JoinNode;
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += Marshal.SizeOf (FlowRes_Create);
-                                            break;
-                                        case 4: //撤消对应
-                                            tagTPE_QueryFlowRes_BuildRelation FlowRes_Drop = new tagTPE_QueryFlowRes_BuildRelation ();
-                                            FlowRes_Drop = (tagTPE_QueryFlowRes_BuildRelation)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_BuildRelation));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.TransType = 4;
-                                            Tpe_CRO.CenterNo = FlowRes_Drop.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_Drop.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_Drop.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_Drop.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_Drop.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_Drop.CardNo;
-                                            Tpe_CRO.JoinCardHolder = FlowRes_Drop.JoinCardHolder;
-                                            Tpe_CRO.JoinNode = FlowRes_Drop.JoinNode;
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += Marshal.SizeOf (FlowRes_Drop);
-                                            break;
-                                        case 5: //更改帐户信息
-                                            tagTPE_QueryFlowRes_UpdateAccount FlowRes_Update = new tagTPE_QueryFlowRes_UpdateAccount ();
-                                            FlowRes_Update = (tagTPE_QueryFlowRes_UpdateAccount)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_UpdateAccount));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.TransType = 5;
-                                            Tpe_CRO.CenterNo = FlowRes_Update.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_Update.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_Update.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_Update.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_Update.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_Update.CardNo;
-                                            Tpe_CRO.TransferLimit = FlowRes_Update.TransferLimit;
-                                            Tpe_CRO.TransferMoney = FlowRes_Update.TransferMoney;
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += Marshal.SizeOf (FlowRes_Update);
-                                            //tagTPE_GetAccountReq ReqA = new tagTPE_GetAccountReq();
-                                            //tagTPE_GetAccountRes ResA = new tagTPE_GetAccountRes();
-                                            //ReqA.AccountNo = FlowRes_Update.AccountNo;
-                                            //ReqA.resflagAccountNo = 1;     //帐号
-                                            //ReqA.resflagCardNo = 1;        //卡号
-                                            //ReqA.resflagCondition = 1;     //状态
-                                            //ReqA.resflagBalance = 1;       //余额
-                                            //ReqA.resflagName = 1;          //姓名
-                                            //ReqA.resflagPersonID = 1;      //身份证号
-                                            //ReqA.resflagPassword = 1;      //密码 
-                                            //ReqA.resflagBirthday = 1;      //出生日期
-                                            //ReqA.resflagDepart = 1;        //部门
-                                            //ReqA.resflagIdenti = 1;        //身份
-                                            //ReqA.resflagNation = 1;        //民族国籍
-                                            //ReqA.resflagTel = 1;           //电话
-                                            //int nRetA = TPE_Class.TPE_GetAccount(1, ref ReqA, out ResA, 1);
-                                            break;
-                                        case 6: //更改对应关系
-                                            tagTPE_QueryFlowRes_UpdateRelation FlowRes_UpdateRelation = new tagTPE_QueryFlowRes_UpdateRelation ();
-                                            FlowRes_UpdateRelation = (tagTPE_QueryFlowRes_UpdateRelation)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_UpdateRelation));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.TransType = 6;
-                                            Tpe_CRO.CenterNo = FlowRes_UpdateRelation.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_UpdateRelation.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_UpdateRelation.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_UpdateRelation.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_UpdateRelation.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_UpdateRelation.CardNo;
-                                            Tpe_CRO.JoinCardHolder = FlowRes_UpdateRelation.JoinCardHolder;
-                                            Tpe_CRO.JoinNode = FlowRes_UpdateRelation.JoinNode;
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += Marshal.SizeOf (FlowRes_UpdateRelation);
-                                            break;
-                                        case 7: //余额变更, 不区分具体来源
-                                        case 8: //余额变更, 由相关操作引发
-                                        case 9: //余额变更, 存取款引发
-                                        case 10: //余额变更, 由补助扣款引发
-                                        case 11: //余额变更, 卡片交易引发
-                                        case 12: //余额变更, 银行转帐引发 
-                                        case 13: //余额变更, 通用缴费 
-                                        case 14: //余额变更, 押金 
-                                        case 15: //余额变更, 管理费 
-                                        case 16: //余额变更, 手续费 
-                                        case 17: //余额变更, 工本费 
-                                        case 18: //余额变更,内部转出
-                                        case 19: //余额变更,内部转入
-                                            tagTPE_QueryFlowRes_Cost FlowRes_Cost = new tagTPE_QueryFlowRes_Cost ();
-                                            FlowRes_Cost = (tagTPE_QueryFlowRes_Cost)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Cost));
-                                            Tpe_CRO = new tagTPE_CReturnObj ();
-                                            Tpe_CRO.OrderID = new byte[16];
-                                            Tpe_CRO.TransType = type;
-                                            Tpe_CRO.CenterNo = FlowRes_Cost.CenterNo;
-                                            Tpe_CRO.OccurNode = FlowRes_Cost.OccurNode;
-                                            Tpe_CRO.OccurIdNo = FlowRes_Cost.OccurIdNo;
-                                            Tpe_CRO.OccurTime = FlowRes_Cost.OccurTime;
-                                            Tpe_CRO.AccountNo = FlowRes_Cost.AccountNo;
-                                            Tpe_CRO.CardNo = FlowRes_Cost.CardNo;
-                                            Tpe_CRO.Balance = FlowRes_Cost.Balance;
-                                            Tpe_CRO.JoinNode = FlowRes_Cost.JoinNode;
-                                            Tpe_CRO.JoinCardHolder = FlowRes_Cost.JoinCardHolder;
-                                            Tpe_CRO.TransMoney = FlowRes_Cost.TransMoney;
-                                            Offset += Marshal.SizeOf (FlowRes_Cost);
-                                            byte[] DataBuf = new byte[FlowRes_Cost.ExtendLen];
-                                            Marshal.Copy (new IntPtr (buffer.ToInt32 () + Offset), DataBuf, 0, (int)FlowRes_Cost.ExtendLen);
-                                            //string strMsg = "流水扩展信息长度" + FlowRes_Cost.ExtendLen.ToString () + "，内容";
-                                            //for (int m = 0; m < FlowRes_Cost.ExtendLen; m++) {
-                                            //    strMsg += DataBuf[m].ToString ("X2");
-                                            //}
-                                            //CPublic.WriteLog (strMsg);
-                                            string retOrderID = "";
-                                            string retOrderWay = "";
-                                            string retOrderStatus = "";
-                                            HTEXTENDINFO tmpHTEXTENDINFO = new HTEXTENDINFO ();
-                                            if (FlowRes_Cost.ExtendLen >= Marshal.SizeOf (tmpHTEXTENDINFO)) {
-                                                tmpHTEXTENDINFO = (HTEXTENDINFO)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (HTEXTENDINFO));
-                                                if (tmpHTEXTENDINFO.NodeType == 0X00030001 && tmpHTEXTENDINFO.OrderID.Length > 0) {
-                                                    byte[] OrderID14 = new byte[14];
-                                                    Array.Copy (tmpHTEXTENDINFO.OrderID, 0, OrderID14, 0, 14);
-                                                    retOrderID = Encoding.UTF8.GetString (OrderID14).TrimEnd ('\0');
-                                                    byte[] OrderID2 = new byte[2];
-                                                    Array.Copy (tmpHTEXTENDINFO.OrderID, 14, OrderID2, 0, 2);
-                                                    retOrderStatus = Encoding.UTF8.GetString (OrderID2).TrimEnd ('\0');
-                                                    switch (retOrderStatus) {
-                                                        case "FC":
-                                                            retOrderWay = "通用";
-                                                            break;
-                                                        case "FP":
-                                                            retOrderWay = "充值";
-                                                            break;
-                                                        case "FM":
-                                                            retOrderWay = "扣款";
-                                                            break;
-                                                        case "FF":
-                                                            retOrderWay = "退款";
-                                                            break;
-                                                        case "":
-                                                            retOrderWay = "未填";
-                                                            break;
-                                                        default:
-                                                            retOrderWay = "未知" + retOrderStatus;
-                                                            break;
-                                                    }
-                                                }
-                                            }
-                                            cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            cTpe_Cro.OrderID = retOrderID;
-                                            cTpe_Cro.OrderStatus = retOrderWay;
-                                            listCRO.Add (cTpe_Cro);
-                                            Offset += (int)FlowRes_Cost.ExtendLen;
-                                            break;
-                                    }
-                                    Offset += 4;
-                                }
-                                Res.pRes = null;
-                                retRes.Result = ret == 0 ? "ok" : "uok";
-                                retRes.Msg = "成功";
+                                listCRO = getWaterInfo (Res);
+                                retRes.Result = (ret == 0) ? "ok" : "uok";
+                                retRes.Msg = "ok";
                                 retRes.ListDate = listCRO;
                             }
                         }
@@ -2831,6 +1992,234 @@ namespace WebServicePark {
             CPublic.WriteLog ("【记录】按订单号调账成功执行，关键信息：" + param);
             return json;
         }
+        unsafe public List<TPE_CReturnObj> getWaterInfo (tagTPE_QueryResControl Res) {
+            List<TPE_CReturnObj> listCRO = new List<TPE_CReturnObj> ();
+            tagTPE_CReturnObj Tpe_CRO;
+            TPE_CReturnObj cTpe_Cro;
+            IntPtr buffer = (IntPtr)((Byte*)(Res.pRes));
+            int Offset = 4;
+            int type = 0;
+            for (int i = 0; i < Res.ResRecCount; i++) {
+                type = Marshal.ReadInt32 (new IntPtr (buffer.ToInt32 () + Offset - 4));
+                switch (type) {
+                    case 1: //开户
+                        tagTPE_QueryFlowRes_Open FlowRes_Open = new tagTPE_QueryFlowRes_Open ();
+                        FlowRes_Open = (tagTPE_QueryFlowRes_Open)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Open));
+                        Tpe_CRO = new tagTPE_CReturnObj ();
+                        Tpe_CRO.TransType = 1;
+                        Tpe_CRO.CenterNo = FlowRes_Open.CenterNo;
+                        Tpe_CRO.OccurNode = FlowRes_Open.OccurNode;
+                        Tpe_CRO.OccurIdNo = FlowRes_Open.OccurIdNo;
+                        Tpe_CRO.OccurTime = FlowRes_Open.OccurTime;
+                        Tpe_CRO.AccountNo = FlowRes_Open.AccountNo;
+                        Tpe_CRO.CardNo = FlowRes_Open.CardNo;
+                        Tpe_CRO.Balance = FlowRes_Open.Balance;
+                        Tpe_CRO.Condition = FlowRes_Open.Condition;
+                        Tpe_CRO.TransferLimit = FlowRes_Open.TransferLimit;
+                        Tpe_CRO.TransferMoney = FlowRes_Open.TransferMoney;
+                        cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
+                        listCRO.Add (cTpe_Cro);
+                        Offset += Marshal.SizeOf (FlowRes_Open);
+                        break;
+                    case 2: //撤户
+                        tagTPE_QueryFlowRes_Open FlowRes_Close = new tagTPE_QueryFlowRes_Open ();
+                        FlowRes_Close = (tagTPE_QueryFlowRes_Open)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Open));
+                        Tpe_CRO = new tagTPE_CReturnObj ();
+                        Tpe_CRO.TransType = 2;
+                        Tpe_CRO.CenterNo = FlowRes_Close.CenterNo;
+                        Tpe_CRO.OccurNode = FlowRes_Close.OccurNode;
+                        Tpe_CRO.OccurIdNo = FlowRes_Close.OccurIdNo;
+                        Tpe_CRO.OccurTime = FlowRes_Close.OccurTime;
+                        Tpe_CRO.AccountNo = FlowRes_Close.AccountNo;
+                        Tpe_CRO.CardNo = FlowRes_Close.CardNo;
+                        Tpe_CRO.Balance = FlowRes_Close.Balance;
+                        Tpe_CRO.Condition = FlowRes_Close.Condition;
+                        Tpe_CRO.TransferLimit = FlowRes_Close.TransferLimit;
+                        Tpe_CRO.TransferMoney = FlowRes_Close.TransferMoney;
+                        cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
+                        listCRO.Add (cTpe_Cro);
+                        Offset += Marshal.SizeOf (FlowRes_Close);
+                        break;
+                    case 3: //建立对应关系
+                        tagTPE_QueryFlowRes_BuildRelation FlowRes_Create = new tagTPE_QueryFlowRes_BuildRelation ();
+                        FlowRes_Create = (tagTPE_QueryFlowRes_BuildRelation)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_BuildRelation));
+                        Tpe_CRO = new tagTPE_CReturnObj ();
+                        Tpe_CRO.TransType = 3;
+                        Tpe_CRO.CenterNo = FlowRes_Create.CenterNo;
+                        Tpe_CRO.OccurNode = FlowRes_Create.OccurNode;
+                        Tpe_CRO.OccurIdNo = FlowRes_Create.OccurIdNo;
+                        Tpe_CRO.OccurTime = FlowRes_Create.OccurTime;
+                        Tpe_CRO.AccountNo = FlowRes_Create.AccountNo;
+                        Tpe_CRO.CardNo = FlowRes_Create.CardNo;
+                        Tpe_CRO.JoinCardHolder = FlowRes_Create.JoinCardHolder;
+                        Tpe_CRO.JoinNode = FlowRes_Create.JoinNode;
+                        cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
+                        listCRO.Add (cTpe_Cro);
+                        Offset += Marshal.SizeOf (FlowRes_Create);
+                        break;
+                    case 4: //撤消对应
+                        tagTPE_QueryFlowRes_BuildRelation FlowRes_Drop = new tagTPE_QueryFlowRes_BuildRelation ();
+                        FlowRes_Drop = (tagTPE_QueryFlowRes_BuildRelation)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_BuildRelation));
+                        Tpe_CRO = new tagTPE_CReturnObj ();
+                        Tpe_CRO.TransType = 4;
+                        Tpe_CRO.CenterNo = FlowRes_Drop.CenterNo;
+                        Tpe_CRO.OccurNode = FlowRes_Drop.OccurNode;
+                        Tpe_CRO.OccurIdNo = FlowRes_Drop.OccurIdNo;
+                        Tpe_CRO.OccurTime = FlowRes_Drop.OccurTime;
+                        Tpe_CRO.AccountNo = FlowRes_Drop.AccountNo;
+                        Tpe_CRO.CardNo = FlowRes_Drop.CardNo;
+                        Tpe_CRO.JoinCardHolder = FlowRes_Drop.JoinCardHolder;
+                        Tpe_CRO.JoinNode = FlowRes_Drop.JoinNode;
+                        cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
+                        listCRO.Add (cTpe_Cro);
+                        Offset += Marshal.SizeOf (FlowRes_Drop);
+                        break;
+                    case 5: //更改帐户信息
+                        tagTPE_QueryFlowRes_UpdateAccount FlowRes_Update = new tagTPE_QueryFlowRes_UpdateAccount ();
+                        FlowRes_Update = (tagTPE_QueryFlowRes_UpdateAccount)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_UpdateAccount));
+                        Tpe_CRO = new tagTPE_CReturnObj ();
+                        Tpe_CRO.TransType = 5;
+                        Tpe_CRO.CenterNo = FlowRes_Update.CenterNo;
+                        Tpe_CRO.OccurNode = FlowRes_Update.OccurNode;
+                        Tpe_CRO.OccurIdNo = FlowRes_Update.OccurIdNo;
+                        Tpe_CRO.OccurTime = FlowRes_Update.OccurTime;
+                        string dt = string.Empty;
+                        string hh = string.Empty;
+                        dt = System.Text.Encoding.Default.GetString (Tpe_CRO.OccurTime);
+                        hh = dt.Substring (8, 2);
+                        Tpe_CRO.AccountNo = FlowRes_Update.AccountNo;
+                        Tpe_CRO.CardNo = FlowRes_Update.CardNo;
+                        Tpe_CRO.TransferLimit = FlowRes_Update.TransferLimit;
+                        Tpe_CRO.TransferMoney = FlowRes_Update.TransferMoney;
+                        cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
+                        //if (int.Parse(hh) > 1) { listCRO.Add(cTpe_Cro); }
+                        listCRO.Add (cTpe_Cro);
+                        Offset += Marshal.SizeOf (FlowRes_Update);
+                        //tagTPE_GetAccountReq ReqA = new tagTPE_GetAccountReq();
+                        //tagTPE_GetAccountRes ResA = new tagTPE_GetAccountRes();
+                        //ReqA.AccountNo = FlowRes_Update.AccountNo;
+                        //ReqA.resflagAccountNo = 1;     //帐号
+                        //ReqA.resflagCardNo = 1;        //卡号
+                        //ReqA.resflagCondition = 1;     //状态
+                        //ReqA.resflagBalance = 1;       //余额
+                        //ReqA.resflagName = 1;          //姓名
+                        //ReqA.resflagPersonID = 1;      //身份证号
+                        //ReqA.resflagPassword = 1;      //密码 
+                        //ReqA.resflagBirthday = 1;      //出生日期
+                        //ReqA.resflagDepart = 1;        //部门
+                        //ReqA.resflagIdenti = 1;        //身份
+                        //ReqA.resflagNation = 1;        //民族国籍
+                        //ReqA.resflagTel = 1;           //电话
+                        //int nRetA = TPE_Class.TPE_GetAccount(1, ref ReqA, out ResA, 1);
+                        break;
+                    case 6: //更改对应关系
+                        tagTPE_QueryFlowRes_UpdateRelation FlowRes_UpdateRelation = new tagTPE_QueryFlowRes_UpdateRelation ();
+                        FlowRes_UpdateRelation = (tagTPE_QueryFlowRes_UpdateRelation)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_UpdateRelation));
+                        Tpe_CRO = new tagTPE_CReturnObj ();
+                        Tpe_CRO.TransType = 6;
+                        Tpe_CRO.CenterNo = FlowRes_UpdateRelation.CenterNo;
+                        Tpe_CRO.OccurNode = FlowRes_UpdateRelation.OccurNode;
+                        Tpe_CRO.OccurIdNo = FlowRes_UpdateRelation.OccurIdNo;
+                        Tpe_CRO.OccurTime = FlowRes_UpdateRelation.OccurTime;
+                        Tpe_CRO.AccountNo = FlowRes_UpdateRelation.AccountNo;
+                        Tpe_CRO.CardNo = FlowRes_UpdateRelation.CardNo;
+                        Tpe_CRO.JoinCardHolder = FlowRes_UpdateRelation.JoinCardHolder;
+                        Tpe_CRO.JoinNode = FlowRes_UpdateRelation.JoinNode;
+                        cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
+                        listCRO.Add (cTpe_Cro);
+                        Offset += Marshal.SizeOf (FlowRes_UpdateRelation);
+                        break;
+                    case 7: //余额变更, 不区分具体来源
+                    case 8: //余额变更, 由相关操作引发
+                    case 9: //余额变更, 存取款引发
+                    case 10: //余额变更, 由补助扣款引发
+                    case 11: //余额变更, 卡片交易引发
+                    case 12: //余额变更, 银行转帐引发 
+                    case 13: //余额变更, 通用缴费 
+                    case 14: //余额变更, 押金 
+                    case 15: //余额变更, 管理费 
+                    case 16: //余额变更, 手续费 
+                    case 17: //余额变更, 工本费 
+                    case 18: //余额变更,内部转出
+                    case 19: //余额变更,内部转入
+                        tagTPE_QueryFlowRes_Cost FlowRes_Cost = new tagTPE_QueryFlowRes_Cost ();
+                        FlowRes_Cost = (tagTPE_QueryFlowRes_Cost)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Cost));
+                        Tpe_CRO = new tagTPE_CReturnObj ();
+                        Tpe_CRO.OrderID = new byte[16];
+                        Tpe_CRO.TransType = type;
+                        Tpe_CRO.CenterNo = FlowRes_Cost.CenterNo;
+                        Tpe_CRO.OccurNode = FlowRes_Cost.OccurNode;
+                        Tpe_CRO.OccurIdNo = FlowRes_Cost.OccurIdNo;
+                        Tpe_CRO.OccurTime = FlowRes_Cost.OccurTime;
+                        Tpe_CRO.AccountNo = FlowRes_Cost.AccountNo;
+                        Tpe_CRO.CardNo = FlowRes_Cost.CardNo;
+                        Tpe_CRO.Balance = FlowRes_Cost.Balance;
+                        Tpe_CRO.JoinNode = FlowRes_Cost.JoinNode;
+                        Tpe_CRO.JoinCardHolder = FlowRes_Cost.JoinCardHolder;
+                        Tpe_CRO.TransMoney = FlowRes_Cost.TransMoney;
+                        Offset += Marshal.SizeOf (FlowRes_Cost);
+                        byte[] DataBuf = new byte[FlowRes_Cost.ExtendLen];
+                        Marshal.Copy (new IntPtr (buffer.ToInt32 () + Offset), DataBuf, 0, (int)FlowRes_Cost.ExtendLen);
+                        //string strMsg = "流水扩展信息长度" + FlowRes_Cost.ExtendLen.ToString () + "，内容";
+                        //for (int m = 0; m < FlowRes_Cost.ExtendLen; m++) {
+                        //    strMsg += DataBuf[m].ToString ("X2");
+                        //}
+                        //CPublic.WriteLog (strMsg);
+                        string retOrderID = "";
+                        string retOrderWay = "";
+                        string retOrderStatus = "";
+                        HTEXTENDINFO tmpHTEXTENDINFO = new HTEXTENDINFO ();
+                        if (FlowRes_Cost.ExtendLen >= Marshal.SizeOf (tmpHTEXTENDINFO)) {
+                            tmpHTEXTENDINFO = (HTEXTENDINFO)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (HTEXTENDINFO));
+                            if (tmpHTEXTENDINFO.NodeType == 0X00030001 && tmpHTEXTENDINFO.OrderID.Length > 0) {
+                                byte[] OrderID14 = new byte[14];
+                                Array.Copy (tmpHTEXTENDINFO.OrderID, 0, OrderID14, 0, 14);
+                                retOrderID = Encoding.UTF8.GetString (OrderID14).TrimEnd ('\0');
+                                byte[] OrderID2 = new byte[2];
+                                Array.Copy (tmpHTEXTENDINFO.OrderID, 14, OrderID2, 0, 2);
+                                retOrderStatus = Encoding.UTF8.GetString (OrderID2).TrimEnd ('\0');
+                                if (retOrderStatus == null) {
+                                    retOrderStatus = "AA";
+                                } else if (string.IsNullOrEmpty (retOrderStatus)) {
+                                    retOrderStatus = "BB";
+                                }
+                                switch (retOrderStatus) {
+                                    case "FC":
+                                        retOrderWay = "通用";
+                                        break;
+                                    case "FP":
+                                        retOrderWay = "充值";
+                                        break;
+                                    case "FM":
+                                        retOrderWay = "扣款";
+                                        break;
+                                    case "FF":
+                                        retOrderWay = "退款";
+                                        break;
+                                    case "AA":
+                                        retOrderWay = "无效";
+                                        break;
+                                    case "BB":
+                                        retOrderWay = "未填";
+                                        break;
+                                    default:
+                                        retOrderWay = "未知" + retOrderStatus;
+                                        break;
+                                }
+                            }
+                        }
+                        cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
+                        cTpe_Cro.OrderID = retOrderID;
+                        cTpe_Cro.OrderStatus = retOrderWay;
+                        listCRO.Add (cTpe_Cro);
+                        Offset += (int)FlowRes_Cost.ExtendLen;
+                        break;
+                }
+                Offset += 4;
+            }
+            //TPE_Class.TPE_Free(ref Res.pRes);
+            return listCRO;
+        }
 
         /// <summary>
         /// 按学工号查询流水
@@ -2846,7 +2235,7 @@ namespace WebServicePark {
             string json = "";
             string param = "";
             CReturnCReturnObj retRes = new CReturnCReturnObj ();
-            List<TPE_CReturnObj> listCRO = new List<TPE_CReturnObj> ();
+            List<TPE_CReturnObj> listCRO = null;
             if (!isAllow ("TPE_QueryFlowByAccount")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
@@ -2915,224 +2304,9 @@ namespace WebServicePark {
                                         retRes.Result = "error";
                                         retRes.Msg += "ResRecCount=" + Res.ResRecCount.ToString ();
                                     } else {
-                                        tagTPE_CReturnObj Tpe_CRO;
-                                        TPE_CReturnObj cTpe_Cro;
-                                        IntPtr buffer = (IntPtr)((Byte*)(Res.pRes));
-                                        int Offset = 4;
-                                        int type = 0;
-                                        for (int i = 0; i < Res.ResRecCount; i++) {
-                                            type = Marshal.ReadInt32 (new IntPtr (buffer.ToInt32 () + Offset - 4));
-                                            switch (type) {
-                                                case 1: //开户
-                                                    tagTPE_QueryFlowRes_Open FlowRes_Open = new tagTPE_QueryFlowRes_Open ();
-                                                    FlowRes_Open = (tagTPE_QueryFlowRes_Open)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Open));
-                                                    Tpe_CRO = new tagTPE_CReturnObj ();
-                                                    Tpe_CRO.TransType = 1;
-                                                    Tpe_CRO.CenterNo = FlowRes_Open.CenterNo;
-                                                    Tpe_CRO.OccurNode = FlowRes_Open.OccurNode;
-                                                    Tpe_CRO.OccurIdNo = FlowRes_Open.OccurIdNo;
-                                                    Tpe_CRO.OccurTime = FlowRes_Open.OccurTime;
-                                                    Tpe_CRO.AccountNo = FlowRes_Open.AccountNo;
-                                                    Tpe_CRO.CardNo = FlowRes_Open.CardNo;
-                                                    Tpe_CRO.Balance = FlowRes_Open.Balance;
-                                                    Tpe_CRO.Condition = FlowRes_Open.Condition;
-                                                    Tpe_CRO.TransferLimit = FlowRes_Open.TransferLimit;
-                                                    Tpe_CRO.TransferMoney = FlowRes_Open.TransferMoney;
-                                                    cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                    listCRO.Add (cTpe_Cro);
-                                                    Offset += Marshal.SizeOf (FlowRes_Open);
-                                                    break;
-                                                case 2: //撤户
-                                                    tagTPE_QueryFlowRes_Open FlowRes_Close = new tagTPE_QueryFlowRes_Open ();
-                                                    FlowRes_Close = (tagTPE_QueryFlowRes_Open)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Open));
-                                                    Tpe_CRO = new tagTPE_CReturnObj ();
-                                                    Tpe_CRO.TransType = 2;
-                                                    Tpe_CRO.CenterNo = FlowRes_Close.CenterNo;
-                                                    Tpe_CRO.OccurNode = FlowRes_Close.OccurNode;
-                                                    Tpe_CRO.OccurIdNo = FlowRes_Close.OccurIdNo;
-                                                    Tpe_CRO.OccurTime = FlowRes_Close.OccurTime;
-                                                    Tpe_CRO.AccountNo = FlowRes_Close.AccountNo;
-                                                    Tpe_CRO.CardNo = FlowRes_Close.CardNo;
-                                                    Tpe_CRO.Balance = FlowRes_Close.Balance;
-                                                    Tpe_CRO.Condition = FlowRes_Close.Condition;
-                                                    Tpe_CRO.TransferLimit = FlowRes_Close.TransferLimit;
-                                                    Tpe_CRO.TransferMoney = FlowRes_Close.TransferMoney;
-                                                    cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                    listCRO.Add (cTpe_Cro);
-                                                    Offset += Marshal.SizeOf (FlowRes_Close);
-                                                    break;
-                                                case 3: //建立对应关系
-                                                    tagTPE_QueryFlowRes_BuildRelation FlowRes_Create = new tagTPE_QueryFlowRes_BuildRelation ();
-                                                    FlowRes_Create = (tagTPE_QueryFlowRes_BuildRelation)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_BuildRelation));
-                                                    Tpe_CRO = new tagTPE_CReturnObj ();
-                                                    Tpe_CRO.TransType = 3;
-                                                    Tpe_CRO.CenterNo = FlowRes_Create.CenterNo;
-                                                    Tpe_CRO.OccurNode = FlowRes_Create.OccurNode;
-                                                    Tpe_CRO.OccurIdNo = FlowRes_Create.OccurIdNo;
-                                                    Tpe_CRO.OccurTime = FlowRes_Create.OccurTime;
-                                                    Tpe_CRO.AccountNo = FlowRes_Create.AccountNo;
-                                                    Tpe_CRO.CardNo = FlowRes_Create.CardNo;
-                                                    Tpe_CRO.JoinCardHolder = FlowRes_Create.JoinCardHolder;
-                                                    Tpe_CRO.JoinNode = FlowRes_Create.JoinNode;
-                                                    cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                    listCRO.Add (cTpe_Cro);
-                                                    Offset += Marshal.SizeOf (FlowRes_Create);
-                                                    break;
-                                                case 4: //撤消对应
-                                                    tagTPE_QueryFlowRes_BuildRelation FlowRes_Drop = new tagTPE_QueryFlowRes_BuildRelation ();
-                                                    FlowRes_Drop = (tagTPE_QueryFlowRes_BuildRelation)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_BuildRelation));
-                                                    Tpe_CRO = new tagTPE_CReturnObj ();
-                                                    Tpe_CRO.TransType = 4;
-                                                    Tpe_CRO.CenterNo = FlowRes_Drop.CenterNo;
-                                                    Tpe_CRO.OccurNode = FlowRes_Drop.OccurNode;
-                                                    Tpe_CRO.OccurIdNo = FlowRes_Drop.OccurIdNo;
-                                                    Tpe_CRO.OccurTime = FlowRes_Drop.OccurTime;
-                                                    Tpe_CRO.AccountNo = FlowRes_Drop.AccountNo;
-                                                    Tpe_CRO.CardNo = FlowRes_Drop.CardNo;
-                                                    Tpe_CRO.JoinCardHolder = FlowRes_Drop.JoinCardHolder;
-                                                    Tpe_CRO.JoinNode = FlowRes_Drop.JoinNode;
-                                                    cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                    listCRO.Add (cTpe_Cro);
-                                                    Offset += Marshal.SizeOf (FlowRes_Drop);
-                                                    break;
-                                                case 5: //更改帐户信息
-                                                    tagTPE_QueryFlowRes_UpdateAccount FlowRes_Update = new tagTPE_QueryFlowRes_UpdateAccount ();
-                                                    FlowRes_Update = (tagTPE_QueryFlowRes_UpdateAccount)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_UpdateAccount));
-                                                    Tpe_CRO = new tagTPE_CReturnObj ();
-                                                    Tpe_CRO.TransType = 5;
-                                                    Tpe_CRO.CenterNo = FlowRes_Update.CenterNo;
-                                                    Tpe_CRO.OccurNode = FlowRes_Update.OccurNode;
-                                                    Tpe_CRO.OccurIdNo = FlowRes_Update.OccurIdNo;
-                                                    Tpe_CRO.OccurTime = FlowRes_Update.OccurTime;
-                                                    string dt = string.Empty;
-                                                    string hh = string.Empty;
-                                                    dt = System.Text.Encoding.Default.GetString (Tpe_CRO.OccurTime);
-                                                    hh = dt.Substring (8, 2);
-                                                    Tpe_CRO.AccountNo = FlowRes_Update.AccountNo;
-                                                    Tpe_CRO.CardNo = FlowRes_Update.CardNo;
-                                                    Tpe_CRO.TransferLimit = FlowRes_Update.TransferLimit;
-                                                    Tpe_CRO.TransferMoney = FlowRes_Update.TransferMoney;
-                                                    cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                    //if (int.Parse(hh) > 1) { listCRO.Add(cTpe_Cro); }
-                                                    listCRO.Add (cTpe_Cro);
-                                                    Offset += Marshal.SizeOf (FlowRes_Update);
-                                                    //tagTPE_GetAccountReq ReqA = new tagTPE_GetAccountReq();
-                                                    //tagTPE_GetAccountRes ResA = new tagTPE_GetAccountRes();
-                                                    //ReqA.AccountNo = FlowRes_Update.AccountNo;
-                                                    //ReqA.resflagAccountNo = 1;     //帐号
-                                                    //ReqA.resflagCardNo = 1;        //卡号
-                                                    //ReqA.resflagCondition = 1;     //状态
-                                                    //ReqA.resflagBalance = 1;       //余额
-                                                    //ReqA.resflagName = 1;          //姓名
-                                                    //ReqA.resflagPersonID = 1;      //身份证号
-                                                    //ReqA.resflagPassword = 1;      //密码 
-                                                    //ReqA.resflagBirthday = 1;      //出生日期
-                                                    //ReqA.resflagDepart = 1;        //部门
-                                                    //ReqA.resflagIdenti = 1;        //身份
-                                                    //ReqA.resflagNation = 1;        //民族国籍
-                                                    //ReqA.resflagTel = 1;           //电话
-                                                    //int nRetA = TPE_Class.TPE_GetAccount(1, ref ReqA, out ResA, 1);
-                                                    break;
-                                                case 6: //更改对应关系
-                                                    tagTPE_QueryFlowRes_UpdateRelation FlowRes_UpdateRelation = new tagTPE_QueryFlowRes_UpdateRelation ();
-                                                    FlowRes_UpdateRelation = (tagTPE_QueryFlowRes_UpdateRelation)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_UpdateRelation));
-                                                    Tpe_CRO = new tagTPE_CReturnObj ();
-                                                    Tpe_CRO.TransType = 6;
-                                                    Tpe_CRO.CenterNo = FlowRes_UpdateRelation.CenterNo;
-                                                    Tpe_CRO.OccurNode = FlowRes_UpdateRelation.OccurNode;
-                                                    Tpe_CRO.OccurIdNo = FlowRes_UpdateRelation.OccurIdNo;
-                                                    Tpe_CRO.OccurTime = FlowRes_UpdateRelation.OccurTime;
-                                                    Tpe_CRO.AccountNo = FlowRes_UpdateRelation.AccountNo;
-                                                    Tpe_CRO.CardNo = FlowRes_UpdateRelation.CardNo;
-                                                    Tpe_CRO.JoinCardHolder = FlowRes_UpdateRelation.JoinCardHolder;
-                                                    Tpe_CRO.JoinNode = FlowRes_UpdateRelation.JoinNode;
-                                                    cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                    listCRO.Add (cTpe_Cro);
-                                                    Offset += Marshal.SizeOf (FlowRes_UpdateRelation);
-                                                    break;
-                                                case 7: //余额变更, 不区分具体来源
-                                                case 8: //余额变更, 由相关操作引发
-                                                case 9: //余额变更, 存取款引发
-                                                case 10: //余额变更, 由补助扣款引发
-                                                case 11: //余额变更, 卡片交易引发
-                                                case 12: //余额变更, 银行转帐引发 
-                                                case 13: //余额变更, 通用缴费 
-                                                case 14: //余额变更, 押金 
-                                                case 15: //余额变更, 管理费 
-                                                case 16: //余额变更, 手续费 
-                                                case 17: //余额变更, 工本费 
-                                                case 18: //余额变更,内部转出
-                                                case 19: //余额变更,内部转入
-                                                    tagTPE_QueryFlowRes_Cost FlowRes_Cost = new tagTPE_QueryFlowRes_Cost ();
-                                                    FlowRes_Cost = (tagTPE_QueryFlowRes_Cost)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (tagTPE_QueryFlowRes_Cost));
-                                                    Tpe_CRO = new tagTPE_CReturnObj ();
-                                                    Tpe_CRO.OrderID = new byte[16];
-                                                    Tpe_CRO.TransType = type;
-                                                    Tpe_CRO.CenterNo = FlowRes_Cost.CenterNo;
-                                                    Tpe_CRO.OccurNode = FlowRes_Cost.OccurNode;
-                                                    Tpe_CRO.OccurIdNo = FlowRes_Cost.OccurIdNo;
-                                                    Tpe_CRO.OccurTime = FlowRes_Cost.OccurTime;
-                                                    Tpe_CRO.AccountNo = FlowRes_Cost.AccountNo;
-                                                    Tpe_CRO.CardNo = FlowRes_Cost.CardNo;
-                                                    Tpe_CRO.Balance = FlowRes_Cost.Balance;
-                                                    Tpe_CRO.JoinNode = FlowRes_Cost.JoinNode;
-                                                    Tpe_CRO.JoinCardHolder = FlowRes_Cost.JoinCardHolder;
-                                                    Tpe_CRO.TransMoney = FlowRes_Cost.TransMoney;
-                                                    Offset += Marshal.SizeOf (FlowRes_Cost);
-                                                    byte[] DataBuf = new byte[FlowRes_Cost.ExtendLen];
-                                                    Marshal.Copy (new IntPtr (buffer.ToInt32 () + Offset), DataBuf, 0, (int)FlowRes_Cost.ExtendLen);
-                                                    //string strMsg = "流水扩展信息长度" + FlowRes_Cost.ExtendLen.ToString () + "，内容";
-                                                    //for (int m = 0; m < FlowRes_Cost.ExtendLen; m++) {
-                                                    //    strMsg += DataBuf[m].ToString ("X2");
-                                                    //}
-                                                    //CPublic.WriteLog (strMsg);
-                                                    string retOrderID = "";
-                                                    string retOrderWay = "";
-                                                    string retOrderStatus = "";
-                                                    HTEXTENDINFO tmpHTEXTENDINFO = new HTEXTENDINFO ();
-                                                    if (FlowRes_Cost.ExtendLen >= Marshal.SizeOf (tmpHTEXTENDINFO)) {
-                                                        tmpHTEXTENDINFO = (HTEXTENDINFO)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (HTEXTENDINFO));
-                                                        if (tmpHTEXTENDINFO.NodeType == 0X00030001 && tmpHTEXTENDINFO.OrderID.Length > 0) {
-                                                            byte[] OrderID14 = new byte[14];
-                                                            Array.Copy (tmpHTEXTENDINFO.OrderID, 0, OrderID14, 0, 14);
-                                                            retOrderID = Encoding.UTF8.GetString (OrderID14).TrimEnd ('\0');
-                                                            byte[] OrderID2 = new byte[2];
-                                                            Array.Copy (tmpHTEXTENDINFO.OrderID, 14, OrderID2, 0, 2);
-                                                            retOrderStatus = Encoding.UTF8.GetString (OrderID2).TrimEnd ('\0');
-                                                            switch (retOrderStatus) {
-                                                                case "FC":
-                                                                    retOrderWay = "通用";
-                                                                    break;
-                                                                case "FP":
-                                                                    retOrderWay = "充值";
-                                                                    break;
-                                                                case "FM":
-                                                                    retOrderWay = "扣款";
-                                                                    break;
-                                                                case "FF":
-                                                                    retOrderWay = "退款";
-                                                                    break;
-                                                                case "":
-                                                                    retOrderWay = "未填";
-                                                                    break;
-                                                                default:
-                                                                    retOrderWay = "未知" + retOrderStatus;
-                                                                    break;
-                                                            }
-                                                        }
-                                                    }
-                                                    cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                    cTpe_Cro.OrderID = retOrderID;
-                                                    cTpe_Cro.OrderStatus = retOrderWay;
-                                                    listCRO.Add (cTpe_Cro);
-                                                    Offset += (int)FlowRes_Cost.ExtendLen;
-                                                    break;
-                                            }
-                                            Offset += 4;
-                                        }
-                                        //TPE_Class.TPE_Free(ref Res.pRes);
+                                        listCRO = getWaterInfo (Res);
                                         retRes.Result = (ret == 0) ? "ok" : "uok";
-                                        retRes.Msg = "成功";
+                                        retRes.Msg = "ok";
                                         retRes.ListDate = listCRO;
                                     }
                                 }
@@ -3217,7 +2391,7 @@ namespace WebServicePark {
                                 }
                                 Res.pRes = null;
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "成功";
+                                retRes.Msg = "ok";
                                 retRes.ListDate = listRes;
                             }
                         }
@@ -3299,7 +2473,7 @@ namespace WebServicePark {
                             }
                         }
                         retRes.Result = (ret == 0) ? "ok" : "uok";
-                        retRes.Msg = "成功";
+                        retRes.Msg = "ok";
                         retRes.ListDate = listRes;
                     }
                 }
@@ -3381,7 +2555,7 @@ namespace WebServicePark {
                                 }
                                 Res.pRes = null;
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "成功";
+                                retRes.Msg = "ok";
                                 retRes.ListDate = listRes;
                             }
                         }
@@ -3453,7 +2627,7 @@ namespace WebServicePark {
                             } else {
                                 TPE_GetAccountExRes Gaer = new TPE_GetAccountExRes (Res);
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "成功";
+                                retRes.Msg = "ok";
                                 retRes.Data = Gaer;
                             }
                         }
@@ -3583,7 +2757,7 @@ namespace WebServicePark {
                                 TPE_FlowUpdateAccountRes Fuar = new TPE_FlowUpdateAccountRes (ResU);
                                 Fuar.CenterNo = QueryCenterByOccurUINT (NodeNo, Fuar.OccurIdNo);
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "成功";
+                                retRes.Msg = "ok";
                                 retRes.Data = Fuar;
                             }
                         }
@@ -3706,7 +2880,7 @@ namespace WebServicePark {
                             TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
                             Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                             retRes.Result = (ret == 0) ? "ok" : "uok";
-                            retRes.Msg = "成功" + (isOrderIDExist (OrderID, "") > 1 ? "[订单号重复，多笔订单将无法正常处理退款]" : "");
+                            retRes.Msg = "ok" + (isOrderIDExist (OrderID, "") > 1 ? "[订单号重复，多笔订单将无法正常处理退款]" : "");
                             retRes.Data = Fr;
                         }
                     }
@@ -3830,7 +3004,7 @@ namespace WebServicePark {
                             TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
                             Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                             retRes.Result = (ret == 0) ? "ok" : "uok";
-                            retRes.Msg = "成功";
+                            retRes.Msg = "ok";
                             retRes.Data = Fr;
                         }
                     }
@@ -3951,7 +3125,7 @@ namespace WebServicePark {
                             TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
                             Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                             retRes.Result = (ret == 0) ? "ok" : "uok";
-                            retRes.Msg = "成功";
+                            retRes.Msg = "ok";
                             retRes.Data = Fr;
                         }
                     }
@@ -4089,7 +3263,7 @@ namespace WebServicePark {
                             TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
                             Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                             retRes.Result = (ret == 0) ? "ok" : "uok";
-                            retRes.Msg = "成功";
+                            retRes.Msg = "ok";
                             retRes.Data = Fr;
                         }
                     }
@@ -4203,7 +3377,7 @@ namespace WebServicePark {
                                 int IDNO = ResF.OccurIdNo;
                                 int CTNO = ResF.CenterNo;
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "成功";
+                                retRes.Msg = "ok";
                                 retRes.Data = Fr;
                             }
                         }
@@ -4316,7 +3490,7 @@ namespace WebServicePark {
                                 TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
                                 Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "成功";
+                                retRes.Msg = "ok";
                                 retRes.Data = Fr;
                             }
                         }
