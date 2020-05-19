@@ -2472,10 +2472,10 @@ namespace WebServicePark {
             try {
                 int nodeNo;
                 string orderStatus = "";
-                if (string.IsNullOrEmpty(OrderStatus)) { 
+                if (!string.IsNullOrEmpty(OrderStatus)) { 
                     if (OrderStatus.Length == 2) {
                         orderStatus = OrderStatus;
-                    } else { orderStatus = ""; }
+                    }
                 }
                 if (string.IsNullOrEmpty (NodeNo) || !int.TryParse (NodeNo, out nodeNo)) {
                     retRes.Result = "error";
@@ -2508,7 +2508,7 @@ namespace WebServicePark {
                         for (int i = 0; i < orderStatus.Length; i++) {
                             tmpOrderStatus += System.Convert.ToString (orderStatus[i], 16);
                         }
-                        String tmpSQL = " WHERE OccurNode = '" + NodeNo.ToString () + "' AND ExtraInfo is not NULL AND sys.fn_varbintohexstr([ExtraInfo]) like '%" + tmpOrderID + "%" + (string.IsNullOrEmpty (orderStatus) ? "" : tmpOrderStatus + "%") + "'";
+                        String tmpSQL = " WHERE OccurNode = '" + NodeNo.ToString () + "' AND ExtraInfo is not NULL AND sys.fn_varbintohexstr([ExtraInfo]) like '%" + tmpOrderID.ToUpper () + "%" + (string.IsNullOrEmpty (orderStatus) ? "" : tmpOrderStatus.ToUpper () + "%") + "'";
                         CPublic.WriteLog (tmpSQL);
                         Req.SQL = new byte[4096];
                         Array.Copy (System.Text.Encoding.Default.GetBytes (tmpSQL), 0, Req.SQL, 0, System.Text.Encoding.Default.GetBytes (tmpSQL).Length);
@@ -2689,6 +2689,7 @@ namespace WebServicePark {
                                             //CPublic.WriteLog (strMsg);
                                             string retOrderID = "";
                                             string retOrderWay = "";
+                                            string retOrderStatus = "";
                                             HTEXTENDINFO tmpHTEXTENDINFO = new HTEXTENDINFO ();
                                             if (FlowRes_Cost.ExtendLen >= Marshal.SizeOf (tmpHTEXTENDINFO)) {
                                                 tmpHTEXTENDINFO = (HTEXTENDINFO)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (HTEXTENDINFO));
@@ -2697,8 +2698,28 @@ namespace WebServicePark {
                                                     Array.Copy (tmpHTEXTENDINFO.OrderID, 0, OrderID14, 0, 14);
                                                     retOrderID = Encoding.UTF8.GetString (OrderID14).TrimEnd ('\0');
                                                     byte[] OrderID2 = new byte[2];
-                                                    Array.Copy (tmpHTEXTENDINFO.OrderID, 14, OrderID14, 0, 2);
-                                                    retOrderWay = Encoding.UTF8.GetString (OrderID14).TrimEnd ('\0');
+                                                    Array.Copy (tmpHTEXTENDINFO.OrderID, 14, OrderID2, 0, 2);
+                                                    retOrderStatus = Encoding.UTF8.GetString (OrderID2).TrimEnd ('\0');
+                                                    switch (retOrderStatus) {
+                                                        case "FC":
+                                                            retOrderWay = "通用";
+                                                            break;
+                                                        case "FP":
+                                                            retOrderWay = "充值";
+                                                            break;
+                                                        case "FM":
+                                                            retOrderWay = "扣款";
+                                                            break;
+                                                        case "FF":
+                                                            retOrderWay = "退款";
+                                                            break;
+                                                        case "":
+                                                            retOrderWay = "未填";
+                                                            break;
+                                                        default:
+                                                            retOrderWay = "未知" + retOrderStatus;
+                                                            break;
+                                                    }
                                                 }
                                             }
                                             cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
@@ -3533,7 +3554,7 @@ namespace WebServicePark {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[TransMoney(金额不能为0,大于0补助,小于0扣款)]";
                 } else {
-                    param = Username;
+                    param = Username + "$";
                     if (!string.IsNullOrEmpty (AccountNo) && !string.IsNullOrEmpty (CardNo)) {
                         param += AccountNo + "$" + CardNo;
                     } else {
