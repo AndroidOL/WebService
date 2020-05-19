@@ -1362,18 +1362,44 @@ namespace WebServicePark {
                                                 //    strMsg += DataBuf[m].ToString ("X2");
                                                 //}
                                                 //CPublic.WriteLog (strMsg);
-                                                string OrderID = "";
+                                                string retOrderID = "";
+                                                string retOrderWay = "";
+                                                string retOrderStatus = "";
                                                 HTEXTENDINFO tmpHTEXTENDINFO = new HTEXTENDINFO ();
                                                 if (FlowRes_Cost.ExtendLen >= Marshal.SizeOf (tmpHTEXTENDINFO)) {
                                                     tmpHTEXTENDINFO = (HTEXTENDINFO)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (HTEXTENDINFO));
                                                     if (tmpHTEXTENDINFO.NodeType == 0X00030001 && tmpHTEXTENDINFO.OrderID.Length > 0) {
                                                         byte[] OrderID14 = new byte[14];
                                                         Array.Copy (tmpHTEXTENDINFO.OrderID, 0, OrderID14, 0, 14);
-                                                        OrderID = Encoding.UTF8.GetString (OrderID14).TrimEnd ('\0');
+                                                        retOrderID = Encoding.UTF8.GetString (OrderID14).TrimEnd ('\0');
+                                                        byte[] OrderID2 = new byte[2];
+                                                        Array.Copy (tmpHTEXTENDINFO.OrderID, 14, OrderID2, 0, 2);
+                                                        retOrderStatus = Encoding.UTF8.GetString (OrderID2).TrimEnd ('\0');
+                                                        switch (retOrderStatus) {
+                                                            case "FC":
+                                                                retOrderWay = "通用";
+                                                                break;
+                                                            case "FP":
+                                                                retOrderWay = "充值";
+                                                                break;
+                                                            case "FM":
+                                                                retOrderWay = "扣款";
+                                                                break;
+                                                            case "FF":
+                                                                retOrderWay = "退款";
+                                                                break;
+                                                            case "":
+                                                                retOrderWay = "未填";
+                                                                break;
+                                                            default:
+                                                                retOrderWay = "未知" + retOrderStatus;
+                                                                break;
+                                                        }
                                                     }
                                                 }
                                                 cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                cTpe_Cro.OrderID = OrderID;
+                                                cTpe_Cro.OrderID = retOrderID;
+                                                cTpe_Cro.OrderStatus = retOrderWay;
                                                 listCRO.Add (cTpe_Cro);
                                                 Offset += (int)FlowRes_Cost.ExtendLen;
                                                 break;
@@ -1855,19 +1881,44 @@ namespace WebServicePark {
                                             //    strMsg += DataBuf[m].ToString ("X2");
                                             //}
                                             //CPublic.WriteLog (strMsg);
-                                            string OrderID = "";
+                                            string retOrderID = "";
+                                            string retOrderWay = "";
+                                            string retOrderStatus = "";
                                             HTEXTENDINFO tmpHTEXTENDINFO = new HTEXTENDINFO ();
                                             if (FlowRes_Cost.ExtendLen >= Marshal.SizeOf (tmpHTEXTENDINFO)) {
                                                 tmpHTEXTENDINFO = (HTEXTENDINFO)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (HTEXTENDINFO));
                                                 if (tmpHTEXTENDINFO.NodeType == 0X00030001 && tmpHTEXTENDINFO.OrderID.Length > 0) {
                                                     byte[] OrderID14 = new byte[14];
                                                     Array.Copy (tmpHTEXTENDINFO.OrderID, 0, OrderID14, 0, 14);
-                                                    OrderID = Encoding.UTF8.GetString (OrderID14).TrimEnd ('\0');
+                                                    retOrderID = Encoding.UTF8.GetString (OrderID14).TrimEnd ('\0');
+                                                    byte[] OrderID2 = new byte[2];
+                                                    Array.Copy (tmpHTEXTENDINFO.OrderID, 14, OrderID2, 0, 2);
+                                                    retOrderStatus = Encoding.UTF8.GetString (OrderID2).TrimEnd ('\0');
+                                                    switch (retOrderStatus) {
+                                                        case "FC":
+                                                            retOrderWay = "通用";
+                                                            break;
+                                                        case "FP":
+                                                            retOrderWay = "充值";
+                                                            break;
+                                                        case "FM":
+                                                            retOrderWay = "扣款";
+                                                            break;
+                                                        case "FF":
+                                                            retOrderWay = "退款";
+                                                            break;
+                                                        case "":
+                                                            retOrderWay = "未填";
+                                                            break;
+                                                        default:
+                                                            retOrderWay = "未知" + retOrderStatus;
+                                                            break;
+                                                    }
                                                 }
                                             }
                                             cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            cTpe_Cro.OrderID = OrderID;
-                                            listCRO.Add (cTpe_Cro);
+                                            cTpe_Cro.OrderID = retOrderID;
+                                            cTpe_Cro.OrderStatus = retOrderWay;
                                             Offset += (int)FlowRes_Cost.ExtendLen;
                                             break;
                                     }
@@ -2405,18 +2456,44 @@ namespace WebServicePark {
                                             //    strMsg += DataBuf[m].ToString ("X2");
                                             //}
                                             //CPublic.WriteLog (strMsg);
-                                            string OrderID = "";
+                                            string retOrderID = "";
+                                            string retOrderWay = "";
+                                            string retOrderStatus = "";
                                             HTEXTENDINFO tmpHTEXTENDINFO = new HTEXTENDINFO ();
                                             if (FlowRes_Cost.ExtendLen >= Marshal.SizeOf (tmpHTEXTENDINFO)) {
                                                 tmpHTEXTENDINFO = (HTEXTENDINFO)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (HTEXTENDINFO));
                                                 if (tmpHTEXTENDINFO.NodeType == 0X00030001 && tmpHTEXTENDINFO.OrderID.Length > 0) {
                                                     byte[] OrderID14 = new byte[14];
                                                     Array.Copy (tmpHTEXTENDINFO.OrderID, 0, OrderID14, 0, 14);
-                                                    OrderID = Encoding.UTF8.GetString (OrderID14).TrimEnd ('\0');
+                                                    retOrderID = Encoding.UTF8.GetString (OrderID14).TrimEnd ('\0');
+                                                    byte[] OrderID2 = new byte[2];
+                                                    Array.Copy (tmpHTEXTENDINFO.OrderID, 14, OrderID2, 0, 2);
+                                                    retOrderStatus = Encoding.UTF8.GetString (OrderID2).TrimEnd ('\0');
+                                                    switch (retOrderStatus) {
+                                                        case "FC":
+                                                            retOrderWay = "通用";
+                                                            break;
+                                                        case "FP":
+                                                            retOrderWay = "充值";
+                                                            break;
+                                                        case "FM":
+                                                            retOrderWay = "扣款";
+                                                            break;
+                                                        case "FF":
+                                                            retOrderWay = "退款";
+                                                            break;
+                                                        case "":
+                                                            retOrderWay = "未填";
+                                                            break;
+                                                        default:
+                                                            retOrderWay = "未知" + retOrderStatus;
+                                                            break;
+                                                    }
                                                 }
                                             }
                                             cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            cTpe_Cro.OrderID = OrderID;
+                                            cTpe_Cro.OrderID = retOrderID;
+                                            cTpe_Cro.OrderStatus = retOrderWay;
                                             listCRO.Add (cTpe_Cro);
                                             Offset += (int)FlowRes_Cost.ExtendLen;
                                             break;
@@ -2723,7 +2800,8 @@ namespace WebServicePark {
                                                 }
                                             }
                                             cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                            cTpe_Cro.OrderID = retOrderID + "[" + retOrderWay + "]";
+                                            cTpe_Cro.OrderID = retOrderID;
+                                            cTpe_Cro.OrderStatus = retOrderWay;
                                             listCRO.Add (cTpe_Cro);
                                             Offset += (int)FlowRes_Cost.ExtendLen;
                                             break;
@@ -3008,18 +3086,44 @@ namespace WebServicePark {
                                                     //    strMsg += DataBuf[m].ToString ("X2");
                                                     //}
                                                     //CPublic.WriteLog (strMsg);
-                                                    string OrderID = "";
+                                                    string retOrderID = "";
+                                                    string retOrderWay = "";
+                                                    string retOrderStatus = "";
                                                     HTEXTENDINFO tmpHTEXTENDINFO = new HTEXTENDINFO ();
                                                     if (FlowRes_Cost.ExtendLen >= Marshal.SizeOf (tmpHTEXTENDINFO)) {
                                                         tmpHTEXTENDINFO = (HTEXTENDINFO)Marshal.PtrToStructure (new IntPtr (buffer.ToInt32 () + Offset), typeof (HTEXTENDINFO));
                                                         if (tmpHTEXTENDINFO.NodeType == 0X00030001 && tmpHTEXTENDINFO.OrderID.Length > 0) {
                                                             byte[] OrderID14 = new byte[14];
                                                             Array.Copy (tmpHTEXTENDINFO.OrderID, 0, OrderID14, 0, 14);
-                                                            OrderID = Encoding.UTF8.GetString (OrderID14).TrimEnd ('\0');
+                                                            retOrderID = Encoding.UTF8.GetString (OrderID14).TrimEnd ('\0');
+                                                            byte[] OrderID2 = new byte[2];
+                                                            Array.Copy (tmpHTEXTENDINFO.OrderID, 14, OrderID2, 0, 2);
+                                                            retOrderStatus = Encoding.UTF8.GetString (OrderID2).TrimEnd ('\0');
+                                                            switch (retOrderStatus) {
+                                                                case "FC":
+                                                                    retOrderWay = "通用";
+                                                                    break;
+                                                                case "FP":
+                                                                    retOrderWay = "充值";
+                                                                    break;
+                                                                case "FM":
+                                                                    retOrderWay = "扣款";
+                                                                    break;
+                                                                case "FF":
+                                                                    retOrderWay = "退款";
+                                                                    break;
+                                                                case "":
+                                                                    retOrderWay = "未填";
+                                                                    break;
+                                                                default:
+                                                                    retOrderWay = "未知" + retOrderStatus;
+                                                                    break;
+                                                            }
                                                         }
                                                     }
                                                     cTpe_Cro = new TPE_CReturnObj (Tpe_CRO);
-                                                    cTpe_Cro.OrderID = OrderID;
+                                                    cTpe_Cro.OrderID = retOrderID;
+                                                    cTpe_Cro.OrderStatus = retOrderWay;
                                                     listCRO.Add (cTpe_Cro);
                                                     Offset += (int)FlowRes_Cost.ExtendLen;
                                                     break;
