@@ -11,9 +11,53 @@ using System.Xml;
 using System.Text;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Collections;
 
 namespace WebServicePark
 {
+
+    public class QRToken {
+        // 0x00 无可用
+        // 0x01 已生成
+        // 0x02 已显示
+        // 0x03 已使用
+        public byte TokenStatus;
+        private byte[] TokenValue;
+        public DateTime TokenLifetime;
+
+        public QRToken () {
+            TokenStatus = 0x01;
+            TokenValue = Encoding.ASCII.GetBytes (Token.RandomGenerator (8, false));
+            TokenLifetime = DateTime.Now.AddMinutes (1);
+        }
+
+        public byte[] GetToken () {
+            if (TokenStatus == 0x01) {
+                TokenStatus = 0x02;
+                return TokenValue;
+            }
+            return new byte[0];
+        }
+
+        public bool CheckToken (byte[] myTokenValue) {
+            if (TokenStatus == 0x02 && myTokenValue != null) {
+                if (TokenValue.Length == myTokenValue.Length && TokenValue.SequenceEqual (myTokenValue)) {
+                    TokenStatus = 0x03;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void DeleteToken () {
+            TokenStatus = 0x00;
+            TokenValue = new byte[0];
+        }
+
+        ~QRToken() {
+            TokenValue = null;
+        }
+    }
     public class Token {
         public int TokenIndex;
         public string TokenUser;
@@ -39,7 +83,7 @@ namespace WebServicePark
             if (Minutes > 30) { Minutes = 30; }
             if (Minutes < 0) { Minutes = 0; }
             TokenLifetime = Minutes * 60;
-            TokenAuth = RandomGenerator (32);
+            TokenAuth = RandomGenerator (32, true);
             isPubliced = false;
             if (oldToken != null) {
                 if (oldToken.Usable ()) {
@@ -118,8 +162,8 @@ namespace WebServicePark
             return 3;
         }
 
-        public static string RandomGenerator (int intLength) {
-            bool booNumber = true; bool booSign = true;
+        public static string RandomGenerator (int intLength, bool Sign) {
+            bool booNumber = true; bool booSign = Sign;
             bool booSmallword = true; bool booBigword = true;
 
             Random ranA = new Random ();
@@ -246,6 +290,7 @@ namespace WebServicePark
         public static bool isLoadUser = false;
         public static List<Token> myTokenList = new List<Token>();
         public static Dictionary<string, string> userList = new Dictionary<string, string> ();
+        public static Dictionary<int, QRToken> QRTokenList = new Dictionary<int, QRToken> ();
         //public static SqlConnection conn = new SqlConnection();
 
         //@"Data Source=" + IP + ";Initial Catalog=SMS;User ID=" + UserName + ";Password=" + Password;
@@ -290,6 +335,23 @@ namespace WebServicePark
                 CPublic.WriteLog("初始化异常:" + e.Message);
                 return -1;
             }
+        }
+        public static byte[] MakeQRToken (int AccountNo) {
+            if (QRTokenList.ContainsKey(AccountNo)) {
+                QRTokenList.Remove (AccountNo);
+            }
+            QRToken myQRToken = new QRToken();
+            return myQRToken.GetToken ();
+        }
+        public static bool UseQRToken(int AccountNo, byte[] myTokenValue) {
+            QRToken myQRToken = null;
+            if (QRTokenList.TryGetValue (AccountNo, out myQRToken)) {
+                if (myQRToken.CheckToken (myTokenValue)) {
+                    QRTokenList.Remove (AccountNo);
+                    return true;
+                }
+            }
+            return false;
         }
         public static bool AuthUpdate() {
             string TU0Username = "0";

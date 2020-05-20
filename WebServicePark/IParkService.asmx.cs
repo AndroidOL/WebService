@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Web.Script.Serialization;
 using System.Web.Services;
 using System.Web.UI.WebControls;
+using ZXing.QrCode;
 
 namespace WebServicePark {
 
@@ -351,6 +352,136 @@ namespace WebServicePark {
         /// <param name="NodeNo">节点号</param>
         /// <param name="AccountNo">账号</param>
         /// <param name="PassWord">密码</param>
+        /// <param name="Operation">操作类型，1表示扣款、2表示签到</param>
+        /// <param name="SHA">SHA(加密过程请查看CheckNode()方法)</param>
+        /// <returns>json</returns>
+        [WebMethod]
+        public string TPE_AccountQRCodeGenerator (string NodeNo, string Username, string AccountNo, string PassWord, string Operation, string SHA) {
+            string json = "";
+            string param = "";
+            CReturnFlowRes retRes = new CReturnFlowRes ();
+            if (!isAllow ("TPE_AccountQRCodeGenerator")) {
+                retRes.Result = "error";
+                retRes.Msg = "权限异常";
+                JavaScriptSerializer jss = new JavaScriptSerializer ();
+                json = jss.Serialize (retRes);
+                return json;
+            }
+            try {
+                int nodeNo;
+                int accNo;
+                byte operation;
+                param = Username + "$" + AccountNo + "$" + PassWord + "$" + Operation;
+                int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_LostAccount");
+                if (string.IsNullOrEmpty (NodeNo) || !int.TryParse (NodeNo, out nodeNo)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[NodeNo(类型Int)]";
+                } else if (string.IsNullOrEmpty (Username)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[Username]";
+                } else if (string.IsNullOrEmpty (SHA)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[SHA]";
+                } else if (string.IsNullOrEmpty (AccountNo) || !int.TryParse (AccountNo, out accNo)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[AccountNo(类型Int)]";
+                } else if (string.IsNullOrEmpty (PassWord)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[PassWord]";
+                } else if (string.IsNullOrEmpty (Operation) || !byte.TryParse (Operation, out operation)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[Operation(类型Int)]";
+                } else if (ret != 0 && ret != -1) {
+                    retRes.Result = "error";
+                    retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
+                } else {
+                    retRes.Result = "error";
+                    retRes.Msg = "已获取账户数据";
+                    if (System.Convert.ToInt32 (Operation) == 1) {
+                        operation = 1;
+                    } else { operation = 2; }
+                    if (operation == 1) {
+                        //验密
+                        tagTPE_GetAccountReq Req = new tagTPE_GetAccountReq ();
+                        tagTPE_GetAccountRes Res = new tagTPE_GetAccountRes ();
+                        Req.AccountNo = System.Convert.ToUInt32 (AccountNo);
+                        Req.Password = new byte[8];
+                        var tmp = System.Text.Encoding.ASCII.GetBytes (PassWord);
+                        Array.Copy (tmp, Req.Password, tmp.Length > 8 ? 8 : tmp.Length);
+                        Req.reqflagPassword = '1';
+                        Req.resflagAccountNo = 1;
+                        Req.resflagName = 1;
+                        Req.resflagBalance = 1;
+                        int nRet = TPE_Class.TPE_GetAccount (1, ref Req, out Res, 1);
+                        if (nRet != 0) {
+                            retRes.Result = "error";
+                            retRes.Msg = "调账失败 nRet=" + nRet.ToString ();
+                        } else {
+                            string myAccountQRCode = "";
+                            ZXing.BarcodeWriter writer = new ZXing.BarcodeWriter ();
+                            writer.Format = ZXing.BarcodeFormat.QR_CODE;
+                            QrCodeEncodingOptions options = new QrCodeEncodingOptions ();
+                            options.DisableECI = true;
+
+                            //设置内容编码
+                            options.CharacterSet = "UTF-8";
+                            //将传来的值赋给二维码的宽度和高度
+                            options.Width = Convert.ToInt32 (300);
+                            options.Height = Convert.ToInt32 (300);
+                            //设置二维码的边距,单位不是固定像素
+                            options.Margin = 1;
+                            writer.Options = options;
+
+                            System.Drawing.Bitmap bitmap = writer.Write ("[" + Res.AccountNo.ToString () + "<" + CPublic.ByteArrayToStr (Res.Name) + ">" + Res.Balance.ToString() + "<]-$" + Encoding.ASCII.GetString(CPublic.MakeQRToken (Res.AccountNo)) + "$");
+                            try {
+                                MemoryStream myBitmap = new MemoryStream ();
+                                bitmap.Save (myBitmap, System.Drawing.Imaging.ImageFormat.Png);
+                                byte[] arrBase64Bitmap = new byte[myBitmap.Length];
+                                myBitmap.Position = 0;
+                                myBitmap.Read (arrBase64Bitmap, 0, (int)myBitmap.Length);
+                                myBitmap.Close ();
+                                myAccountQRCode = Convert.ToBase64String (arrBase64Bitmap);
+                                bitmap.Dispose ();
+                            } catch (Exception e) {
+
+                            }
+                            retRes.Result = "error";
+                            retRes.Msg = "数据为空";
+                            if (nRet != 0) {
+                                retRes.Result = "error";
+                                retRes.Msg = "nRet=" + nRet.ToString ();
+                            } else {
+                                if (!string.IsNullOrEmpty(myAccountQRCode)) {
+                                    retRes.Result = ret == 0 ? "ok" : "uok";
+                                    retRes.Msg = "data:image/png;base64," + myAccountQRCode;
+                                }
+                            }
+                        }
+
+                    }
+                }
+            } catch (Exception e) {
+                retRes.Result = "error";
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】挂失解挂时抛出异常：" + e.Message);
+            }
+            try {
+                JavaScriptSerializer jss = new JavaScriptSerializer ();
+                json = jss.Serialize (retRes);
+            } catch (Exception ex) {
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】挂失解挂 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
+            }
+            CPublic.WriteLog ("【记录】挂失解挂成功执行，关键信息：" + param);
+            return json;
+        }
+
+        /// <summary>
+        /// 调帐
+        /// </summary>
+        /// <param name="NodeNo">节点号</param>
+        /// <param name="AccountNo">账号</param>
+        /// <param name="PassWord">密码</param>
         /// <param name="Operation">操作类型，1表示挂失、2表示解挂</param>
         /// <param name="SHA">SHA(加密过程请查看CheckNode()方法)</param>
         /// <returns>json</returns>
@@ -398,7 +529,6 @@ namespace WebServicePark {
                         operation = 1;
                     } else { operation = 2; }
                     if (operation == 1) {
-
                         //验密
                         tagTPE_GetAccountReq Req = new tagTPE_GetAccountReq ();
                         tagTPE_GetAccountRes Res = new tagTPE_GetAccountRes ();
@@ -425,7 +555,7 @@ namespace WebServicePark {
                                 TPE_FlowRes Fr = new TPE_FlowRes (ResF);
                                 Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                                 retRes.Result = ret == 0 ? "ok" : "uok";
-                                retRes.Msg = "ok";
+                                retRes.Msg = "方法调用成功完成";
                                 retRes.Data = Fr;
                             }
                         }
@@ -465,7 +595,7 @@ namespace WebServicePark {
                                     TPE_FlowRes Fr = new TPE_FlowRes (ResF);
                                     Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                                     retRes.Result = ret == 0 ? "ok" : "uok";
-                                    retRes.Msg = "ok";
+                                    retRes.Msg = "方法调用成功完成";
                                     retRes.Data = Fr;
                                 }
                             }
@@ -604,7 +734,7 @@ namespace WebServicePark {
                                         TPE_FlowUpdateAccountRes Fuar = new TPE_FlowUpdateAccountRes (ResU);
                                         Fuar.CenterNo = QueryCenterByOccurUINT (NodeNo, Fuar.OccurIdNo);
                                         retRes.Result = ret == 0 ? "ok" : "uok";
-                                        retRes.Msg = "ok";
+                                        retRes.Msg = "方法调用成功完成";
                                         retRes.Data = Fuar;
                                     }
                                 }
@@ -714,7 +844,7 @@ namespace WebServicePark {
                             } else {
                                 TPE_GetAccountRes tpe_GetAccRes = new TPE_GetAccountRes (Res);
                                 retRes.Result = ret == 0 ? "ok" : "uok";
-                                retRes.Msg = "ok";
+                                retRes.Msg = "方法调用成功完成";
                                 retRes.Data = tpe_GetAccRes;
                             }
                         }
@@ -822,7 +952,7 @@ namespace WebServicePark {
                             } else {
                                 TPE_GetAccountRes tpe_GetAccRes = new TPE_GetAccountRes (Res);
                                 retRes.Result = ret == 0 ? "ok" : "uok";
-                                retRes.Msg = "ok";
+                                retRes.Msg = "方法调用成功完成";
                                 retRes.Data = tpe_GetAccRes;
                             }
                         }
@@ -925,7 +1055,7 @@ namespace WebServicePark {
                                     ResControl.pRes = null;
                                 }
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "ok";
+                                retRes.Msg = "方法调用成功完成";
                                 retRes.ListDate = listRes;
                             }
                         }
@@ -1048,7 +1178,7 @@ namespace WebServicePark {
                             TPE_GetAccountRes tpe_GetAccRes = new TPE_GetAccountRes (AccRes);
 
                             retRes.Result = (ret == 0) ? "ok" : "uok";
-                            retRes.Msg = "ok";
+                            retRes.Msg = "方法调用成功完成";
                             retRes.Data = tpe_GetAccRes;
                         }
                     }
@@ -1187,7 +1317,7 @@ namespace WebServicePark {
                                 } else {
                                     listCRO = getWaterInfo (Res);
                                     retRes.Result = (ret == 0) ? "ok" : "uok";
-                                    retRes.Msg = "ok";
+                                    retRes.Msg = "方法调用成功完成";
                                     retRes.ListDate = listCRO;
                                 }
                             }
@@ -1290,7 +1420,7 @@ namespace WebServicePark {
                             } else {
                                 TPE_GetAccountRes Ctpe_Res = new TPE_GetAccountRes (Res);
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "ok";
+                                retRes.Msg = "方法调用成功完成";
                                 retRes.Data = Ctpe_Res;
                             }
                         }
@@ -1407,7 +1537,7 @@ namespace WebServicePark {
                                 }
                                 Res.pRes = null;
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "ok";
+                                retRes.Msg = "方法调用成功完成";
                                 retRes.ListDate = listRes;
                             }
                         }
@@ -1496,7 +1626,7 @@ namespace WebServicePark {
                             } else {
                                 listCRO = getWaterInfo (Res);
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "ok";
+                                retRes.Msg = "方法调用成功完成";
                                 retRes.ListDate = listCRO;
                             }
                         }
@@ -1862,7 +1992,7 @@ namespace WebServicePark {
                             } else {
                                 listCRO = getWaterInfo (Res);
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "ok";
+                                retRes.Msg = "方法调用成功完成";
                                 retRes.ListDate = listCRO;
                             }
                         }
@@ -1960,7 +2090,7 @@ namespace WebServicePark {
                             } else {
                                 listCRO = getWaterInfo (Res);
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "ok";
+                                retRes.Msg = "方法调用成功完成";
                                 retRes.ListDate = listCRO;
                             }
                         }
@@ -2295,7 +2425,7 @@ namespace WebServicePark {
                                     } else {
                                         listCRO = getWaterInfo (Res);
                                         retRes.Result = (ret == 0) ? "ok" : "uok";
-                                        retRes.Msg = "ok";
+                                        retRes.Msg = "方法调用成功完成";
                                         retRes.ListDate = listCRO;
                                     }
                                 }
@@ -2380,7 +2510,7 @@ namespace WebServicePark {
                                 }
                                 Res.pRes = null;
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "ok";
+                                retRes.Msg = "方法调用成功完成";
                                 retRes.ListDate = listRes;
                             }
                         }
@@ -2462,7 +2592,7 @@ namespace WebServicePark {
                             }
                         }
                         retRes.Result = (ret == 0) ? "ok" : "uok";
-                        retRes.Msg = "ok";
+                        retRes.Msg = "方法调用成功完成";
                         retRes.ListDate = listRes;
                     }
                 }
@@ -2544,7 +2674,7 @@ namespace WebServicePark {
                                 }
                                 Res.pRes = null;
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "ok";
+                                retRes.Msg = "方法调用成功完成";
                                 retRes.ListDate = listRes;
                             }
                         }
@@ -2616,7 +2746,7 @@ namespace WebServicePark {
                             } else {
                                 TPE_GetAccountExRes Gaer = new TPE_GetAccountExRes (Res);
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "ok";
+                                retRes.Msg = "方法调用成功完成";
                                 retRes.Data = Gaer;
                             }
                         }
@@ -2746,7 +2876,7 @@ namespace WebServicePark {
                                 TPE_FlowUpdateAccountRes Fuar = new TPE_FlowUpdateAccountRes (ResU);
                                 Fuar.CenterNo = QueryCenterByOccurUINT (NodeNo, Fuar.OccurIdNo);
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "ok";
+                                retRes.Msg = "方法调用成功完成";
                                 retRes.Data = Fuar;
                             }
                         }
@@ -2993,7 +3123,7 @@ namespace WebServicePark {
                             TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
                             Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                             retRes.Result = (ret == 0) ? "ok" : "uok";
-                            retRes.Msg = "ok";
+                            retRes.Msg = "方法调用成功完成";
                             retRes.Data = Fr;
                         }
                     }
@@ -3114,7 +3244,7 @@ namespace WebServicePark {
                             TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
                             Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                             retRes.Result = (ret == 0) ? "ok" : "uok";
-                            retRes.Msg = "ok";
+                            retRes.Msg = "方法调用成功完成";
                             retRes.Data = Fr;
                         }
                     }
@@ -3252,7 +3382,7 @@ namespace WebServicePark {
                             TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
                             Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                             retRes.Result = (ret == 0) ? "ok" : "uok";
-                            retRes.Msg = "ok";
+                            retRes.Msg = "方法调用成功完成";
                             retRes.Data = Fr;
                         }
                     }
@@ -3366,7 +3496,7 @@ namespace WebServicePark {
                                 int IDNO = ResF.OccurIdNo;
                                 int CTNO = ResF.CenterNo;
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "ok";
+                                retRes.Msg = "方法调用成功完成";
                                 retRes.Data = Fr;
                             }
                         }
@@ -3479,7 +3609,7 @@ namespace WebServicePark {
                                 TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
                                 Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
                                 retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "ok";
+                                retRes.Msg = "方法调用成功完成";
                                 retRes.Data = Fr;
                             }
                         }
