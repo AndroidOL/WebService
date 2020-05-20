@@ -417,43 +417,48 @@ namespace WebServicePark {
                             retRes.Result = "error";
                             retRes.Msg = "调账失败 nRet=" + nRet.ToString ();
                         } else {
-                            string myAccountQRCode = "";
-                            ZXing.BarcodeWriter writer = new ZXing.BarcodeWriter ();
-                            writer.Format = ZXing.BarcodeFormat.QR_CODE;
-                            QrCodeEncodingOptions options = new QrCodeEncodingOptions ();
-                            options.DisableECI = true;
-
-                            //设置内容编码
-                            options.CharacterSet = "UTF-8";
-                            //将传来的值赋给二维码的宽度和高度
-                            options.Width = Convert.ToInt32 (300);
-                            options.Height = Convert.ToInt32 (300);
-                            //设置二维码的边距,单位不是固定像素
-                            options.Margin = 1;
-                            writer.Options = options;
-
-                            System.Drawing.Bitmap bitmap = writer.Write ("[" + Res.AccountNo.ToString () + "<" + CPublic.ByteArrayToStr (Res.Name) + ">" + Res.Balance.ToString() + "<]-$" + Encoding.ASCII.GetString(CPublic.MakeQRToken (Res.AccountNo)) + "$");
-                            try {
-                                MemoryStream myBitmap = new MemoryStream ();
-                                bitmap.Save (myBitmap, System.Drawing.Imaging.ImageFormat.Png);
-                                byte[] arrBase64Bitmap = new byte[myBitmap.Length];
-                                myBitmap.Position = 0;
-                                myBitmap.Read (arrBase64Bitmap, 0, (int)myBitmap.Length);
-                                myBitmap.Close ();
-                                myAccountQRCode = Convert.ToBase64String (arrBase64Bitmap);
-                                bitmap.Dispose ();
-                            } catch (Exception e) {
-
-                            }
-                            retRes.Result = "error";
-                            retRes.Msg = "数据为空";
-                            if (nRet != 0) {
+                            if (Res.RetValue != 0) {
                                 retRes.Result = "error";
-                                retRes.Msg = "nRet=" + nRet.ToString ();
+                                retRes.Msg = "验密 RetValue=" + Res.RetValue.ToString ();
                             } else {
-                                if (!string.IsNullOrEmpty(myAccountQRCode)) {
-                                    retRes.Result = ret == 0 ? "ok" : "uok";
-                                    retRes.Msg = "data:image/png;base64," + myAccountQRCode;
+                                string myAccountQRCode = "";
+                                ZXing.BarcodeWriter writer = new ZXing.BarcodeWriter ();
+                                writer.Format = ZXing.BarcodeFormat.QR_CODE;
+                                QrCodeEncodingOptions options = new QrCodeEncodingOptions ();
+                                options.DisableECI = true;
+
+                                //设置内容编码
+                                options.CharacterSet = "UTF-8";
+                                //将传来的值赋给二维码的宽度和高度
+                                options.Width = Convert.ToInt32 (300);
+                                options.Height = Convert.ToInt32 (300);
+                                //设置二维码的边距,单位不是固定像素
+                                options.Margin = 1;
+                                writer.Options = options;
+
+                                System.Drawing.Bitmap bitmap = writer.Write ("[" + Res.AccountNo.ToString () + "<" + CPublic.ByteArrayToStr (Res.Name) + ">" + Res.Balance.ToString () + "<]-$" + Encoding.ASCII.GetString (CPublic.MakeQRToken (Res.AccountNo)) + "$");
+                                try {
+                                    MemoryStream myBitmap = new MemoryStream ();
+                                    bitmap.Save (myBitmap, System.Drawing.Imaging.ImageFormat.Png);
+                                    byte[] arrBase64Bitmap = new byte[myBitmap.Length];
+                                    myBitmap.Position = 0;
+                                    myBitmap.Read (arrBase64Bitmap, 0, (int)myBitmap.Length);
+                                    myBitmap.Close ();
+                                    myAccountQRCode = Convert.ToBase64String (arrBase64Bitmap);
+                                    bitmap.Dispose ();
+                                } catch (Exception e) {
+
+                                }
+                                retRes.Result = "error";
+                                retRes.Msg = "数据为空";
+                                if (nRet != 0) {
+                                    retRes.Result = "error";
+                                    retRes.Msg = "nRet=" + nRet.ToString ();
+                                } else {
+                                    if (!string.IsNullOrEmpty (myAccountQRCode)) {
+                                        retRes.Result = ret == 0 ? "ok" : "uok";
+                                        retRes.Msg = "data:image/png;base64," + myAccountQRCode;
+                                    }
                                 }
                             }
                         }
