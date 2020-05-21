@@ -17,6 +17,10 @@ namespace WebServicePark
 {
 
     public class QRToken {
+        // 0x00 禁用
+        // 0x01 付款
+        // 0x02 签到
+        private byte TokenType;
         // 0x00 无可用
         // 0x01 已生成
         // 0x02 已显示
@@ -24,8 +28,10 @@ namespace WebServicePark
         public byte TokenStatus;
         private byte[] TokenValue;
         public DateTime TokenLifetime;
+        public DateTime Lifetime { get { return TokenLifetime; } }
 
-        public QRToken () {
+        public QRToken (byte type) {
+            TokenType = type;
             TokenStatus = 0x01;
             TokenValue = Encoding.ASCII.GetBytes (Token.RandomGenerator (8, false));
             TokenLifetime = DateTime.Now.AddMinutes (1);
@@ -39,14 +45,14 @@ namespace WebServicePark
             return new byte[0];
         }
 
-        public bool CheckToken (byte[] myTokenValue) {
+        public byte CheckToken (byte[] myTokenValue) {
             if (TokenStatus == 0x02 && myTokenValue != null) {
                 if (TokenValue.Length == myTokenValue.Length && TokenValue.SequenceEqual (myTokenValue)) {
                     TokenStatus = 0x03;
-                    return true;
+                    return TokenType;
                 }
             }
-            return false;
+            return 0;
         }
 
         public void DeleteToken () {
@@ -336,22 +342,24 @@ namespace WebServicePark
                 return -1;
             }
         }
-        public static byte[] MakeQRToken (int AccountNo) {
+        public static byte[] MakeQRToken (byte type, int AccountNo) {
             if (QRTokenList.ContainsKey(AccountNo)) {
                 QRTokenList.Remove (AccountNo);
             }
-            QRToken myQRToken = new QRToken();
+            QRToken myQRToken = new QRToken(type);
+            QRTokenList.Add (AccountNo, myQRToken);
             return myQRToken.GetToken ();
         }
-        public static bool UseQRToken(int AccountNo, byte[] myTokenValue) {
+        public static byte UseQRToken(int AccountNo, byte[] myTokenValue) {
             QRToken myQRToken = null;
             if (QRTokenList.TryGetValue (AccountNo, out myQRToken)) {
-                if (myQRToken.CheckToken (myTokenValue)) {
-                    QRTokenList.Remove (AccountNo);
-                    return true;
+                byte myQRTokenType = myQRToken.CheckToken (myTokenValue);
+                if (myQRToken.TokenLifetime > DateTime.Now && myQRTokenType > 0) {
+                    return myQRTokenType;
                 }
+                QRTokenList.Remove (AccountNo);
             }
-            return false;
+            return 0;
         }
         public static bool AuthUpdate() {
             string TU0Username = "0";

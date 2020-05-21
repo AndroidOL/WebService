@@ -352,6 +352,92 @@ namespace WebServicePark {
         /// <param name="NodeNo">节点号</param>
         /// <param name="AccountNo">账号</param>
         /// <param name="PassWord">密码</param>
+        /// <param name="Operation">操作类型，1表示挂失、2表示解挂</param>
+        /// <param name="SHA">SHA(加密过程请查看CheckNode()方法)</param>
+        /// <returns>json</returns>
+        [WebMethod]
+        public string TPE_AccountQRCodeVerificator (string NodeNo, string AccountNo, string TransferMoney, string QRToken, string MAC) {
+            string json = "";
+            string param = "";
+            CReturnFlowRes retRes = new CReturnFlowRes ();
+            if (!isAllow ("TPE_AccountQRCodeVerificator")) {
+                retRes.Result = "error";
+                retRes.Msg = "权限异常";
+                JavaScriptSerializer jss = new JavaScriptSerializer ();
+                json = jss.Serialize (retRes);
+                return json;
+            }
+            try {
+                int nodeNo;
+                int accNo;
+                int transMoney;
+                param = AccountNo + "$" + TransferMoney + "$" + QRToken;
+                if (string.IsNullOrEmpty (NodeNo) || !int.TryParse (NodeNo, out nodeNo)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[NodeNo(类型Int)]";
+                } else if (string.IsNullOrEmpty (MAC)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[SHA]";
+                } else if (string.IsNullOrEmpty (AccountNo) || !int.TryParse (AccountNo, out accNo)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[AccountNo(类型Int)]";
+                } else if (string.IsNullOrEmpty (TransferMoney) || !int.TryParse (TransferMoney, out transMoney)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[TransferMoney(类型Int)]";
+                } else if (string.IsNullOrEmpty (QRToken)) {
+                    retRes.Result = "error";
+                    retRes.Msg = "请传入有效参数[QRToken(String)]";
+                } else if (CheckNode (NodeNo, param, MAC) != 0) {
+                    retRes.Result = "error";
+                    retRes.Msg = "节点校验失败！" + NodeCheckInfo[CheckNode (NodeNo, param, MAC)];
+                } else {
+                    byte type = CPublic.UseQRToken (accNo, Encoding.ASCII.GetBytes (QRToken));
+                    if (type == 0) {
+                        retRes.Result = "error";
+                        retRes.Msg = "二维码不存在或已失效，请重新生成";
+                    } else if (transMoney != 0 && type != 1) {
+                        retRes.Result = "error";
+                        retRes.Msg = "二维码类型错误，无法用于消费";
+                    } else {
+                        switch (type) {
+                            case 1:
+                                //消费金额
+                                retRes.Result = "ok";
+                                retRes.Msg = "处理消费";
+                                break;
+                            case 2:
+                                retRes.Result = "ok";
+                                retRes.Msg = "签到成功";
+                                break;
+                            default:
+                                retRes.Result = "error";
+                                retRes.Msg = "未知二维码类型";
+                                break;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                retRes.Result = "error";
+                retRes.Msg = "服务器异常";
+                CPublic.WriteLog ("【严重】申请令牌时抛出异常：" + e.Message);
+            }
+            try {
+                JavaScriptSerializer jss = new JavaScriptSerializer ();
+                json = jss.Serialize (retRes);
+            } catch (Exception ex) {
+                CPublic.WriteLog ("【警告】关键信息：" + param);
+                CPublic.WriteLog ("【警告】申请令牌 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
+            }
+            CPublic.WriteLog ("【记录】申请令牌成功执行，关键信息：" + param);
+            return json;
+        }
+
+        /// <summary>
+        /// 调帐
+        /// </summary>
+        /// <param name="NodeNo">节点号</param>
+        /// <param name="AccountNo">账号</param>
+        /// <param name="PassWord">密码</param>
         /// <param name="Operation">操作类型，1表示扣款、2表示签到</param>
         /// <param name="SHA">SHA(加密过程请查看CheckNode()方法)</param>
         /// <returns>json</returns>
@@ -396,11 +482,11 @@ namespace WebServicePark {
                     retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
                 } else {
                     retRes.Result = "error";
-                    retRes.Msg = "已获取账户数据";
+                    retRes.Msg = "已获取账户数据，但未定义操作类型";
                     if (System.Convert.ToInt32 (Operation) == 1) {
                         operation = 1;
                     } else { operation = 2; }
-                    if (operation == 1) {
+                    if (operation == 1 || operation == 2) {
                         //验密
                         tagTPE_GetAccountReq Req = new tagTPE_GetAccountReq ();
                         tagTPE_GetAccountRes Res = new tagTPE_GetAccountRes ();
@@ -436,7 +522,7 @@ namespace WebServicePark {
                                 options.Margin = 1;
                                 writer.Options = options;
 
-                                System.Drawing.Bitmap bitmap = writer.Write ("[" + Res.AccountNo.ToString () + "<" + CPublic.ByteArrayToStr (Res.Name) + ">" + Res.Balance.ToString () + "<]-$" + Encoding.ASCII.GetString (CPublic.MakeQRToken (Res.AccountNo)) + "$");
+                                System.Drawing.Bitmap bitmap = writer.Write ("[" + Res.AccountNo.ToString () + "<" + CPublic.ByteArrayToStr (Res.Name) + ">" + Res.Balance.ToString () + "]-$" + Encoding.ASCII.GetString (CPublic.MakeQRToken (operation, Res.AccountNo)) + "$");
                                 try {
                                     MemoryStream myBitmap = new MemoryStream ();
                                     bitmap.Save (myBitmap, System.Drawing.Imaging.ImageFormat.Png);
@@ -468,16 +554,16 @@ namespace WebServicePark {
             } catch (Exception e) {
                 retRes.Result = "error";
                 retRes.Msg = "服务器异常";
-                CPublic.WriteLog ("【严重】挂失解挂时抛出异常：" + e.Message);
+                CPublic.WriteLog ("【严重】二维码生成时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
                 CPublic.WriteLog ("【警告】关键信息：" + param);
-                CPublic.WriteLog ("【警告】挂失解挂 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
+                CPublic.WriteLog ("【警告】二维码生成 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
-            CPublic.WriteLog ("【记录】挂失解挂成功执行，关键信息：" + param);
+            CPublic.WriteLog ("【记录】二维码生成成功执行，关键信息：" + param);
             return json;
         }
 
