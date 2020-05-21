@@ -377,7 +377,7 @@ namespace WebServicePark {
                     retRes.Msg = "请传入有效参数[NodeNo(类型Int)]";
                 } else if (string.IsNullOrEmpty (MAC)) {
                     retRes.Result = "error";
-                    retRes.Msg = "请传入有效参数[SHA]";
+                    retRes.Msg = "请传入有效参数[MAC]";
                 } else if (string.IsNullOrEmpty (AccountNo) || !int.TryParse (AccountNo, out accNo)) {
                     retRes.Result = "error";
                     retRes.Msg = "请传入有效参数[AccountNo(类型Int)]";
@@ -428,8 +428,6 @@ namespace WebServicePark {
                                     retRes.Msg = "ok" + (isOrderIDExist (OrderID, "") > 1 ? "[订单号重复，多笔订单将无法正常处理退款]" : "");
                                     retRes.Data = Fr;
                                 }
-                                retRes.Result = "ok";
-                                retRes.Msg = "处理消费";
                                 break;
                             case 2:
                                 retRes.Result = "ok";
