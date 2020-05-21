@@ -359,7 +359,7 @@ namespace WebServicePark {
         public string TPE_AccountQRCodeVerificator (string NodeNo, string AccountNo, string TransferMoney, string QRToken, string MAC) {
             string json = "";
             string param = "";
-            CReturnFlowRes retRes = new CReturnFlowRes ();
+            CReturnFlowCostRes retRes = new CReturnFlowCostRes ();
             if (!isAllow ("TPE_AccountQRCodeVerificator")) {
                 retRes.Result = "error";
                 retRes.Msg = "权限异常";
@@ -401,7 +401,33 @@ namespace WebServicePark {
                     } else {
                         switch (type) {
                             case 1:
-                                //消费金额
+                                tagTPE_OnLineGetMaxSnRes SnRes = new tagTPE_OnLineGetMaxSnRes ();
+                                TPE_Class.TPE_OnLineGetMaxSn (1, out SnRes, 1);
+                                tagTPE_FlowCostReq ReqL = new tagTPE_FlowCostReq ();
+                                tagTPE_FlowCostRes ResF = new tagTPE_FlowCostRes ();
+                                ReqL.OccurIdNo = SnRes.MaxSn + 1;
+                                byte[] occurtime = Encoding.GetEncoding ("gb2312").GetBytes (DateTime.Now.ToString ("yyyyMMddHHmmss"));
+                                ReqL.OccurTime = new byte[14];
+                                Array.Copy (occurtime, ReqL.OccurTime, 14);
+                                ReqL.AccountNo = System.Convert.ToInt32 (AccountNo);
+                                ReqL.CostType = 9;
+                                ReqL.TransMoney = transMoney;
+                                int OrderIDLen = ReqL.OccurIdNo.ToString ().Length;
+                                string OrderID = "WLAT" + ReqL.OccurIdNo.ToString ().Substring (0, OrderIDLen <= 10 ? OrderIDLen : 10);
+                                byte[] byOrderID = new byte[16];
+                                Array.Copy (Encoding.ASCII.GetBytes (OrderID), 0, byOrderID, 0, Encoding.ASCII.GetBytes (OrderID).Length);
+                                Array.Copy (Encoding.ASCII.GetBytes ("QC"), 0, byOrderID, 14, 2);
+                                int nRet = TPE_Class.TPE_FlowCostOrder (1, ref ReqL, ref byOrderID[0], 1, out ResF, 1);
+                                if (nRet != 0) {
+                                    retRes.Result = "error";
+                                    retRes.Msg = "nRet=" + nRet.ToString ();
+                                } else {
+                                    TPE_FlowCostRes Fr = new TPE_FlowCostRes (ResF);
+                                    Fr.CenterNo = QueryCenterByOccur (NodeNo, Fr.OccurIdNo);
+                                    retRes.Result = "ok";
+                                    retRes.Msg = "ok" + (isOrderIDExist (OrderID, "") > 1 ? "[订单号重复，多笔订单将无法正常处理退款]" : "");
+                                    retRes.Data = Fr;
+                                }
                                 retRes.Result = "ok";
                                 retRes.Msg = "处理消费";
                                 break;
@@ -419,16 +445,16 @@ namespace WebServicePark {
             } catch (Exception e) {
                 retRes.Result = "error";
                 retRes.Msg = "服务器异常";
-                CPublic.WriteLog ("【严重】申请令牌时抛出异常：" + e.Message);
+                CPublic.WriteLog ("【严重】核销令牌时抛出异常：" + e.Message);
             }
             try {
                 JavaScriptSerializer jss = new JavaScriptSerializer ();
                 json = jss.Serialize (retRes);
             } catch (Exception ex) {
                 CPublic.WriteLog ("【警告】关键信息：" + param);
-                CPublic.WriteLog ("【警告】申请令牌 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
+                CPublic.WriteLog ("【警告】核销令牌 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
             }
-            CPublic.WriteLog ("【记录】申请令牌成功执行，关键信息：" + param);
+            CPublic.WriteLog ("【记录】核销令牌成功执行，关键信息：" + param);
             return json;
         }
 
