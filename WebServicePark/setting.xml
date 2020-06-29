@@ -18,6 +18,7 @@
 <add key="TPE_GetAccountEx" value="true" />
 <add key="TPE_LostAccount" value="true" />
 <add key="TPE_QueryFlowByAccount" value="true" />
+<add key="TPE_QueryFlowByAccountPaging" value="true" />
 <add key="TPE_QueryFlowByCenter" value="true" />
 <add key="TPE_QueryFlowByCertNo" value="true" />
 <add key="TPE_QueryFlowByOccur" value="true" />

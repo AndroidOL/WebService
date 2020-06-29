@@ -196,36 +196,6 @@ namespace WebServicePark {
         /// <param name="IDNo">身份证</param>
         /// <param name="SHA">SHA(加密过程请查看CheckNode()方法)</param>
         /// <returns>json </returns>
-        //[WebMethod]
-        //public string TPE_GetOccurInfo (string MAC) {
-        //    string json = "";
-        //    CReturnFlowRes retRes = new CReturnFlowRes ();
-        //    if (!isAllow ("TPE_ConditionParse")) {
-        //        retRes.Result = "error";
-        //        retRes.Msg = "权限异常";
-        //        JavaScriptSerializer jss = new JavaScriptSerializer ();
-        //        json = jss.Serialize (retRes);
-        //        return json;
-        //    }
-
-        //    try {
-        //        JavaScriptSerializer jss = new JavaScriptSerializer ();
-        //        json = jss.Serialize (retRes);
-        //    } catch (Exception ex) {
-        //        CPublic.WriteLog ("【警告】关键信息：");
-        //        CPublic.WriteLog ("【警告】地点解析 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
-        //    }
-        //    CPublic.WriteLog ("【记录】地点解析成功执行，关键信息：");
-        //    return json;
-        //}
-
-        /// <summary>
-        /// 调帐
-        /// </summary>
-        /// <param name="NodeNo">节点号</param>
-        /// <param name="IDNo">身份证</param>
-        /// <param name="MAC">MAC(加密过程请查看CheckNode()方法)</param>
-        /// <returns>json </returns>
         [WebMethod]
         public string TPE_AuthUpdate (string Submit) {
             CReturnGetAccountRes retRes = new CReturnGetAccountRes ();
@@ -959,7 +929,7 @@ namespace WebServicePark {
                         Req.resflagExpireDate = 1; //有效期
                         Req.resflagName = 1; //姓名
                         Req.resflagPersonID = 1; //身份证号
-                        Req.resflagPassword = 1; //密码 
+                        Req.resflagPassword = 0; //密码 
                         Req.resflagAccessControl = 1; //访问控制,
                         Req.resflagBirthday = 1; //出生日期
                         Req.resflagDepart = 1; //部门
@@ -970,8 +940,8 @@ namespace WebServicePark {
                         Req.resflagCreditCardNo = 0; //银行卡号
                         Req.resflagTransferLimit = 0; //转帐限额 
                         Req.resflagTransferMoney = 0; //转帐金额
-                        Req.resflagTel = 0; //电话
-                        Req.resflagEmail = 0; //电邮
+                        Req.resflagTel = 1; //电话
+                        Req.resflagEmail = 1; //电邮
                         Req.resflagPostalCode = 0; //邮政编码
                         Req.resflagPostalAddr = 0; //通信地址
                         Req.resflagFile = 0; //文件;
@@ -1169,36 +1139,11 @@ namespace WebServicePark {
                         Regex.Replace (sqlinput, "drop", "", RegexOptions.IgnoreCase);
                         Regex.Replace (sqlinput, "select", "", RegexOptions.IgnoreCase);
                         Req.SQL = " where PersonID = '" + sqlinput + "'";
-                        /*经常会有这样的检索条件,AccountNo , CardNo , JoinNode,JoinCardHolder
-                          TPE在处理时优先级按帐号>卡号>对应关系来处理,过渡的条件为前面字段=0;
-                          调帐交易中用户可以定义自己需要的字段,如果不需要的字段可以不选择,网络上也不会传输
-                          ,这样会提高传输速度,因此使用者应该根据自己的需要来调所需要的字段,不要盲目的全部调.
-                          此外<帐号,卡号,状态,余额,开户日期,密码,访问控制>在数据中心的高速缓冲内,不需要访
-                          问数据库,速度为其它字段的1000倍以上,因此,一般情况下,应该优先考虑使用这些字段.*/
-                        Req.resflagCardNo = 1; //卡号
-                        Req.resflagCondition = 1; //状态
-                        Req.resflagBalance = 1; //余额
-                        Req.resflagCreateTime = 1; //开户时间 
-                        Req.resflagExpireDate = 1; //有效期
-                        Req.resflagName = 1; //姓名
-                        Req.resflagPersonID = 1; //身份证号
-                        Req.resflagBirthday = 1; //出生日期
-                        Req.resflagDepart = 1; //部门
-                        Req.resflagIdenti = 1; //身份
-                        Req.resflagNation = 1; //民族国籍
-                        Req.resflagCertType = 1; //证件类型
-                        Req.resflagCertCode = 1; //证件号码
-                        Req.resflagCreditCardNo = 0; //银行卡号
-                        Req.resflagTransferLimit = 0; //转帐限额 
-                        Req.resflagTransferMoney = 0; //转帐金额
-                        Req.resflagTel = 0; //电话
-                        Req.resflagEmail = 0; //电邮
-                        Req.resflagPostalCode = 0; //邮政编码
-                        Req.resflagPostalAddr = 0; //通信地址
-                        Req.resflagFile = 0; //文件;
-                        Req.resflagComment = 0; //注释
-                        Req.resflagExtend = 0; //扩展
-                        Req.resflagUpdateTime = 0; //最后更新日期
+                        Req.resflagName = 1;
+                        Req.resflagCertCode = 1;
+                        Req.resflagBalance = 1;
+                        Req.resflagCardNo = 1;
+                        Req.resflagCondition = 1;
 
                         int nRet = TPE_Class.TPE_QueryGeneralAccount (1, ref Req, out ResControl, 1);
                         if (nRet != 0) {
@@ -1217,21 +1162,9 @@ namespace WebServicePark {
                                 IntPtr buffer;
                                 unsafe {
                                     for (int i = 0; i < ResControl.ResRecCount; i++) {
-                                        buffer = (IntPtr) ((Byte * ) (ResControl.pRes) + i * Marshal.SizeOf (AccRes_X));
-                                        AccRes_X = (tagTPE_GetAccountRes) Marshal.PtrToStructure (buffer, typeof (tagTPE_GetAccountRes));
+                                        buffer = (IntPtr) ((Byte * ) (ResControl.pRes) + i * System.Runtime.InteropServices.Marshal.SizeOf (AccRes_X));
+                                        AccRes_X = (tagTPE_GetAccountRes) System.Runtime.InteropServices.Marshal.PtrToStructure (buffer, typeof (tagTPE_GetAccountRes));
                                         tpe_GetAccRes_X = new TPE_GetAccountRes (AccRes_X);
-                                        tagTPE_GetAccountReq ReqCert = new tagTPE_GetAccountReq ();
-                                        tagTPE_GetAccountRes ResCert = new tagTPE_GetAccountRes ();
-                                        if (tpe_GetAccRes_X.AccountNo > 0) {
-                                            ReqCert.AccountNo = (uint) tpe_GetAccRes_X.AccountNo;
-                                        }
-                                        ReqCert.resflagAccountNo = 1; //帐号
-                                        ReqCert.resflagCardNo = 1; //卡号
-                                        ReqCert.resflagCertCode = 1; //证件号码
-                                        int nRetCert = TPE_Class.TPE_GetAccount (1, ref ReqCert, out ResCert, 1);
-                                        if (nRetCert == 0 && ResCert.RetValue == 0) {
-                                            tpe_GetAccRes_X.CertCode = Encoding.ASCII.GetString(ResCert.CertCode).TrimEnd ('\0');
-                                        } else { tpe_GetAccRes_X.CertCode = ""; }
                                         listRes.Add (tpe_GetAccRes_X);
                                     }
                                     ResControl.pRes = null;
@@ -1317,7 +1250,7 @@ namespace WebServicePark {
                         Req.resflagCreateTime = 1; //开户时间 
                         Req.resflagExpireDate = 1; //有效期
                         Req.resflagName = 1; //姓名
-                        Req.resflagPersonID = 1; //身份证号
+                        Req.resflagPersonID = 0; //身份证号
                         Req.resflagBirthday = 1; //出生日期
                         Req.resflagDepart = 1; //部门
                         Req.resflagIdenti = 1; //身份
@@ -1327,8 +1260,8 @@ namespace WebServicePark {
                         Req.resflagCreditCardNo = 0; //银行卡号
                         Req.resflagTransferLimit = 0; //转帐限额 
                         Req.resflagTransferMoney = 0; //转帐金额
-                        Req.resflagTel = 0; //电话
-                        Req.resflagEmail = 0; //电邮
+                        Req.resflagTel = 1; //电话
+                        Req.resflagEmail = 1; //电邮
                         Req.resflagPostalCode = 0; //邮政编码
                         Req.resflagPostalAddr = 0; //通信地址
                         Req.resflagFile = 0; //文件;
@@ -1350,10 +1283,9 @@ namespace WebServicePark {
                             tagTPE_GetAccountRes AccRes = new tagTPE_GetAccountRes ();
                             unsafe {
                                 IntPtr buffer1 = (IntPtr) ((Byte * ) (ResControl.pRes));
-                                AccRes = (tagTPE_GetAccountRes) Marshal.PtrToStructure (buffer1, typeof (tagTPE_GetAccountRes));
+                                AccRes = (tagTPE_GetAccountRes) System.Runtime.InteropServices.Marshal.PtrToStructure (buffer1, typeof (tagTPE_GetAccountRes));
                                 try {
                                     ResControl.pRes = null;
-                                    AccRes.CertCode = Encoding.ASCII.GetBytes( sqlinput ) ;
                                 } catch (Exception ex) {
                                     CPublic.WriteLog ("解析账户信息时抛出异常" + ex.Message);
                                 }
@@ -2387,7 +2319,7 @@ namespace WebServicePark {
                         Tpe_CRO.OccurTime = FlowRes_Update.OccurTime;
                         string dt = string.Empty;
                         string hh = string.Empty;
-                        dt = Encoding.Default.GetString (Tpe_CRO.OccurTime);
+                        dt = System.Text.Encoding.Default.GetString (Tpe_CRO.OccurTime);
                         hh = dt.Substring (8, 2);
                         Tpe_CRO.AccountNo = FlowRes_Update.AccountNo;
                         Tpe_CRO.CardNo = FlowRes_Update.CardNo;
@@ -2612,113 +2544,6 @@ namespace WebServicePark {
                                         retRes.ListDate = listCRO;
                                     }
                                 }
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                retRes.Result = "error";
-                retRes.Msg = "服务器异常";
-                CPublic.WriteLog ("【严重】按工号调账时抛出异常：" + e.Message);
-            }
-            try {
-                JavaScriptSerializer jss = new JavaScriptSerializer ();
-                json = jss.Serialize (retRes);
-            } catch (Exception ex) {
-                CPublic.WriteLog ("【警告】关键信息：" + param);
-                CPublic.WriteLog ("【警告】按工号调账 JSON 序列化时抛出异常：" + ex.Message + "【当前操作应当已经成功】");
-            }
-            CPublic.WriteLog ("【记录】按工号调账成功执行，关键信息：" + param);
-            return json;
-        }
-
-        /// <summary>
-        /// 按学工号查询流水
-        /// </summary>
-        /// <param name="NodeNo">节点号</param>
-        /// <param name="AccountNo">账号</param>
-        /// <param name="BeginTime">起始时间 20200101000000</param>
-        /// <param name="EndTime">结束时间 20200101000000</param>
-        /// <param name="SHA">SHA</param>
-        /// <returns></returns>
-        [WebMethod]
-        unsafe public string TPE_QueryFlowByAccountPaging (string NodeNo, string Username, string AccountNo, string BeginTime, string EndTime, string Page, string PageSize, string SHA) {
-            string json = "";
-            string param = "";
-            CReturnCReturnObj retRes = new CReturnCReturnObj ();
-            List<TPE_CReturnObj> listCRO = null;
-            if (!isAllow ("TPE_QueryFlowByAccount")) {
-                retRes.Result = "error";
-                retRes.Msg = "权限异常";
-                JavaScriptSerializer jss = new JavaScriptSerializer ();
-                json = jss.Serialize (retRes);
-                return json;
-            }
-            try {
-                int accountno;
-                int nodeNo;
-                int page;
-                int pagesize;
-                if (string.IsNullOrEmpty (NodeNo) || !int.TryParse (NodeNo, out nodeNo)) {
-                    retRes.Result = "error";
-                    retRes.Msg += "请传入有效参数[NodeNo(类型Int)]";
-                } else if (string.IsNullOrEmpty (AccountNo) || !int.TryParse (AccountNo, out accountno)) {
-                    retRes.Result = "error";
-                    retRes.Msg += "请传入有效参数[AccountNo(类型Int)]";
-                } else if (BeginTime.Length != 14 || EndTime.Length != 14) {
-                    retRes.Result = "error";
-                    retRes.Msg += "请传入有效参数[BeginTime/EndTime(类型String)]";
-                } else if (string.IsNullOrEmpty (Page) || !int.TryParse (Page, out page)) {
-                    retRes.Result = "error";
-                    retRes.Msg += "请传入有效参数[Page(类型Int)]";
-                } else if (string.IsNullOrEmpty (PageSize) || !int.TryParse (PageSize, out pagesize)) {
-                    retRes.Result = "error";
-                    retRes.Msg += "请传入有效参数[PageSize(类型Int)]";
-                } else if (string.IsNullOrEmpty (SHA)) {
-                    retRes.Result = "error";
-                    retRes.Msg += "请传入有效参数[SHA]";
-                } else {
-                    param = Username + "$" + AccountNo + "$" + BeginTime + "$" + EndTime + "$" + Page + "$" + PageSize;
-                    int ret = CheckNodeUsingToken (NodeNo, Username, param, SHA, "TPE_QueryFlowByAccountPaging");
-                    if (ret != 0 && ret != -1) {
-                        retRes.Result = "error";
-                        retRes.Msg = "节点校验失败！" + getTokenStatusInfo (ret);
-                    } else {
-                        string YY_S = BeginTime.Substring (0, 4);
-                        string MM_S = BeginTime.Substring (4, 2);
-                        string DD_S = BeginTime.Substring (6, 2);
-                        string hh_S = BeginTime.Substring (8, 2);
-                        string mm_S = BeginTime.Substring (10, 2);
-                        string ss_S = BeginTime.Substring (12, 2);
-                        string YY_E = EndTime.Substring (0, 4);
-                        string MM_E = EndTime.Substring (4, 2);
-                        string DD_E = EndTime.Substring (6, 2);
-                        string hh_E = EndTime.Substring (8, 2);
-                        string mm_E = EndTime.Substring (10, 2);
-                        string ss_E = EndTime.Substring (12, 2);
-                        string dt_S = YY_S + "-" + MM_S + "-" + DD_S + " " + hh_S + ":" + mm_S + ":" + ss_S + ".000";
-                        string dt_E = YY_E + "-" + MM_E + "-" + DD_E + " " + hh_E + ":" + mm_E + ":" + ss_E + ".999";
-
-                        tagTPE_QueryFlowBySQLReq Req = new tagTPE_QueryFlowBySQLReq ();
-                        tagTPE_QueryResControl Res = new tagTPE_QueryResControl ();
-                        // String tmpSQL = " WHERE AccountNo = " + accountno +  " AND CentralTm BETWEEN '" + dt_S + "' AND '" + dt_E + "'";
-                        // LEFT JOIN (SELECT Name, Node FROM [ConCard].[dbo].[TabICon]) AS 商户表 ON 商户表.[Node] = [OccurNode]
-                        String tmpSQL = " WHERE CentralNo IN ( SELECT CentralNo FROM ( SELECT row_number () OVER (ORDER BY CentralNo DESC) AS RowNum, CentralNo FROM [ConCard].[dbo].[TabLog] WHERE AccountNo = '" + accountno + "' AND CentralTm BETWEEN '" + dt_S + "' AND '" + dt_E + "' ) AS 临时表 WHERE RowNum BETWEEN (" + page + " - 1) * " + pagesize + " + 1 AND " + page + " * " + pagesize + " )";
-                        Req.SQL = new byte[4096];
-                        Array.Copy (Encoding.Default.GetBytes (tmpSQL), 0, Req.SQL, 0, Encoding.Default.GetBytes (tmpSQL).Length);
-                        int nRet = TPE_Class.TPE_QueryFlowBySQL (1, ref Req, out Res, 1);
-                        if (nRet != 0) {
-                            retRes.Result = "error";
-                            retRes.Msg = "nRet=" + nRet.ToString ();
-                        } else {
-                            if (Res.ResRecCount == 0) {
-                                retRes.Result = "error";
-                                retRes.Msg = "ResRecCount=" + Res.ResRecCount.ToString ();
-                            } else {
-                                listCRO = getWaterInfo (Res);
-                                retRes.Result = (ret == 0) ? "ok" : "uok";
-                                retRes.Msg = "方法调用成功完成";
-                                retRes.ListDate = listCRO;
                             }
                         }
                     }
